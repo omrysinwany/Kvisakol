@@ -298,7 +298,7 @@ export default function AdminDashboardPage() {
             <CardHeader className="pb-3">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                   <div className="flex items-center">
-                      <DollarSign className="h-6 w-6 text-muted-foreground ml-2" />
+                      <DollarSign className="h-5 w-5 text-muted-foreground ml-2" />
                       <CardTitle className="text-2xl font-bold">
                           הכנסות בתקופה הנבחרת
                       </CardTitle>
@@ -383,7 +383,7 @@ export default function AdminDashboardPage() {
                   )}
                 </div>
               )}
-              <div className="text-3xl font-bold mt-2">{formatPrice(filteredRevenue)}</div>
+              <div className="text-2xl font-bold mt-2">{formatPrice(filteredRevenue)}</div>
               <p className="text-sm text-muted-foreground">
                   סה"כ מהזמנות <span className="font-medium">שהושלמו</span> בתקופה שנבחרה.
               </p>
@@ -393,6 +393,3 @@ export default function AdminDashboardPage() {
     </>
   );
 }
-
-
-    
