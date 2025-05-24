@@ -7,12 +7,12 @@ import { OrderTable } from '@/components/admin/order-table';
 import { getOrdersForAdmin, updateOrderStatusService } from '@/services/order-service';
 import type { Order } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Download, CalendarIcon, X } from 'lucide-react';
+import { Download, CalendarIcon, X, Filter } from 'lucide-react'; // Added Filter icon
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { Label } from "@/components/ui/label";
+// Label removed as per new compact design
 import { format, startOfDay, endOfDay } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { cn } from "@/lib/utils";
@@ -111,7 +111,7 @@ export default function AdminOrdersPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-2 mb-6">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-2 mb-4">
         <h1 className="text-3xl font-bold tracking-tight">ניהול הזמנות</h1>
         <Button variant="outline" className="w-full sm:w-auto" onClick={handleExportOrders}>
             <Download className="ml-2 h-4 w-4" />
@@ -119,91 +119,84 @@ export default function AdminOrdersPage() {
         </Button>
       </div>
 
-      {/* Filter Section */}
-      <div className="mb-6 p-3 border rounded-lg bg-card shadow-sm">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+      {/* Filter Section - Compact Design */}
+      <div className="mb-4 p-2 border rounded-lg bg-muted/30 shadow-sm">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Status Filter */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="status-filter">סנן לפי סטטוס</Label>
-            <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilterValue)} name="status-filter" >
-              <SelectTrigger id="status-filter" className="w-full">
-                <SelectValue placeholder="סנן לפי סטטוס" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableStatuses.map((statusKey) => (
-                  <SelectItem key={statusKey} value={statusKey}>
-                    {statusTranslationsForFilter[statusKey]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilterValue)}>
+            <SelectTrigger className="h-9 px-3 text-xs w-auto min-w-[130px]">
+              {/* SelectValue will render the selected item's text. Placeholder is for when value is undefined or not matching any item. */}
+              {/* Here, statusFilter always has a value from availableStatuses, so SelectValue will render it. */}
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {availableStatuses.map((statusKey) => (
+                <SelectItem key={statusKey} value={statusKey} className="text-xs">
+                  {statusTranslationsForFilter[statusKey]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           {/* Start Date */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="start-date-popover">מתאריך</Label>
-            <Popover>
-                <PopoverTrigger asChild>
-                    <Button
-                    id="start-date-popover"
-                    variant={"outline"}
-                    className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !startDate && "text-muted-foreground"
-                    )}
-                    >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {startDate ? format(startDate, "PPP", { locale: he }) : <span>בחר תאריך התחלה</span>}
-                    </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                    <Calendar
-                    mode="single"
-                    selected={startDate}
-                    onSelect={setStartDate}
-                    initialFocus
-                    disabled={(date) => endDate ? date > endDate : false}
-                    />
-                </PopoverContent>
-            </Popover>
-          </div>
-          
-          {/* End Date & Clear Button */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="end-date-popover">עד תאריך</Label>
-            <div className="flex gap-2 items-center">
-              <Popover>
-                  <PopoverTrigger asChild>
-                      <Button
-                      id="end-date-popover"
-                      variant={"outline"}
-                      className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !endDate && "text-muted-foreground"
-                      )}
-                      >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {endDate ? format(endDate, "PPP", { locale: he }) : <span>בחר תאריך סיום</span>}
-                      </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                      <Calendar
-                      mode="single"
-                      selected={endDate}
-                      onSelect={setEndDate}
-                      disabled={(date) => startDate && date < startDate}
-                      initialFocus
-                      />
-                  </PopoverContent>
-              </Popover>
-              {(startDate || endDate) && (
-                  <Button variant="ghost" onClick={handleClearDates} size="icon" className="h-10 w-10 shrink-0">
-                      <X className="h-4 w-4" />
-                      <span className="sr-only">נקה תאריכים</span>
+          <Popover>
+              <PopoverTrigger asChild>
+                  <Button
+                  variant={"outline"}
+                  size="sm" // h-9
+                  className={cn(
+                      "h-9 px-3 text-xs w-auto min-w-[110px] justify-start text-left font-normal",
+                      !startDate && "text-muted-foreground"
+                  )}
+                  >
+                  <CalendarIcon className="mr-1 h-3.5 w-3.5" />
+                  {startDate ? format(startDate, "d/M/yy", { locale: he }) : <span className="text-xs">מתאריך</span>}
                   </Button>
-              )}
-            </div>
-          </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                  <Calendar
+                  mode="single"
+                  selected={startDate}
+                  onSelect={setStartDate}
+                  initialFocus
+                  disabled={(date) => endDate ? date > endDate : false}
+                  />
+              </PopoverContent>
+          </Popover>
+          
+          {/* End Date */}
+          <Popover>
+              <PopoverTrigger asChild>
+                  <Button
+                  variant={"outline"}
+                  size="sm" // h-9
+                  className={cn(
+                      "h-9 px-3 text-xs w-auto min-w-[110px] justify-start text-left font-normal",
+                      !endDate && "text-muted-foreground"
+                  )}
+                  >
+                  <CalendarIcon className="mr-1 h-3.5 w-3.5" />
+                  {endDate ? format(endDate, "d/M/yy", { locale: he }) : <span className="text-xs">עד תאריך</span>}
+                  </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                  <Calendar
+                  mode="single"
+                  selected={endDate}
+                  onSelect={setEndDate}
+                  disabled={(date) => startDate && date < startDate}
+                  initialFocus
+                  />
+              </PopoverContent>
+          </Popover>
+
+          {/* Clear Dates Button */}
+          {(startDate || endDate) && (
+              <Button variant="ghost" onClick={handleClearDates} size="icon" className="h-9 w-9 shrink-0">
+                  <X className="h-4 w-4" />
+                  <span className="sr-only">נקה תאריכים</span>
+              </Button>
+          )}
         </div>
       </div>
       
@@ -229,4 +222,3 @@ export default function AdminOrdersPage() {
     </>
   );
 }
-
