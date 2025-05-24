@@ -6,14 +6,14 @@ import type { Product, Order, AdminUser } from './types';
 export const placeholderAdminUsers: AdminUser[] = [
   {
     id: 'su1',
-    username: '0544808850', // שם משתמש עדכני
+    username: 'Eden', // שם משתמש עדכני
     passwordHash: '0544808850', // סיסמה עדכנית. במערכת אמיתית יש להשתמש ב-hash.
     isSuperAdmin: true,
     displayName: 'סוכן עדן', // שם לתצוגה מעודכן
   },
 ];
 
-export const placeholderProducts: Product[] = [
+export let placeholderProducts: Product[] = [
   // נוזלי כביסה (כולל מוצרי Bio לשעבר)
   {
     id: 'kbio1',
@@ -991,7 +991,8 @@ export const placeholderProducts: Product[] = [
   },
 ];
 
-export const placeholderOrders: Order[] = [
+// We use 'let' here so we can modify it in service functions (for demo purposes)
+export let placeholderOrders: Order[] = [
   {
     id: 'o1',
     customerName: 'ישראל ישראלי',
@@ -1036,3 +1037,71 @@ export const placeholderOrders: Order[] = [
     status: 'completed',
   },
 ];
+
+// Function to allow service to modify placeholderProducts (for demo purposes)
+export function setPlaceholderProducts(newProducts: Product[]) {
+  placeholderProducts = newProducts;
+}
+
+export function addPlaceholderProduct(newProduct: Product) {
+  placeholderProducts.push(newProduct);
+}
+
+export function updatePlaceholderProduct(updatedProduct: Product) {
+  const index = placeholderProducts.findIndex(p => p.id === updatedProduct.id);
+  if (index !== -1) {
+    placeholderProducts[index] = updatedProduct;
+  }
+}
+
+export function deletePlaceholderProduct(productId: string) {
+  placeholderProducts = placeholderProducts.filter(p => p.id !== productId);
+}
+
+
+// Function to allow service to modify placeholderOrders (for demo purposes)
+export function setPlaceholderOrders(newOrders: Order[]) {
+  placeholderOrders = newOrders;
+}
+
+export function addPlaceholderOrder(newOrder: Order) {
+  placeholderOrders.unshift(newOrder); // Add to the beginning to show newest first
+}
+
+export function updatePlaceholderOrder(updatedOrder: Order) {
+  const index = placeholderOrders.findIndex(o => o.id === updatedOrder.id);
+  if (index !== -1) {
+    placeholderOrders[index] = updatedOrder;
+  }
+}
+
+// Function to allow service to modify placeholderAdminUsers (for demo purposes)
+// Note: In a real app, admin user management would be much more robust and secure.
+export function setPlaceholderAdminUsers(newUsers: AdminUser[]) {
+  // placeholderAdminUsers = newUsers; // This won't work as placeholderAdminUsers is const
+  // Instead, clear the array and push new users
+  while (placeholderAdminUsers.length > 0) {
+    placeholderAdminUsers.pop();
+  }
+  newUsers.forEach(user => placeholderAdminUsers.push(user));
+}
+
+export function addPlaceholderAdminUser(newUser: AdminUser) {
+  placeholderAdminUsers.push(newUser);
+}
+
+export function updatePlaceholderAdminUser(updatedUser: AdminUser) {
+  const index = placeholderAdminUsers.findIndex(u => u.id === updatedUser.id);
+  if (index !== -1) {
+    placeholderAdminUsers[index] = updatedUser;
+  }
+}
+
+export function deletePlaceholderAdminUser(userId: string) {
+  const index = placeholderAdminUsers.findIndex(u => u.id === userId);
+  if (index !== -1) {
+    placeholderAdminUsers.splice(index, 1);
+  }
+}
+
+    
