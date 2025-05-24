@@ -9,7 +9,7 @@ import { ShoppingCartIcon, PlusCircle, MinusCircle } from 'lucide-react';
 import { useCart } from '@/contexts/cart-context';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input'; // Import Input component
+import { Input } from '@/components/ui/input';
 import { useState, useEffect } from 'react';
 
 interface ProductCardProps {
@@ -37,28 +37,23 @@ export function ProductCard({ product }: ProductCardProps) {
 
   const handleQuantityChangeViaInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setInputValue(value); // Update input field immediately
+    setInputValue(value); 
 
     const newQuantity = parseInt(value, 10);
     if (!isNaN(newQuantity) && newQuantity > 0) {
       updateQuantity(product.id, newQuantity);
     } else if (value === '' || newQuantity === 0) {
-      // If input is cleared or 0, treat as removing (or handle as min 1 if preferred)
-      // For now, let's allow it to go to 0 and then get removed by updateQuantity logic
       updateQuantity(product.id, 0); 
     }
   };
 
   const handleBlurInput = () => {
-    // If input is empty or invalid on blur, reset to actual cart quantity or 1 if not in cart
     const currentCartQty = getItemQuantity(product.id);
     if (inputValue === '' || isNaN(parseInt(inputValue, 10)) || parseInt(inputValue, 10) <= 0) {
       if (currentCartQty > 0) {
         setInputValue(currentCartQty.toString());
       } else {
-        // If it was not in cart or quantity was 0, and input is invalid,
-        // we might want to reset to 0 or 1 depending on desired behavior.
-        // For now, if it was 0, it will stay as "0" in inputValue or be handled by addToCart
+        // Keep input as is if it was already 0 or empty and not in cart
       }
     }
   };
@@ -71,7 +66,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   const handleDecreaseQuantity = () => {
     const newQuantity = quantityInCart - 1;
-    updateQuantity(product.id, newQuantity); // updateQuantity handles removal if newQuantity <= 0
+    updateQuantity(product.id, newQuantity); 
     setInputValue(newQuantity > 0 ? newQuantity.toString() : "0");
   };
   
@@ -93,7 +88,7 @@ export function ProductCard({ product }: ProductCardProps) {
           />
         </div>
       </CardHeader>
-      <CardContent className="p-3 flex-grow">
+      <CardContent className="p-3 flex-1">
         <CardTitle className="text-sm font-semibold mb-1 h-10 leading-tight overflow-hidden">
           {product.name}
         </CardTitle>
@@ -117,7 +112,7 @@ export function ProductCard({ product }: ProductCardProps) {
               onChange={handleQuantityChangeViaInput}
               onBlur={handleBlurInput}
               className="h-7 w-10 text-center px-1 text-sm"
-              min="0" // Allow 0 to effectively remove, or set to 1 to enforce min quantity
+              min="0" 
             />
             <Button variant="outline" size="icon" onClick={handleIncreaseQuantity} className="h-7 w-7">
               <PlusCircle className="h-4 w-4" />
