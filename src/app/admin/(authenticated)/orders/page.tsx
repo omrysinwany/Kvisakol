@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { Label } from "@/components/ui/label"; // Added Label import
 import { format, startOfDay, endOfDay } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { cn } from "@/lib/utils";
@@ -110,80 +111,102 @@ export default function AdminOrdersPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 space-y-2 sm:space-y-0 mb-6">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-2 mb-6">
         <h1 className="text-3xl font-bold tracking-tight">ניהול הזמנות</h1>
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-          <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilterValue)}>
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="סנן לפי סטטוס" />
-            </SelectTrigger>
-            <SelectContent>
-              {availableStatuses.map((statusKey) => (
-                <SelectItem key={statusKey} value={statusKey}>
-                  {statusTranslationsForFilter[statusKey]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button variant="outline" className="w-full sm:w-auto" onClick={handleExportOrders}>
-              <Download className="ml-2 h-4 w-4" />
-              ייצא הזמנות (CSV)
-          </Button>
+        <Button variant="outline" className="w-full sm:w-auto" onClick={handleExportOrders}>
+            <Download className="ml-2 h-4 w-4" />
+            ייצא הזמנות (CSV)
+        </Button>
+      </div>
+
+      {/* Filter Section */}
+      <div className="mb-6 p-4 border rounded-lg bg-card shadow-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-end">
+          {/* Status Filter */}
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="status-filter">סנן לפי סטטוס</Label>
+            <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilterValue)} name="status-filter" >
+              <SelectTrigger id="status-filter" className="w-full">
+                <SelectValue placeholder="סנן לפי סטטוס" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableStatuses.map((statusKey) => (
+                  <SelectItem key={statusKey} value={statusKey}>
+                    {statusTranslationsForFilter[statusKey]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Start Date */}
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="start-date-popover">מתאריך</Label>
+            <Popover>
+                <PopoverTrigger asChild>
+                    <Button
+                    id="start-date-popover"
+                    variant={"outline"}
+                    className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !startDate && "text-muted-foreground"
+                    )}
+                    >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {startDate ? format(startDate, "PPP", { locale: he }) : <span>בחר תאריך התחלה</span>}
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                    <Calendar
+                    mode="single"
+                    selected={startDate}
+                    onSelect={setStartDate}
+                    initialFocus
+                    disabled={(date) => endDate ? date > endDate : false}
+                    />
+                </PopoverContent>
+            </Popover>
+          </div>
+          
+          {/* End Date & Clear Button */}
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="end-date-popover">עד תאריך</Label>
+            <div className="flex gap-2 items-center">
+              <Popover>
+                  <PopoverTrigger asChild>
+                      <Button
+                      id="end-date-popover"
+                      variant={"outline"}
+                      className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !endDate && "text-muted-foreground"
+                      )}
+                      >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {endDate ? format(endDate, "PPP", { locale: he }) : <span>בחר תאריך סיום</span>}
+                      </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                      <Calendar
+                      mode="single"
+                      selected={endDate}
+                      onSelect={setEndDate}
+                      disabled={(date) => startDate && date < startDate}
+                      initialFocus
+                      />
+                  </PopoverContent>
+              </Popover>
+              {(startDate || endDate) && (
+                  <Button variant="ghost" onClick={handleClearDates} size="icon" className="h-10 w-10 shrink-0">
+                      <X className="h-4 w-4" />
+                      <span className="sr-only">נקה תאריכים</span>
+                  </Button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
-      <div className="mb-6 flex flex-col sm:flex-row gap-2 items-center">
-        <Popover>
-            <PopoverTrigger asChild>
-                <Button
-                variant={"outline"}
-                className={cn(
-                    "w-full sm:w-[200px] justify-start text-left font-normal",
-                    !startDate && "text-muted-foreground"
-                )}
-                >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {startDate ? format(startDate, "PPP", { locale: he }) : <span>בחר תאריך התחלה</span>}
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-                <Calendar
-                mode="single"
-                selected={startDate}
-                onSelect={setStartDate}
-                initialFocus
-                />
-            </PopoverContent>
-        </Popover>
-        <Popover>
-            <PopoverTrigger asChild>
-                <Button
-                variant={"outline"}
-                className={cn(
-                    "w-full sm:w-[200px] justify-start text-left font-normal",
-                    !endDate && "text-muted-foreground"
-                )}
-                >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {endDate ? format(endDate, "PPP", { locale: he }) : <span>בחר תאריך סיום</span>}
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-                <Calendar
-                mode="single"
-                selected={endDate}
-                onSelect={setEndDate}
-                disabled={(date) => startDate && date < startDate}
-                initialFocus
-                />
-            </PopoverContent>
-        </Popover>
-        {(startDate || endDate) && (
-            <Button variant="ghost" onClick={handleClearDates} size="icon">
-                <X className="h-4 w-4" />
-                <span className="sr-only">נקה תאריכים</span>
-            </Button>
-        )}
-      </div>
+      
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle>רשימת הזמנות ({filteredOrders.length})</CardTitle>
