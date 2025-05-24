@@ -3,8 +3,8 @@
 import Image from 'next/image';
 import type { Product } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ShoppingCartIcon, PlusCircle, MinusCircle, CheckCircle } from 'lucide-react';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { ShoppingCartIcon, PlusCircle, MinusCircle } from 'lucide-react';
 import { useCart } from '@/contexts/cart-context';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
@@ -56,11 +56,9 @@ export function ProductCard({ product }: ProductCardProps) {
       <CardContent className="p-4 flex-grow">
         <CardTitle className="text-lg font-semibold mb-1">{product.name}</CardTitle>
         {product.category && <Badge variant="secondary" className="mb-2">{product.category}</Badge>}
-        <CardDescription className="text-sm text-muted-foreground h-20 overflow-y-auto">
-          {product.description}
-        </CardDescription>
+        {/* Removed CardDescription here */}
       </CardContent>
-      <CardFooter className="p-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+      <CardFooter className="p-4 flex flex-col sm:flex-row justify-between items-center gap-2 mt-auto">
         <p className="text-xl font-bold text-primary">{formatPrice(product.price)}</p>
         {quantityInCart === 0 ? (
           <Button onClick={handleAddToCart} className="w-full sm:w-auto">
