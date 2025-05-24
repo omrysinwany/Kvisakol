@@ -108,7 +108,7 @@ export function ProductCard({ product }: ProductCardProps) {
         {product.category && <Badge variant="secondary" className="mb-1 text-xs">{product.category}</Badge>}
       </CardContent>
       <CardFooter className="p-2 flex flex-col sm:flex-row justify-between items-center gap-1 mt-auto">
-        <p className="text-base font-bold">{formatPrice(product.price)}</p>
+        <p className="text-sm font-bold">{formatPrice(product.price)}</p> {/* Changed from text-base to text-sm */}
         {quantityInCart === 0 ? (
           <Button onClick={handleAddToCart} className="w-full sm:w-auto" size="sm">
             <ShoppingCartIcon className="ml-1.5 h-4 w-4" />
