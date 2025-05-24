@@ -210,7 +210,7 @@ export default function AdminDashboardPage() {
                       variant={"outline"}
                       size="sm"
                       className={cn(
-                        "w-full sm:w-[170px] justify-start text-left font-normal text-xs",
+                        "w-full sm:w-[160px] justify-start text-left font-normal text-xs",
                         !customRevenueStartDate && "text-muted-foreground"
                       )}
                     >
@@ -234,7 +234,7 @@ export default function AdminDashboardPage() {
                       variant={"outline"}
                        size="sm"
                       className={cn(
-                        "w-full sm:w-[170px] justify-start text-left font-normal text-xs",
+                        "w-full sm:w-[160px] justify-start text-left font-normal text-xs",
                         !customRevenueEndDate && "text-muted-foreground"
                       )}
                     >
@@ -253,7 +253,7 @@ export default function AdminDashboardPage() {
                   </PopoverContent>
                 </Popover>
                 {(customRevenueStartDate || customRevenueEndDate) && (
-                    <Button variant="ghost" size="sm" onClick={handleClearCustomDates} className="p-2">
+                    <Button variant="ghost" size="icon" onClick={handleClearCustomDates} className="h-9 w-9">
                         <X className="h-4 w-4" />
                         <span className="sr-only">נקה תאריכים</span>
                     </Button>
