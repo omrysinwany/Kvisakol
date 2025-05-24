@@ -37,7 +37,7 @@ export default function AdminDashboardPage() {
         const totalOrders = orders.length;
         const newOrders = orders.filter(o => o.status === 'new').length;
         const totalRevenue = orders
-          .filter(o => o.status === 'completed' || o.status === 'shipped')
+          .filter(o => o.status === 'completed') // Only count completed orders for revenue
           .reduce((sum, order) => sum + order.totalAmount, 0);
         
         // For "popular products", just take the first 3 for this example

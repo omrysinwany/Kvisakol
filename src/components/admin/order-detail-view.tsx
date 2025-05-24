@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Order, OrderItem } from '@/lib/types';
@@ -7,15 +8,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
-import { Printer, Edit, CheckCircle, Truck, XCircle, Hourglass, Phone, MapPin, FileText } from 'lucide-react';
+import { Printer, CheckCircle, XCircle, Hourglass, Phone, MapPin, FileText } from 'lucide-react'; // Removed Edit, Truck
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
   DropdownMenuPortal
 } from '@/components/ui/dropdown-menu';
@@ -27,24 +25,18 @@ interface OrderDetailViewProps {
 
 const statusTranslations: Record<Order['status'], string> = {
   new: 'חדשה',
-  processed: 'בעיבוד',
-  shipped: 'נשלחה',
   completed: 'הושלמה',
   cancelled: 'בוטלה',
 };
 
 const statusColors: Record<Order['status'], string> = {
   new: 'bg-blue-500 hover:bg-blue-600',
-  processed: 'bg-yellow-500 hover:bg-yellow-600',
-  shipped: 'bg-purple-500 hover:bg-purple-600',
   completed: 'bg-green-500 hover:bg-green-600',
   cancelled: 'bg-red-500 hover:bg-red-600',
 };
 
 const statusIcons: Record<Order['status'], React.ElementType> = {
   new: Hourglass,
-  processed: Edit,
-  shipped: Truck,
   completed: CheckCircle,
   cancelled: XCircle,
 }
@@ -78,9 +70,9 @@ export function OrderDetailView({ order, onUpdateStatus }: OrderDetailViewProps)
                     value={order.status} 
                     onValueChange={(newStatus) => onUpdateStatus(order.id, newStatus as Order['status'])}
                     >
-                    {Object.entries(statusTranslations).map(([statusKey, statusValue]) => (
+                    {(['new', 'completed', 'cancelled'] as Order['status'][]).map((statusKey) => (
                         <DropdownMenuRadioItem key={statusKey} value={statusKey} className="cursor-pointer">
-                        {statusValue}
+                        {statusTranslations[statusKey]}
                         </DropdownMenuRadioItem>
                     ))}
                     </DropdownMenuRadioGroup>

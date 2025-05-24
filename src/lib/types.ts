@@ -30,7 +30,7 @@ export interface Order {
   items: OrderItem[];
   totalAmount: number;
   orderTimestamp: Date;
-  status: 'new' | 'processed' | 'shipped' | 'completed' | 'cancelled';
+  status: 'new' | 'completed' | 'cancelled';
 }
 
 export interface AdminUser {

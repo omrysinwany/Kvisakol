@@ -984,7 +984,7 @@ export let placeholderProducts: Product[] = [
     name: 'אבקת כביסה "כביסכל קלאסי הישן"',
     description: 'אבקת כביסה איכותית לכל סוגי הבדים, בניחוח מרענן. (מוצר ישן, לא פעיל)',
     price: 39.90,
-    imageUrl: '/images/products/pold1.png', // Placeholder for local image
+    imageUrl: '/images/products/pold1.png', 
     dataAiHint: 'laundry powder',
     category: 'אבקות כביסה',
     isActive: false,
@@ -1020,7 +1020,7 @@ export let placeholderOrders: Order[] = [
     ],
     totalAmount: 45.00 + 45.00 + 25.00,
     orderTimestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // Two days ago
-    status: 'processed',
+    status: 'completed',
   },
   {
     id: 'o3',
@@ -1034,7 +1034,7 @@ export let placeholderOrders: Order[] = [
     ],
     totalAmount: 19.90 + (16.50 * 2) + 35.00,
     orderTimestamp: new Date(), // Today
-    status: 'completed',
+    status: 'new',
   },
 ];
 
@@ -1103,5 +1103,3 @@ export function deletePlaceholderAdminUser(userId: string) {
     placeholderAdminUsers.splice(index, 1);
   }
 }
-
-    

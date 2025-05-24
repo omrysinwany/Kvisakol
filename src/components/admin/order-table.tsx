@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -5,7 +6,7 @@ import type { Order } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, Eye, Edit, CheckCircle, Truck, XCircle, Hourglass } from 'lucide-react';
+import { MoreHorizontal, Eye, Edit, CheckCircle, XCircle, Hourglass } from 'lucide-react'; // Removed Truck
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,29 +26,23 @@ import { he } from 'date-fns/locale';
 
 interface OrderTableProps {
   orders: Order[];
-  onUpdateStatus: (orderId: string, newStatus: Order['status']) => void; // Placeholder
+  onUpdateStatus: (orderId: string, newStatus: Order['status']) => void; 
 }
 
 const statusTranslations: Record<Order['status'], string> = {
   new: 'חדשה',
-  processed: 'בעיבוד',
-  shipped: 'נשלחה',
   completed: 'הושלמה',
   cancelled: 'בוטלה',
 };
 
 const statusColors: Record<Order['status'], string> = {
   new: 'bg-blue-500 hover:bg-blue-600',
-  processed: 'bg-yellow-500 hover:bg-yellow-600',
-  shipped: 'bg-purple-500 hover:bg-purple-600',
   completed: 'bg-green-500 hover:bg-green-600',
   cancelled: 'bg-red-500 hover:bg-red-600',
 };
 
 const statusIcons: Record<Order['status'], React.ElementType> = {
   new: Hourglass,
-  processed: Edit,
-  shipped: Truck,
   completed: CheckCircle,
   cancelled: XCircle,
 }
@@ -118,9 +113,9 @@ export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
                           value={order.status} 
                           onValueChange={(newStatus) => onUpdateStatus(order.id, newStatus as Order['status'])}
                         >
-                          {Object.entries(statusTranslations).map(([statusKey, statusValue]) => (
+                          {(['new', 'completed', 'cancelled'] as Order['status'][]).map((statusKey) => (
                             <DropdownMenuRadioItem key={statusKey} value={statusKey} className="cursor-pointer">
-                              {statusValue}
+                              {statusTranslations[statusKey]}
                             </DropdownMenuRadioItem>
                           ))}
                         </DropdownMenuRadioGroup>
