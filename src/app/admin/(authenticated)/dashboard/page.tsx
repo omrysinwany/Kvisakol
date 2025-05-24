@@ -153,13 +153,11 @@ export default function AdminDashboardPage() {
             } else if (customRevenueEndDate) {
                  relevantOrders = relevantOrders.filter(o => new Date(o.orderTimestamp) <= endOfDay(customRevenueEndDate));
             } else {
-                 // If custom is selected but no dates are set, show 0 or based on some default
-                 relevantOrders = []; // Or allTime if that's preferred default for empty custom
+                 relevantOrders = []; 
             }
             break;
         case 'allTime':
         default:
-            // No additional date filtering beyond 'completed' status - uses all completed orders
             break;
     }
     const newFilteredRevenue = relevantOrders.reduce((sum, order) => sum + order.totalAmount, 0);
@@ -175,8 +173,6 @@ export default function AdminDashboardPage() {
   const handleClearCustomDates = () => {
     setCustomRevenueStartDate(undefined);
     setCustomRevenueEndDate(undefined);
-    // Optionally, reset to a default period like 'thisMonth' or 'allTime' if 'custom' with no dates isn't desired
-    // setSelectedRevenuePeriod('thisMonth'); 
   };
 
   if (isLoading) {
@@ -198,8 +194,8 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Card className="sm:col-span-2">
+      <div className="grid grid-cols-2 gap-4">
+        <Card className="col-span-2">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center">
