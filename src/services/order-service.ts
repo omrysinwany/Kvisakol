@@ -1,7 +1,7 @@
 
 'use server';
 
-import { placeholderOrders } from '@/lib/placeholder-data';
+import { placeholderOrders, setPlaceholderOrders } from '@/lib/placeholder-data';
 import type { Order, OrderItem } from '@/lib/types';
 
 // const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -26,7 +26,7 @@ export async function createOrderService(orderDetails: {
   customerPhone: string;
   customerAddress: string;
   customerNotes?: string;
-  items: OrderItem[]; // Ensure items are OrderItem[], not CartItem[]
+  items: OrderItem[]; 
   totalAmount: number;
 }): Promise<Order> {
   console.log('SERVICE: Simulating createOrder:', orderDetails);
@@ -40,19 +40,40 @@ export async function createOrderService(orderDetails: {
     totalAmount: orderDetails.totalAmount,
     orderTimestamp: new Date(),
     status: 'new',
+    isViewedByAgent: false, // Default for new orders
   };
-  // In a real DB, this would be an insert operation.
-  // For placeholder, to see it in admin immediately (won't persist page reload):
-  placeholderOrders.unshift(newOrder); 
+  
+  const currentOrders = [...placeholderOrders];
+  currentOrders.unshift(newOrder);
+  setPlaceholderOrders(currentOrders); // Update the in-memory array via the setter
+
   return Promise.resolve(newOrder);
 }
 
 export async function updateOrderStatusService(orderId: string, newStatus: Order['status']): Promise<Order | null> {
   console.log('SERVICE: Simulating updateOrderStatus:', orderId, newStatus);
-  const orderIndex = placeholderOrders.findIndex(o => o.id === orderId);
+  const currentOrders = [...placeholderOrders];
+  const orderIndex = currentOrders.findIndex(o => o.id === orderId);
   if (orderIndex === -1) {
     return Promise.resolve(null);
   }
-  placeholderOrders[orderIndex].status = newStatus; // Modifies in-memory array
-  return Promise.resolve(placeholderOrders[orderIndex]);
+  currentOrders[orderIndex].status = newStatus; 
+  // If status changes from 'new', it implies it has been viewed/processed.
+  if (newStatus !== 'new') {
+    currentOrders[orderIndex].isViewedByAgent = true;
+  }
+  setPlaceholderOrders(currentOrders);
+  return Promise.resolve(currentOrders[orderIndex]);
+}
+
+export async function markOrderAsViewedService(orderId: string): Promise<Order | null> {
+  console.log('SERVICE: Simulating markOrderAsViewed:', orderId);
+  const currentOrders = [...placeholderOrders];
+  const orderIndex = currentOrders.findIndex(o => o.id === orderId);
+  if (orderIndex === -1) {
+    return Promise.resolve(null);
+  }
+  currentOrders[orderIndex].isViewedByAgent = true;
+  setPlaceholderOrders(currentOrders);
+  return Promise.resolve(currentOrders[orderIndex]);
 }

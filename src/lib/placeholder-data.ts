@@ -861,7 +861,7 @@ export let placeholderProducts: Product[] = [
     id: 'kwp3',
     name: 'מארז מגבונים לחים ארומטי לניקוי כללי',
     description: 'מארז 3 חבילות מגבונים לניקוי כללי בניחוח ארומטי.',
-    price: 22.90,
+    price: 22.90, // Was 24.90, now 22.90
     imageUrl: '/images/products/kwp3.jpeg',
     dataAiHint: 'cleaning wipes aromatic',
     category: 'מגבונים',
@@ -871,7 +871,7 @@ export let placeholderProducts: Product[] = [
     id: 'kwp4',
     name: 'מארז מגבונים לחים בייבי לניקוי כללי',
     description: 'מארז 3 חבילות מגבונים לניקוי כללי בניחוח בייבי עדין.',
-    price: 22.90,
+    price: 22.90, // Was 24.90, now 22.90
     imageUrl: '/images/products/kwp4.jpeg',
     dataAiHint: 'cleaning wipes baby',
     category: 'מגבונים',
@@ -881,7 +881,7 @@ export let placeholderProducts: Product[] = [
     id: 'kwp5',
     name: 'מארז מגבונים לחים ספא לניקוי כללי',
     description: 'מארז 3 חבילות מגבונים לניקוי כללי בניחוח ספא יוקרתי.',
-    price: 22.90,
+    price: 22.90, // Was 24.90, now 22.90
     imageUrl: '/images/products/kwp5.jpeg',
     dataAiHint: 'cleaning wipes spa',
     category: 'מגבונים',
@@ -891,7 +891,7 @@ export let placeholderProducts: Product[] = [
     id: 'kwp6',
     name: 'מארז מגבונים לחים רוז לניקוי כללי',
     description: 'מארז 3 חבילות מגבונים לניקוי כללי בניחוח רוז קלאסי.',
-    price: 22.90,
+    price: 22.90, // Was 24.90, now 22.90
     imageUrl: '/images/products/kwp6.jpeg',
     dataAiHint: 'cleaning wipes rose',
     category: 'מגבונים',
@@ -1001,11 +1001,11 @@ export let placeholderOrders: Order[] = [
     items: [
       { productId: 'kbio1', productName: 'כביסכל Bio אלגנס – 2 ליטר', quantity: 2, priceAtOrder: 43.00 },
       { productId: 'kmb1', productName: 'מבשם אלגנס 750 מ"ל', quantity: 1, priceAtOrder: 25.00 },
-      { productId: 'pkg1', productName: 'מארז חבילה מוגדלת', quantity: 1, priceAtOrder: 324.00 },
     ],
-    totalAmount: (43.00 * 2) + 25.00 + 324.00,
+    totalAmount: (43.00 * 2) + 25.00,
     orderTimestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // Yesterday
     status: 'new',
+    isViewedByAgent: false,
   },
   {
     id: 'o2',
@@ -1015,12 +1015,12 @@ export let placeholderOrders: Order[] = [
     customerNotes: 'נא להשאיר ליד הדלת אם אין מענה',
     items: [
       { productId: 'kbio2', productName: 'כביסכל Bio ספורט 2 ליטר', quantity: 1, priceAtOrder: 45.00 },
-      { productId: 'kmb16', productName: 'BRONZE – מבשם קפסולרי מרוכז 350 מ"ל', quantity: 1, priceAtOrder: 45.00 },
       { productId: 'kpff1', productName: 'מבשם רצפות פרוביוטי מאסק פלאוורס', quantity: 1, priceAtOrder: 25.00 },
     ],
-    totalAmount: 45.00 + 45.00 + 25.00,
+    totalAmount: 45.00 + 25.00,
     orderTimestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // Two days ago
     status: 'completed',
+    isViewedByAgent: true,
   },
   {
     id: 'o3',
@@ -1030,11 +1030,11 @@ export let placeholderOrders: Order[] = [
     items: [
       { productId: 'kprof1', productName: 'נוזל אורנים', quantity: 1, priceAtOrder: 19.90 },
       { productId: 'kds1', productName: 'נוזל כלים פרוביוטי לבנדר פרש', quantity: 2, priceAtOrder: 16.50 },
-      { productId: 'kwp7', productName: 'דלי מגבונים לניקוי כללי בניחוח ארומטי', quantity: 1, priceAtOrder: 35.00 },
     ],
-    totalAmount: 19.90 + (16.50 * 2) + 35.00,
+    totalAmount: 19.90 + (16.50 * 2),
     orderTimestamp: new Date(), // Today
     status: 'new',
+    isViewedByAgent: false,
   },
 ];
 

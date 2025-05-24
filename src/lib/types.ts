@@ -31,13 +31,13 @@ export interface Order {
   totalAmount: number;
   orderTimestamp: Date;
   status: 'new' | 'completed' | 'cancelled';
+  isViewedByAgent?: boolean; // Added field
 }
 
 export interface AdminUser {
   id: string;
   username: string;
-  passwordHash: string; // Storing plain text passwords is not secure. This should be a hash.
-                        // For this placeholder, we'll keep it simple but flag it.
+  passwordHash: string; 
   isSuperAdmin: boolean;
-  displayName?: string; // Optional display name
+  displayName?: string; 
 }

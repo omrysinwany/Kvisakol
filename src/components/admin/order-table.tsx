@@ -6,7 +6,7 @@ import type { Order } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, Eye, Edit, CheckCircle, XCircle, Hourglass } from 'lucide-react'; // Removed Truck
+import { MoreHorizontal, Eye, Edit, CheckCircle, XCircle, Hourglass, RadioTower } from 'lucide-react'; 
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
 interface OrderTableProps {
   orders: Order[];
@@ -68,18 +69,27 @@ export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
       <TableBody>
         {orders.map((order) => {
           const StatusIcon = statusIcons[order.status];
+          const isNewUnviewed = order.status === 'new' && !order.isViewedByAgent;
           return (
-          <TableRow key={order.id}>
+          <TableRow 
+            key={order.id} 
+            className={cn(isNewUnviewed && "bg-primary/5")}
+          >
             <TableCell className="font-medium">
-              <Link href={`/admin/orders/${order.id}`} className="hover:underline text-primary">
-                #{order.id.substring(order.id.length - 6)}
-              </Link>
+              <div className="flex items-center">
+                {isNewUnviewed && (
+                  <RadioTower className="h-4 w-4 text-blue-500 ml-2 animate-pulse" title="הזמנה חדשה שלא נצפתה"/>
+                )}
+                <Link href={`/admin/orders/${order.id}`} className="hover:underline text-primary">
+                  #{order.id.substring(order.id.length - 6)}
+                </Link>
+              </div>
             </TableCell>
-            <TableCell>{order.customerName}</TableCell>
-            <TableCell className="hidden md:table-cell">
+            <TableCell className={cn(isNewUnviewed && "font-semibold")}>{order.customerName}</TableCell>
+            <TableCell className={cn("hidden md:table-cell", isNewUnviewed && "font-semibold")}>
               {format(new Date(order.orderTimestamp), 'dd/MM/yyyy HH:mm', { locale: he })}
             </TableCell>
-            <TableCell className="hidden sm:table-cell">{formatPrice(order.totalAmount)}</TableCell>
+            <TableCell className={cn("hidden sm:table-cell", isNewUnviewed && "font-semibold")}>{formatPrice(order.totalAmount)}</TableCell>
             <TableCell>
               <Badge variant="default" className={`${statusColors[order.status]} text-white`}>
                 <StatusIcon className="h-3 w-3 ml-1.5" />
@@ -122,7 +132,6 @@ export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
                       </DropdownMenuSubContent>
                     </DropdownMenuPortal>
                   </DropdownMenuSub>
-                  {/* Add more actions if needed, e.g., print invoice */}
                 </DropdownMenuContent>
               </DropdownMenu>
             </TableCell>

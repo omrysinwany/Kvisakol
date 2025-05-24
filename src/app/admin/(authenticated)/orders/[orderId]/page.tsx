@@ -4,7 +4,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { OrderDetailView } from '@/components/admin/order-detail-view';
-import { getOrderByIdForAdmin, updateOrderStatusService } from '@/services/order-service';
+import { getOrderByIdForAdmin, updateOrderStatusService, markOrderAsViewedService } from '@/services/order-service';
 import type { Order } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
@@ -29,10 +29,23 @@ export default function AdminOrderDetailPage() {
           const fetchedOrder = await getOrderByIdForAdmin(orderId);
           if (fetchedOrder) {
             setOrder(fetchedOrder);
+            // Mark as viewed if it's new and not viewed
+            if (fetchedOrder.status === 'new' && !fetchedOrder.isViewedByAgent) {
+              try {
+                const markedOrder = await markOrderAsViewedService(fetchedOrder.id);
+                if (markedOrder) {
+                  // Optionally update local state if visual feedback is immediate,
+                  // though the table will reflect change on next load/filter
+                   setOrder(prevOrder => prevOrder ? { ...prevOrder, isViewedByAgent: true } : null);
+                }
+              } catch (viewError) {
+                console.error("Failed to mark order as viewed:", viewError);
+                // Not critical enough to show a toast to the user for this
+              }
+            }
           } else {
             setError('הזמנה לא נמצאה.');
             toast({ variant: 'destructive', title: 'שגיאה', description: 'ההזמנה המבוקשת לא נמצאה.' });
-            // router.push('/admin/orders'); // Optional: redirect if not found
           }
         } catch (err) {
           console.error("Failed to fetch order:", err);
@@ -51,11 +64,11 @@ export default function AdminOrderDetailPage() {
       const updatedOrder = await updateOrderStatusService(updatedOrderId, newStatus);
       if (updatedOrder) {
         if (order && order.id === updatedOrderId) {
-          setOrder({ ...order, status: newStatus });
+          setOrder(updatedOrder); // Update with the full updated order from service
         }
         toast({
           title: "סטטוס הזמנה עודכן",
-          description: `הסטטוס של הזמנה ${updatedOrderId.substring(updatedOrderId.length -6)} שונה ל: ${newStatus}.`,
+          description: `הסטטוס של הזמנה ${updatedOrderId.substring(updatedOrderId.length -6)} שונה ל: ${newStatus === 'new' ? 'חדשה' : newStatus === 'completed' ? 'הושלמה' : 'בוטלה'}.`,
         });
       } else {
         toast({ variant: 'destructive', title: 'שגיאה', description: 'לא ניתן היה לעדכן את סטטוס ההזמנה.' });
