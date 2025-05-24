@@ -35,7 +35,7 @@ export default function AdminDashboardPage() {
 
         const totalProducts = products.filter(p => p.isActive).length;
         const totalOrders = orders.length;
-        const newOrders = orders.filter(o => o.status === 'new').length; // Only count 'new' status
+        const newOrders = orders.filter(o => o.status === 'new').length;
         const totalRevenue = orders
           .filter(o => o.status === 'completed') 
           .reduce((sum, order) => sum + order.totalAmount, 0);
@@ -84,7 +84,18 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="md:col-span-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">סה"כ הכנסות (שהושלמו)</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatPrice(summary.totalRevenue)}</div>
+            <p className="text-xs text-muted-foreground">מהזמנות שהושלמו</p>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">הזמנות חדשות (טרם נצפו)</CardTitle>
@@ -95,6 +106,7 @@ export default function AdminDashboardPage() {
             <p className="text-xs text-muted-foreground">מתוך {summary.totalOrders} הזמנות בסה"כ</p>
           </CardContent>
         </Card>
+        
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">מוצרים פעילים</CardTitle>
@@ -105,6 +117,7 @@ export default function AdminDashboardPage() {
             <p className="text-xs text-muted-foreground">זמינים בקטלוג</p>
           </CardContent>
         </Card>
+        
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">פעילות אחרונה</CardTitle> 
@@ -113,16 +126,6 @@ export default function AdminDashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">{summary.latestOrders.filter(o => new Date(o.orderTimestamp) > new Date(Date.now() - 24*60*60*1000)).length}</div> 
             <p className="text-xs text-muted-foreground">הזמנות ב-24 שעות אחרונות</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">סה"כ הכנסות (שהושלמו)</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatPrice(summary.totalRevenue)}</div>
-            <p className="text-xs text-muted-foreground">מהזמנות שהושלמו</p>
           </CardContent>
         </Card>
       </div>
