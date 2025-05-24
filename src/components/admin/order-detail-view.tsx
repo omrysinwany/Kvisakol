@@ -1,14 +1,15 @@
 
 'use client';
 
-import type { Order, OrderItem } from '@/lib/types';
+import type { Order } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
-import { Printer, CheckCircle, XCircle, Hourglass, Phone, MapPin, FileText, ClipboardCheck } from 'lucide-react';
+import { Printer, CheckCircle, XCircle, Hourglass, Phone, MapPin, FileText, ClipboardCheck, Save } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,10 +18,12 @@ import {
   DropdownMenuTrigger,
   DropdownMenuPortal
 } from '@/components/ui/dropdown-menu';
+import { useState } from 'react';
 
 interface OrderDetailViewProps {
   order: Order;
   onUpdateStatus: (orderId: string, newStatus: Order['status']) => void;
+  onSaveAgentNotes: (orderId: string, notes: string) => Promise<void>;
 }
 
 const statusTranslations: Record<Order['status'], string> = {
@@ -32,7 +35,7 @@ const statusTranslations: Record<Order['status'], string> = {
 
 const statusColors: Record<Order['status'], string> = {
   new: 'bg-blue-500 hover:bg-blue-600',
-  received: 'bg-amber-500 hover:bg-amber-600', // Changed to amber
+  received: 'bg-amber-500 hover:bg-amber-600',
   completed: 'bg-green-500 hover:bg-green-600',
   cancelled: 'bg-red-500 hover:bg-red-600',
 };
@@ -44,21 +47,29 @@ const statusIcons: Record<Order['status'], React.ElementType> = {
   cancelled: XCircle,
 }
 
-export function OrderDetailView({ order, onUpdateStatus }: OrderDetailViewProps) {
+export function OrderDetailView({ order, onUpdateStatus, onSaveAgentNotes }: OrderDetailViewProps) {
   const formatPrice = (price: number) => `₪${price.toFixed(2)}`;
   const StatusIcon = statusIcons[order.status];
+  const [currentAgentNotes, setCurrentAgentNotes] = useState(order.agentNotes || '');
+  const [isSavingNotes, setIsSavingNotes] = useState(false);
+
+  const handleSaveNotes = async () => {
+    setIsSavingNotes(true);
+    await onSaveAgentNotes(order.id, currentAgentNotes);
+    setIsSavingNotes(false);
+  };
 
   return (
     <div className="space-y-6">
       <Card className="shadow-lg">
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div>
             <CardTitle className="text-2xl">הזמנה #{order.id.substring(order.id.length - 6)}</CardTitle>
             <CardDescription>
               תאריך הזמנה: {format(new Date(order.orderTimestamp), 'dd/MM/yyyy HH:mm', { locale: he })}
             </CardDescription>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start">
              <Badge variant="default" className={`${statusColors[order.status]} text-white text-sm px-3 py-1`}>
                 <StatusIcon className="h-4 w-4 ml-1.5" />
                 {statusTranslations[order.status]}
@@ -69,8 +80,8 @@ export function OrderDetailView({ order, onUpdateStatus }: OrderDetailViewProps)
               </DropdownMenuTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuContent>
-                    <DropdownMenuRadioGroup 
-                    value={order.status} 
+                    <DropdownMenuRadioGroup
+                    value={order.status}
                     onValueChange={(newStatus) => onUpdateStatus(order.id, newStatus as Order['status'])}
                     >
                     {(['new', 'received', 'completed', 'cancelled'] as Order['status'][]).map((statusKey) => (
@@ -95,7 +106,7 @@ export function OrderDetailView({ order, onUpdateStatus }: OrderDetailViewProps)
               <div className="space-y-1 text-sm">
                 <p><strong>שם:</strong> {order.customerName}</p>
                 <p className="flex items-center gap-1">
-                  <Phone className="w-3 h-3 text-muted-foreground"/> <strong>טלפון:</strong> 
+                  <Phone className="w-3 h-3 text-muted-foreground"/> <strong>טלפון:</strong>
                   <a href={`tel:${order.customerPhone}`} className="text-primary hover:underline">{order.customerPhone}</a>
                 </p>
                 <p className="flex items-start gap-1">
@@ -103,13 +114,31 @@ export function OrderDetailView({ order, onUpdateStatus }: OrderDetailViewProps)
                 </p>
               </div>
             </div>
-            {order.customerNotes && (
-              <div>
-                <h3 className="text-lg font-semibold mb-2 flex items-center gap-1"><FileText className="w-4 h-4"/>הערות לקוח</h3>
-                <p className="text-sm bg-muted/50 p-3 rounded-md whitespace-pre-wrap">{order.customerNotes}</p>
-              </div>
-            )}
+            <div className="space-y-2">
+                {order.customerNotes && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2 flex items-center gap-1"><FileText className="w-4 h-4"/>הערות לקוח</h3>
+                    <p className="text-sm bg-muted/50 p-3 rounded-md whitespace-pre-wrap">{order.customerNotes}</p>
+                  </div>
+                )}
+            </div>
           </div>
+
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-2">הערות סוכן (פנימי)</h3>
+            <Textarea
+              placeholder="הוסף הערות פנימיות לגבי ההזמנה..."
+              value={currentAgentNotes}
+              onChange={(e) => setCurrentAgentNotes(e.target.value)}
+              rows={3}
+              className="bg-background"
+            />
+            <Button onClick={handleSaveNotes} size="sm" className="mt-2" disabled={isSavingNotes}>
+              <Save className="ml-2 h-4 w-4" />
+              {isSavingNotes ? 'שומר...' : 'שמור הערות'}
+            </Button>
+          </div>
+
 
           <h3 className="text-lg font-semibold mb-2">פריטים בהזמנה</h3>
           <div className="border rounded-md overflow-hidden">
@@ -145,4 +174,3 @@ export function OrderDetailView({ order, onUpdateStatus }: OrderDetailViewProps)
     </div>
   );
 }
-

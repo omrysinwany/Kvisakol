@@ -978,11 +978,11 @@ export let placeholderProducts: Product[] = [
     isActive: true,
   },
   {
-    id: 'pold1', 
+    id: 'pold1',
     name: 'אבקת כביסה "כביסכל קלאסי הישן"',
     description: 'אבקת כביסה איכותית לכל סוגי הבדים, בניחוח מרענן. (מוצר ישן, לא פעיל)',
     price: 39.90,
-    imageUrl: '/images/products/pold1.png', 
+    imageUrl: '/images/products/pold1.png',
     dataAiHint: 'laundry powder',
     category: 'אבקות כביסה',
     isActive: false,
@@ -1003,6 +1003,7 @@ export let placeholderOrders: Order[] = [
     orderTimestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
     status: 'new',
     isViewedByAgent: false,
+    agentNotes: 'לקוח ביקש לוודא שהמשלוח מגיע לפני סוף השבוע.',
   },
   {
     id: 'o2',
@@ -1030,8 +1031,9 @@ export let placeholderOrders: Order[] = [
     ],
     totalAmount: 19.90 + (16.50 * 2),
     orderTimestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // Yesterday
-    status: 'received', // Changed from 'new' to 'received' for variety
-    isViewedByAgent: true, // Consistent with 'received'
+    status: 'received',
+    isViewedByAgent: true,
+    agentNotes: 'לקוח חוזר, הזמנה קודמת הייתה בסדר.',
   },
   {
     id: 'o4',
@@ -1113,4 +1115,3 @@ export function deletePlaceholderAdminUser(userId: string) {
     placeholderAdminUsers.splice(index, 1);
   }
 }
-

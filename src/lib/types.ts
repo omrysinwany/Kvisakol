@@ -30,15 +30,15 @@ export interface Order {
   items: OrderItem[];
   totalAmount: number;
   orderTimestamp: Date;
-  status: 'new' | 'received' | 'completed' | 'cancelled'; // Added 'received'
-  isViewedByAgent?: boolean; 
+  status: 'new' | 'received' | 'completed' | 'cancelled';
+  isViewedByAgent?: boolean;
+  agentNotes?: string; // Added for internal agent notes
 }
 
 export interface AdminUser {
   id: string;
   username: string;
-  passwordHash: string; 
+  passwordHash: string;
   isSuperAdmin: boolean;
-  displayName?: string; 
+  displayName?: string;
 }
-

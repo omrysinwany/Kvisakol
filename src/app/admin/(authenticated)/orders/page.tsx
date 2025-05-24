@@ -7,14 +7,18 @@ import { OrderTable } from '@/components/admin/order-table';
 import { getOrdersForAdmin, updateOrderStatusService } from '@/services/order-service';
 import type { Order } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
+import { Download, CalendarIcon, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { usePathname } from 'next/navigation'; // Import usePathname
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format, startOfDay, endOfDay } from 'date-fns';
+import { he } from 'date-fns/locale';
+import { cn } from "@/lib/utils";
+import { usePathname } from 'next/navigation';
 
 type StatusFilterValue = Order['status'] | 'all';
 
-// Updated status translations to match the allowed statuses
 const statusTranslationsForFilter: Record<StatusFilterValue, string> = {
   all: 'כל הסטטוסים',
   new: 'חדשה',
@@ -30,8 +34,10 @@ export default function AdminOrdersPage() {
   const [allOrders, setAllOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<StatusFilterValue>('all');
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const { toast } = useToast();
-  const pathname = usePathname(); // Get current pathname
+  const pathname = usePathname();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -47,14 +53,14 @@ export default function AdminOrdersPage() {
       }
     };
     fetchOrders();
-  }, [toast, pathname]); // Add pathname to dependency array
+  }, [toast, pathname]);
 
   const handleUpdateStatus = async (orderId: string, newStatus: Order['status']) => {
     try {
       const updatedOrder = await updateOrderStatusService(orderId, newStatus);
       if (updatedOrder) {
         setAllOrders(prevOrders =>
-          prevOrders.map(o => (o.id === orderId ? { ...updatedOrder } : o)) 
+          prevOrders.map(o => (o.id === orderId ? { ...updatedOrder } : o))
         );
         toast({
           title: "סטטוס הזמנה עודכן",
@@ -70,22 +76,32 @@ export default function AdminOrdersPage() {
   };
 
   const filteredOrders = useMemo(() => {
-    if (statusFilter === 'all') {
-      return allOrders;
+    let ordersToFilter = allOrders;
+
+    if (statusFilter !== 'all') {
+      ordersToFilter = ordersToFilter.filter(order => order.status === statusFilter);
     }
-    return allOrders.filter(order => order.status === statusFilter);
-  }, [allOrders, statusFilter]);
+
+    if (startDate) {
+      ordersToFilter = ordersToFilter.filter(order => new Date(order.orderTimestamp) >= startOfDay(startDate));
+    }
+    if (endDate) {
+      ordersToFilter = ordersToFilter.filter(order => new Date(order.orderTimestamp) <= endOfDay(endDate));
+    }
+
+    return ordersToFilter;
+  }, [allOrders, statusFilter, startDate, endDate]);
+
+  const handleClearDates = () => {
+    setStartDate(undefined);
+    setEndDate(undefined);
+  };
 
   const handleExportOrders = () => {
-    // Placeholder for future CSV export functionality
     toast({
       title: "ייצוא הזמנות",
       description: "פונקציונליות ייצוא ל-CSV תתווסף בעתיד.",
     });
-    // In a real implementation, you would:
-    // 1. Fetch/filter the orders to export.
-    // 2. Convert the data to CSV format.
-    // 3. Trigger a download of the CSV file.
   };
 
   if (isLoading) {
@@ -94,7 +110,7 @@ export default function AdminOrdersPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-2 space-y-2 sm:space-y-0 mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 space-y-2 sm:space-y-0 mb-6">
         <h1 className="text-3xl font-bold tracking-tight">ניהול הזמנות</h1>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilterValue)}>
@@ -114,6 +130,59 @@ export default function AdminOrdersPage() {
               ייצא הזמנות (CSV)
           </Button>
         </div>
+      </div>
+      <div className="mb-6 flex flex-col sm:flex-row gap-2 items-center">
+        <Popover>
+            <PopoverTrigger asChild>
+                <Button
+                variant={"outline"}
+                className={cn(
+                    "w-full sm:w-[200px] justify-start text-left font-normal",
+                    !startDate && "text-muted-foreground"
+                )}
+                >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {startDate ? format(startDate, "PPP", { locale: he }) : <span>בחר תאריך התחלה</span>}
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+                <Calendar
+                mode="single"
+                selected={startDate}
+                onSelect={setStartDate}
+                initialFocus
+                />
+            </PopoverContent>
+        </Popover>
+        <Popover>
+            <PopoverTrigger asChild>
+                <Button
+                variant={"outline"}
+                className={cn(
+                    "w-full sm:w-[200px] justify-start text-left font-normal",
+                    !endDate && "text-muted-foreground"
+                )}
+                >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {endDate ? format(endDate, "PPP", { locale: he }) : <span>בחר תאריך סיום</span>}
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+                <Calendar
+                mode="single"
+                selected={endDate}
+                onSelect={setEndDate}
+                disabled={(date) => startDate && date < startDate}
+                initialFocus
+                />
+            </PopoverContent>
+        </Popover>
+        {(startDate || endDate) && (
+            <Button variant="ghost" onClick={handleClearDates} size="icon">
+                <X className="h-4 w-4" />
+                <span className="sr-only">נקה תאריכים</span>
+            </Button>
+        )}
       </div>
       <Card className="shadow-lg">
         <CardHeader>
