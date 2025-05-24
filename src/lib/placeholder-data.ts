@@ -130,7 +130,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kprof1',
     name: 'נוזל אורנים',
-    description: 'נוזל ניקוי בניחוח אורנים מרענן.',
+    description: 'נוזל ניקוי רב תכליתי בניחוח אורנים מרענן לניקוי משטחים.',
     price: 19.90,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'pine cleaner',
@@ -140,7 +140,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kprof2',
     name: 'מנקה ומבריק שמשות ומשטחי זכוכית',
-    description: 'מנקה ביעילות ומבריק משטחי זכוכית ושמשות ללא סימנים.',
+    description: 'מנקה ביעילות ומבריק משטחי זכוכית ושמשות, ללא סימנים.',
     price: 25.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'glass cleaner',
@@ -150,7 +150,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kprof3',
     name: 'ניקוי והיגיינה למכונות כביסה',
-    description: 'מנקה את מכונת הכביסה, מסיר אבנית ושומר על היגיינה.',
+    description: 'מנקה את מכונת הכביסה ביסודיות, מסיר אבנית ושומר על היגיינה.',
     price: 45.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'washing machine cleaner',
@@ -160,7 +160,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kprof4',
     name: 'חזק נגד שומנים קשים',
-    description: 'מסיר שומנים עוצמתי לניקוי תנורים, כיריים ומשטחים עם שומן קשה.',
+    description: 'מסיר שומנים עוצמתי לניקוי תנורים, כיריים ומשטחים עם שומן קשה במיוחד.',
     price: 45.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'grease remover',
@@ -170,7 +170,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kprof5',
     name: 'מסיר אבנית חלודה ולכלוך קשה',
-    description: 'מסיר ביעילות אבנית, חלודה ולכלוך קשה מכלים סניטריים ומשטחים.',
+    description: 'מסיר ביעילות אבנית, חלודה ולכלוך קשה מכלים סניטריים, ברזים ומשטחים.',
     price: 45.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'limescale remover',
@@ -180,20 +180,20 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kprof6',
     name: 'מנקה, מבריק משטחים , רהיטים ומשטחי פורמייקה',
-    description: 'נוזל לניקוי והברקת משטחים, רהיטים ופורמייקה.',
+    description: 'נוזל ייעודי לניקוי והברקת משטחים, רהיטים ופורמייקה, משאיר ניחוח נעים.',
     price: 35.00,
     imageUrl: 'https://placehold.co/600x400.png',
-    dataAiHint: 'surface cleaner',
+    dataAiHint: 'surface cleaner furniture',
     category: 'מוצרי ניקוי מקצועיים',
     isActive: true,
   },
   {
     id: 'kprof7',
     name: 'מסיר כתמים לפני כביסה',
-    description: 'תרסיס להסרת כתמים יעילה לפני הכנסת הבגד למכונת הכביסה.',
+    description: 'תרסיס עוצמתי להסרת כתמים קשים מבגדים לפני הכנסתם למכונת הכביסה.',
     price: 40.00,
     imageUrl: 'https://placehold.co/600x400.png',
-    dataAiHint: 'stain remover',
+    dataAiHint: 'stain remover prewash',
     category: 'מוצרי ניקוי מקצועיים',
     isActive: true,
   },
@@ -225,17 +225,7 @@ export const placeholderProducts: Product[] = [
     price: 35.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'classic laundry',
-    category: 'נוזלי כביסה',
-    isActive: true,
-  },
-  {
-    id: 'kcat8',
-    name: 'נוזל כלים "לימון וג\'ינג\'ר"',
-    description: 'נוזל כלים מרוכז עם נוסחה פעילה להסרת שומנים בניחוח מרענן.',
-    price: 18.00,
-    imageUrl: 'https://placehold.co/600x400.png',
-    dataAiHint: 'dish soap lemon',
-    category: 'נוזלי כלים',
+    category: 'נוזלי כביסה', // This category is separate from Bio products
     isActive: true,
   },
   {
@@ -563,11 +553,11 @@ export const placeholderProducts: Product[] = [
     isActive: true,
   },
 
-  // מגבונים - קטגוריה חדשה
+  // מגבונים
   {
     id: 'kwp1',
     name: 'מגבונים רכים לתינוק בניחוח סופט קייר',
-    description: 'מגבונים עדינים במיוחד לתינוקות בניחוח סופט קייר.',
+    description: 'מגבונים עדינים במיוחד לתינוקות בניחוח סופט קייר, לשמירה על עורו הרגיש של תינוקך.',
     price: 5.90,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'baby wipes softcare',
@@ -577,7 +567,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp2',
     name: 'מגבונים רכים לתינוק בניחוח בייבי',
-    description: 'מגבונים עדינים במיוחד לתינוקות בניחוח בייבי הקלאסי.',
+    description: 'מגבונים עדינים במיוחד לתינוקות בניחוח בייבי הקלאסי והאהוב.',
     price: 5.90,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'baby wipes classic',
@@ -587,8 +577,8 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp3',
     name: 'מארז מגבונים לחים ארומטי לניקוי כללי',
-    description: 'מארז מגבונים לניקוי כללי בניחוח ארומטי מרענן.',
-    price: 22.90,
+    description: 'מארז מגבונים לניקוי כללי בניחוח ארומטי מרענן, לניקוי מהיר ויעיל של משטחים.',
+    price: 22.90, // Price was 24.90, now 22.90
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'cleaning wipes aromatic',
     category: 'מגבונים',
@@ -597,8 +587,8 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp4',
     name: 'מארז מגבונים לחים בייבי לניקוי כללי',
-    description: 'מארז מגבונים לניקוי כללי בניחוח בייבי עדין.',
-    price: 22.90,
+    description: 'מארז מגבונים לניקוי כללי בניחוח בייבי עדין, מתאים לניקוי בסביבת ילדים.',
+    price: 22.90, // Price was 24.90, now 22.90
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'cleaning wipes baby',
     category: 'מגבונים',
@@ -607,8 +597,8 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp5',
     name: 'מארז מגבונים לחים ספא לניקוי כללי',
-    description: 'מארז מגבונים לניקוי כללי בניחוח ספא יוקרתי.',
-    price: 22.90,
+    description: 'מארז מגבונים לניקוי כללי בניחוח ספא יוקרתי, לחווית ניקיון מפנקת.',
+    price: 22.90, // Price was 24.90, now 22.90
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'cleaning wipes spa',
     category: 'מגבונים',
@@ -617,8 +607,8 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp6',
     name: 'מארז מגבונים לחים רוז לניקוי כללי',
-    description: 'מארז מגבונים לניקוי כללי בניחוח רוז קלאסי.',
-    price: 22.90,
+    description: 'מארז מגבונים לניקוי כללי בניחוח רוז קלאסי ונעים.',
+    price: 22.90, // Price was 24.90, now 22.90
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'cleaning wipes rose',
     category: 'מגבונים',
@@ -627,7 +617,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp7',
     name: 'דלי מגבונים לניקוי כללי בניחוח ארומטי',
-    description: 'דלי מגבונים (400 יח\') לניקוי כללי בניחוח ארומטי.',
+    description: 'דלי מגבונים (400 יח\') לניקוי כללי בניחוח ארומטי, לשימוש ממושך ונוח.',
     price: 35.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bucket wipes aromatic',
@@ -637,7 +627,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp8',
     name: 'דלי מגבונים לניקוי כללי בניחוח ספא',
-    description: 'דלי מגבונים (400 יח\') לניקוי כללי בניחוח ספא.',
+    description: 'דלי מגבונים (400 יח\') לניקוי כללי בניחוח ספא, לחווית ניקיון יוקרתית.',
     price: 35.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bucket wipes spa',
@@ -647,7 +637,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp9',
     name: 'דלי מגבונים לניקוי כללי בניחוח בייבי',
-    description: 'דלי מגבונים (400 יח\') לניקוי כללי בניחוח בייבי.',
+    description: 'דלי מגבונים (400 יח\') לניקוי כללי בניחוח בייבי, אידיאלי לבתים עם ילדים.',
     price: 35.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bucket wipes baby',
@@ -657,11 +647,52 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp10',
     name: 'דלי מגבונים לניקוי כללי בניחוח רוז',
-    description: 'דלי מגבונים (400 יח\') לניקוי כללי בניחוח רוז.',
+    description: 'דלי מגבונים (400 יח\') לניקוי כללי בניחוח רוז, לניחוח נעים ומתמשך.',
     price: 35.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bucket wipes rose',
     category: 'מגבונים',
+    isActive: true,
+  },
+  // נוזלי כלים
+  {
+    id: 'kds1',
+    name: 'נוזל כלים פרוביוטי לבנדר פרש',
+    description: 'נוזל כלים פרוביוטי מרוכז בניחוח לבנדר פרש מרענן.',
+    price: 16.50,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'dish soap lavender',
+    category: 'נוזלי כלים',
+    isActive: true,
+  },
+  {
+    id: 'kds2',
+    name: 'נוזל כלים פרוביוטי אושן',
+    description: 'נוזל כלים פרוביוטי מרוכז בניחוח אושן נקי ומרענן.',
+    price: 16.50,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'dish soap ocean',
+    category: 'נוזלי כלים',
+    isActive: true,
+  },
+  {
+    id: 'kds3',
+    name: 'נוזל כלים פרוביוטי מאסק פלאוורס',
+    description: 'נוזל כלים פרוביוטי מרוכז בניחוח מאסק פלאוורס קסום.',
+    price: 16.50,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'dish soap musk',
+    category: 'נוזלי כלים',
+    isActive: true,
+  },
+  {
+    id: 'kds4',
+    name: 'נוזל כלים פרוביוטי ספא',
+    description: 'נוזל כלים פרוביוטי מרוכז בניחוח ספא מרגיע ויוקרתי.',
+    price: 16.50,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'dish soap spa',
+    category: 'נוזלי כלים',
     isActive: true,
   },
 ];
@@ -702,11 +733,12 @@ export const placeholderOrders: Order[] = [
     customerAddress: 'דרך השלום 10, חיפה',
     items: [
       { productId: 'kprof1', productName: 'נוזל אורנים', quantity: 1, priceAtOrder: 19.90 },
-      { productId: 'kcat8', productName: 'נוזל כלים "לימון וג\'ינג\'ר"', quantity: 2, priceAtOrder: 18.00 },
+      { productId: 'kds1', productName: 'נוזל כלים פרוביוטי לבנדר פרש', quantity: 2, priceAtOrder: 16.50 },
       { productId: 'kpff4', productName: 'מבשם רצפות פרוביוטי בייבי', quantity: 1, priceAtOrder: 25.00 },
     ],
-    totalAmount: 19.90 + (18.00 * 2) + 25.00,
+    totalAmount: 19.90 + (16.50 * 2) + 25.00,
     orderTimestamp: new Date(), // Today
     status: 'completed',
   },
 ];
+
