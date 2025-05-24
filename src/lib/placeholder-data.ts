@@ -249,16 +249,6 @@ export const placeholderProducts: Product[] = [
     isActive: true,
   },
   {
-    id: 'kcat9',
-    name: 'פרפלור מבשם רצפות "אביב"',
-    description: 'מבשם רצפות מרוכז בניחוח אביבי ופרחוני לרצפה מבריקה וריחנית.',
-    price: 30.00,
-    imageUrl: 'https://placehold.co/600x400.png',
-    dataAiHint: 'floor freshener spring',
-    category: 'פרפלור מבשמי רצפות',
-    isActive: true,
-  },
-  {
     id: 'pold1',
     name: 'אבקת כביסה "כביסכל קלאסי הישן"',
     description: 'אבקת כביסה איכותית לכל סוגי הבדים, בניחוח מרענן. (מוצר ישן, לא פעיל)',
@@ -505,6 +495,87 @@ export const placeholderProducts: Product[] = [
     category: 'מבשמים',
     isActive: false, // Out of stock
   },
+  // פרפלור מבשמי רצפות
+  {
+    id: 'kpff1',
+    name: 'מבשם רצפות פרוביוטי מאסק פלאוורס',
+    description: 'מבשם רצפות פרוביוטי מרוכז בניחוח מאסק פלאוורס.',
+    price: 25.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'floor freshener musk',
+    category: 'פרפלור מבשמי רצפות',
+    isActive: true,
+  },
+  {
+    id: 'kpff2',
+    name: 'מבשם רצפות פרקט ועץ רויאל',
+    description: 'מבשם רצפות מיוחד לפרקט ועץ בניחוח רויאל יוקרתי.',
+    price: 25.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'floor freshener wood',
+    category: 'פרפלור מבשמי רצפות',
+    isActive: true,
+  },
+  {
+    id: 'kpff3',
+    name: 'מבשם רצפות פרוביוטי אלגנס',
+    description: 'מבשם רצפות פרוביוטי מרוכז בניחוח אלגנס קלאסי.',
+    price: 25.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'floor freshener elegance',
+    category: 'פרפלור מבשמי רצפות',
+    isActive: true,
+  },
+  {
+    id: 'kpff4',
+    name: 'מבשם רצפות פרוביוטי בייבי',
+    description: 'מבשם רצפות פרוביוטי עדין בניחוח בייבי, מתאים לחדרי ילדים.',
+    price: 25.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'floor freshener baby',
+    category: 'פרפלור מבשמי רצפות',
+    isActive: true,
+  },
+  {
+    id: 'kpff5',
+    name: 'מבשם רצפות פרוביוטי רוז',
+    description: 'מבשם רצפות פרוביוטי מרוכז בניחוח ורדים רומנטי.',
+    price: 25.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'floor freshener rose',
+    category: 'פרפלור מבשמי רצפות',
+    isActive: true,
+  },
+  {
+    id: 'kpff6',
+    name: 'מבשם רצפות רד רוז',
+    description: 'מבשם רצפות מרוכז בניחוח רד רוז עמוק וחושני.',
+    price: 25.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'floor freshener redrose',
+    category: 'פרפלור מבשמי רצפות',
+    isActive: true,
+  },
+  {
+    id: 'kpff7',
+    name: 'מבשם רצפות פרוביוטי ספא',
+    description: 'מבשם רצפות פרוביוטי מרוכז בניחוח ספא מרגיע.',
+    price: 25.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'floor freshener spa',
+    category: 'פרפלור מבשמי רצפות',
+    isActive: true,
+  },
+  {
+    id: 'kpff8',
+    name: 'מבשם רצפות פרוביוטי ארומטי',
+    description: 'מבשם רצפות פרוביוטי מרוכז בניחוח ארומטי עשיר.',
+    price: 25.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'floor freshener aromatic',
+    category: 'פרפלור מבשמי רצפות',
+    isActive: true,
+  },
 ];
 
 export const placeholderOrders: Order[] = [
@@ -516,8 +587,9 @@ export const placeholderOrders: Order[] = [
     items: [
       { productId: 'kbio1', productName: 'כביסכל Bio אלגנס – 2 ליטר', quantity: 2, priceAtOrder: 43.00 },
       { productId: 'kmb1', productName: 'מבשם אלגנס 750 מ"ל', quantity: 1, priceAtOrder: 25.00 },
+      { productId: 'kpff1', productName: 'מבשם רצפות פרוביוטי מאסק פלאוורס', quantity: 1, priceAtOrder: 25.00 },
     ],
-    totalAmount: (43.00 * 2) + 25.00,
+    totalAmount: (43.00 * 2) + 25.00 + 25.00,
     orderTimestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // Yesterday
     status: 'new',
   },
@@ -543,10 +615,10 @@ export const placeholderOrders: Order[] = [
     items: [
       { productId: 'kprof1', productName: 'נוזל אורנים', quantity: 1, priceAtOrder: 19.90 },
       { productId: 'kcat8', productName: 'נוזל כלים "לימון וג\'ינג\'ר"', quantity: 2, priceAtOrder: 18.00 },
+      { productId: 'kpff4', productName: 'מבשם רצפות פרוביוטי בייבי', quantity: 1, priceAtOrder: 25.00 },
     ],
-    totalAmount: 19.90 + (18.00 * 2),
+    totalAmount: 19.90 + (18.00 * 2) + 25.00,
     orderTimestamp: new Date(), // Today
     status: 'completed',
   },
 ];
-
