@@ -17,14 +17,13 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
-      {
-        protocol: 'https',
-        hostname: 'kvisakol.com', // Updated domain
-        port: '',
-        pathname: '/**',
-      },
+      // The kvisakol.com entry is removed as product images are now local.
+      // If you have other external images from kvisakol.com (not product images),
+      // you might need to re-add it or a more specific pattern.
     ],
   },
 };
 
 export default nextConfig;
+
+    
