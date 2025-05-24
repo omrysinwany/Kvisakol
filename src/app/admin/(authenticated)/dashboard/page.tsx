@@ -84,8 +84,8 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Card> {/* Total Revenue - no longer full width */}
+      <div className="grid grid-cols-2 gap-4"> {/* Changed from grid-cols-1 sm:grid-cols-2 */}
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">סה"כ הכנסות (שהושלמו)</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
