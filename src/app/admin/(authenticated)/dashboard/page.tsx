@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { getAllProductsForAdmin } from "@/services/product-service";
 import { getOrdersForAdmin } from "@/services/order-service";
 import type { Product, Order } from "@/lib/types";
-import { DollarSign, Package, ShoppingCart, Activity, ClipboardCheck, Eye } from "lucide-react"; // Added ClipboardCheck, Eye
+import { DollarSign, Package, ShoppingCart, Activity, ClipboardCheck, Eye } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -35,8 +35,8 @@ export default function AdminDashboardPage() {
 
         const totalProducts = products.filter(p => p.isActive).length;
         const totalOrders = orders.length;
-        const newOrders = orders.filter(o => o.status === 'new').length;
-        const receivedOrders = orders.filter(o => o.status === 'received').length;
+        const newOrdersCount = orders.filter(o => o.status === 'new').length;
+        const receivedOrdersCount = orders.filter(o => o.status === 'received').length;
         const totalRevenue = orders
           .filter(o => o.status === 'completed') 
           .reduce((sum, order) => sum + order.totalAmount, 0);
@@ -46,8 +46,8 @@ export default function AdminDashboardPage() {
         setSummary({
           totalProducts,
           totalOrders,
-          newOrders,
-          receivedOrders,
+          newOrders: newOrdersCount,
+          receivedOrders: receivedOrdersCount,
           totalRevenue,
           latestOrders,
         });
@@ -84,8 +84,8 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4"> {/* Changed from grid-cols-1 sm:grid-cols-2 */}
-        <Card>
+      <div className="grid grid-cols-2 gap-4">
+        <Card className="col-span-2"> {/* This card will span both columns */}
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">סה"כ הכנסות (שהושלמו)</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -103,7 +103,7 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{summary.newOrders}</div>
-            <p className="text-xs text-muted-foreground">ממתינות לצפייה ראשונית</p>
+            <p className="text-xs text-muted-foreground">מתוך {summary.totalOrders} הזמנות בסה"כ</p>
           </CardContent>
         </Card>
         
