@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { Label } from "@/components/ui/label"; // Added Label import
+import { Label } from "@/components/ui/label";
 import { format, startOfDay, endOfDay } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { cn } from "@/lib/utils";
@@ -120,8 +120,8 @@ export default function AdminOrdersPage() {
       </div>
 
       {/* Filter Section */}
-      <div className="mb-6 p-4 border rounded-lg bg-card shadow-sm">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-end">
+      <div className="mb-6 p-3 border rounded-lg bg-card shadow-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
           {/* Status Filter */}
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="status-filter">סנן לפי סטטוס</Label>
@@ -229,3 +229,4 @@ export default function AdminOrdersPage() {
     </>
   );
 }
+
