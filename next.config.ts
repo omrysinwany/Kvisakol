@@ -19,17 +19,10 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'kviskol.co.il', // Assuming this is the correct domain
+        hostname: 'kvisakol.com', // Updated domain
         port: '',
         pathname: '/**',
       },
-      // If they use a specific CDN subdomain, add it too:
-      // {
-      //   protocol: 'https',
-      //   hostname: 'cdn.kviskol.co.il', 
-      //   port: '',
-      //   pathname: '/**',
-      // },
     ],
   },
 };
