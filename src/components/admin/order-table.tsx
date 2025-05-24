@@ -39,7 +39,7 @@ const baseStatusTranslations: Record<Order['status'], string> = {
 
 const baseStatusColors: Record<Order['status'], string> = {
   new: 'bg-blue-500 hover:bg-blue-600',
-  received: 'bg-sky-500 hover:bg-sky-600',
+  received: 'bg-amber-500 hover:bg-amber-600', // Changed to amber
   completed: 'bg-green-500 hover:bg-green-600',
   cancelled: 'bg-red-500 hover:bg-red-600',
 };
@@ -84,9 +84,9 @@ export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
           const DisplayStatusIcon = displayStatus.icon;
           
           return (
-          <TableRow key={order.id} className={order.status === 'new' ? 'bg-primary/5' : ''}>
+          <TableRow key={order.id} className={order.status === 'new' && !order.isViewedByAgent ? 'bg-primary/5' : ''}>
             <TableCell className="font-medium">
-              {order.status === 'new' && <Hourglass className="h-4 w-4 mr-2 inline-block text-blue-500" />}
+              {order.status === 'new' && !order.isViewedByAgent && <Hourglass className="h-4 w-4 mr-2 inline-block text-blue-500" />}
               <Link href={`/admin/orders/${order.id}`} className="hover:underline text-primary">
                 #{order.id.substring(order.id.length - 6)}
               </Link>

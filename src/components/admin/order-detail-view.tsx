@@ -32,7 +32,7 @@ const statusTranslations: Record<Order['status'], string> = {
 
 const statusColors: Record<Order['status'], string> = {
   new: 'bg-blue-500 hover:bg-blue-600',
-  received: 'bg-sky-500 hover:bg-sky-600',
+  received: 'bg-amber-500 hover:bg-amber-600', // Changed to amber
   completed: 'bg-green-500 hover:bg-green-600',
   cancelled: 'bg-red-500 hover:bg-red-600',
 };
