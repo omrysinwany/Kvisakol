@@ -40,7 +40,6 @@ export function OrderForm() {
   });
 
   const onSubmit = async (data: OrderFormValues) => {
-    form.formState.isSubmitting = true;
     try {
       const orderItems: OrderItem[] = cartItems.map(item => ({
         productId: item.id,
@@ -71,8 +70,6 @@ export function OrderForm() {
         title: 'שגיאה בשליחת ההזמנה',
         description: 'אירעה שגיאה לא צפויה. אנא נסה שוב מאוחר יותר או פנה לתמיכה.',
       });
-    } finally {
-      form.formState.isSubmitting = false;
     }
   };
   

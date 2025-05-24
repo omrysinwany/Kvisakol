@@ -36,7 +36,6 @@ export function AdminLoginForm() {
 
   const onSubmit = async (data: LoginFormValues) => {
     console.log('Admin login attempt with username:', data.username); 
-    form.formState.isSubmitting = true;
     try {
       const foundUser = await getAdminUserByUsername(data.username);
 
@@ -79,8 +78,6 @@ export function AdminLoginForm() {
         title: 'שגיאה בתהליך ההתחברות',
         description: 'אירעה שגיאה לא צפויה. אנא נסה שוב מאוחר יותר או פנה לתמיכה.',
       });
-    } finally {
-      form.formState.isSubmitting = false;
     }
   };
 
