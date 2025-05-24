@@ -2,13 +2,12 @@
 'use client';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { getAllProductsForAdmin } from "@/services/product-service";
 import { getOrdersForAdmin } from "@/services/order-service";
 import type { Product, Order } from "@/lib/types";
-import { DollarSign, Package, ShoppingCart, Activity, ClipboardCheck, Eye, Users, CalendarDays, CalendarCheck, CalendarIcon, X, Hourglass } from "lucide-react";
+import { DollarSign, Package, ShoppingCart, Activity, ClipboardCheck, Eye, Users, CalendarDays, CalendarCheck, CalendarIcon, X, Hourglass, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +15,15 @@ import { Badge } from "@/components/ui/badge";
 import { format, isToday, isWithinInterval, startOfWeek, endOfWeek, subDays, startOfMonth, endOfMonth, startOfDay, endOfDay } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator
+} from "@/components/ui/dropdown-menu";
 
 
 const statusTranslationsForDashboard: Record<Order['status'], string> = {
@@ -44,6 +52,13 @@ interface DashboardSummary {
 }
 
 type RevenuePeriod = 'allTime' | 'today' | 'thisWeek' | 'thisMonth' | 'custom';
+const revenuePeriodTranslations: Record<RevenuePeriod, string> = {
+  allTime: 'כל הזמן',
+  today: 'היום',
+  thisWeek: 'השבוע',
+  thisMonth: 'החודש',
+  custom: 'מותאם אישית',
+};
 
 export default function AdminDashboardPage() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
@@ -51,7 +66,7 @@ export default function AdminDashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const [selectedRevenuePeriod, setSelectedRevenuePeriod] = useState<RevenuePeriod>('allTime');
+  const [selectedRevenuePeriod, setSelectedRevenuePeriod] = useState<RevenuePeriod>('thisMonth');
   const [customRevenueStartDate, setCustomRevenueStartDate] = useState<Date | undefined>();
   const [customRevenueEndDate, setCustomRevenueEndDate] = useState<Date | undefined>();
   const [filteredRevenue, setFilteredRevenue] = useState<number>(0);
@@ -138,7 +153,8 @@ export default function AdminDashboardPage() {
             } else if (customRevenueEndDate) {
                  relevantOrders = relevantOrders.filter(o => new Date(o.orderTimestamp) <= endOfDay(customRevenueEndDate));
             } else {
-                 relevantOrders = []; 
+                 // If custom is selected but no dates are set, show 0 or based on some default
+                 relevantOrders = []; // Or allTime if that's preferred default for empty custom
             }
             break;
         case 'allTime':
@@ -159,6 +175,8 @@ export default function AdminDashboardPage() {
   const handleClearCustomDates = () => {
     setCustomRevenueStartDate(undefined);
     setCustomRevenueEndDate(undefined);
+    // Optionally, reset to a default period like 'thisMonth' or 'allTime' if 'custom' with no dates isn't desired
+    // setSelectedRevenuePeriod('thisMonth'); 
   };
 
   if (isLoading) {
@@ -180,25 +198,35 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <Card className="col-span-2">
-          <CardHeader className="pb-2">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="md:col-span-2">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center">
-                    <DollarSign className="h-5 w-5 text-muted-foreground ml-2" />
-                    <CardTitle className="text-lg font-semibold">
+                    <DollarSign className="h-6 w-6 text-muted-foreground ml-2" />
+                    <CardTitle className="text-xl font-semibold">
                         הכנסות בתקופה הנבחרת
                     </CardTitle>
                 </div>
-                <Tabs value={selectedRevenuePeriod} onValueChange={(value) => setSelectedRevenuePeriod(value as RevenuePeriod)} className="w-full sm:w-auto">
-                    <TabsList className="grid grid-cols-3 sm:grid-cols-5 h-auto sm:h-10 w-full">
-                        <TabsTrigger value="allTime" className="text-xs px-2 sm:px-3">כל הזמן</TabsTrigger>
-                        <TabsTrigger value="today" className="text-xs px-2 sm:px-3">היום</TabsTrigger>
-                        <TabsTrigger value="thisWeek" className="text-xs px-2 sm:px-3">שבוע</TabsTrigger>
-                        <TabsTrigger value="thisMonth" className="text-xs px-2 sm:px-3">חודש</TabsTrigger>
-                        <TabsTrigger value="custom" className="text-xs px-2 sm:px-3">מותאם</TabsTrigger>
-                    </TabsList>
-                </Tabs>
+                <DropdownMenu dir="rtl">
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="min-w-[130px] justify-between">
+                      {revenuePeriodTranslations[selectedRevenuePeriod]}
+                      <ChevronDown className="h-4 w-4 opacity-50 mr-1" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>בחר תקופה</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuRadioGroup value={selectedRevenuePeriod} onValueChange={(value) => setSelectedRevenuePeriod(value as RevenuePeriod)}>
+                      <DropdownMenuRadioItem value="thisMonth">החודש</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="thisWeek">השבוע</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="today">היום</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="allTime">כל הזמן</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="custom">מותאם אישית</DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
             </div>
           </CardHeader>
           <CardContent>
