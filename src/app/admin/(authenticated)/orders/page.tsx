@@ -62,9 +62,11 @@ export default function AdminOrdersPage() {
         setAllOrders(prevOrders =>
           prevOrders.map(o => (o.id === orderId ? { ...updatedOrder } : o))
         );
+        // Find the correct translation for toast based on new status
+        const statusKeyForToast = newStatus as keyof typeof statusTranslationsForFilter;
         toast({
           title: "סטטוס הזמנה עודכן",
-          description: `הסטטוס של הזמנה ${orderId.substring(orderId.length - 6)} שונה ל: ${statusTranslationsForFilter[newStatus]}.`,
+          description: `הסטטוס של הזמנה ${orderId.substring(orderId.length - 6)} שונה ל: ${statusTranslationsForFilter[statusKeyForToast]}.`,
         });
       } else {
         toast({ variant: "destructive", title: "שגיאה", description: "לא ניתן היה לעדכן את סטטוס ההזמנה." });
@@ -110,14 +112,12 @@ export default function AdminOrdersPage() {
 
   return (
     <>
-      <div className="mb-4"> {/* Removed flex and justify-between */}
+      <div className="mb-4">
         <h1 className="text-3xl font-bold tracking-tight">ניהול הזמנות</h1>
       </div>
 
-      {/* Filter Section - Compact Design */}
       <div className="mb-4 p-2 border rounded-lg bg-muted/30 shadow-sm">
         <div className="flex flex-wrap items-center gap-2">
-          {/* Status Filter */}
           <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilterValue)}>
             <SelectTrigger className="h-9 px-3 text-xs w-auto min-w-[130px]">
               <SelectValue />
@@ -131,7 +131,6 @@ export default function AdminOrdersPage() {
             </SelectContent>
           </Select>
 
-          {/* Start Date */}
           <Popover>
               <PopoverTrigger asChild>
                   <Button
@@ -157,7 +156,6 @@ export default function AdminOrdersPage() {
               </PopoverContent>
           </Popover>
           
-          {/* End Date */}
           <Popover>
               <PopoverTrigger asChild>
                   <Button
@@ -183,7 +181,6 @@ export default function AdminOrdersPage() {
               </PopoverContent>
           </Popover>
 
-          {/* Clear Dates Button */}
           {(startDate || endDate) && (
               <Button variant="ghost" onClick={handleClearDates} size="icon" className="h-9 w-9 shrink-0">
                   <X className="h-4 w-4" />
@@ -201,9 +198,9 @@ export default function AdminOrdersPage() {
               נהל את כל ההזמנות שהתקבלו מלקוחות. עקוב אחר סטטוסים ופרטי הזמנות.
             </CardDescription>
           </div>
-          <Button variant="outline" size="sm" onClick={handleExportOrders}>
-              <Download className="ml-2 h-4 w-4" />
-              ייצא הזמנות (CSV)
+          <Button variant="ghost" size="sm" onClick={handleExportOrders} className="text-xs text-muted-foreground hover:text-foreground whitespace-nowrap">
+              <Download className="ml-1.5 h-3.5 w-3.5" />
+              ייצא CSV
           </Button>
         </CardHeader>
         <CardContent>
@@ -221,4 +218,3 @@ export default function AdminOrdersPage() {
     </>
   );
 }
-
