@@ -78,7 +78,7 @@ export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
             <TableCell className="font-medium">
               <div className="flex items-center">
                 {isNewUnviewed && (
-                  <AlertCircle className="h-4 w-4 text-blue-500 mr-2 animate-pulse" title="הזמנה חדשה שלא נצפתה"/>
+                  <AlertCircle className="h-4 w-4 text-blue-500 mr-2" title="הזמנה חדשה שלא נצפתה"/>
                 )}
                 <Link href={`/admin/orders/${order.id}`} className="hover:underline text-primary">
                   #{order.id.substring(order.id.length - 6)}
