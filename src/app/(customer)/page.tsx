@@ -10,7 +10,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { CategoryFilter } from '@/components/customer/category-filter';
 import { PaginationControls } from '@/components/customer/pagination-controls';
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 10; // Changed from 5 to 10
 
 // Function to get products (simulated)
 async function getProducts(): Promise<Product[]> {
