@@ -30,8 +30,8 @@ export interface Order {
   items: OrderItem[];
   totalAmount: number;
   orderTimestamp: Date;
-  status: 'new' | 'completed' | 'cancelled';
-  isViewedByAgent?: boolean; // Added field
+  status: 'new' | 'received' | 'completed' | 'cancelled'; // Added 'received'
+  isViewedByAgent?: boolean; 
 }
 
 export interface AdminUser {
@@ -41,3 +41,4 @@ export interface AdminUser {
   isSuperAdmin: boolean;
   displayName?: string; 
 }
+

@@ -11,6 +11,13 @@ import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 
+const statusTranslationsToast: Record<Order['status'], string> = {
+  new: 'חדשה',
+  received: 'התקבלה',
+  completed: 'הושלמה',
+  cancelled: 'בוטלה',
+};
+
 export default function AdminOrderDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -29,18 +36,18 @@ export default function AdminOrderDetailPage() {
           const fetchedOrder = await getOrderByIdForAdmin(orderId);
           if (fetchedOrder) {
             setOrder(fetchedOrder);
-            // Mark as viewed if it's new and not viewed
             if (fetchedOrder.status === 'new' && !fetchedOrder.isViewedByAgent) {
               try {
                 const markedOrder = await markOrderAsViewedService(fetchedOrder.id);
                 if (markedOrder) {
-                  // Optionally update local state if visual feedback is immediate,
-                  // though the table will reflect change on next load/filter
-                   setOrder(prevOrder => prevOrder ? { ...prevOrder, isViewedByAgent: true } : null);
+                   setOrder(markedOrder); // Update local state with the order that now has 'received' status
+                   toast({
+                     title: "הזמנה התקבלה",
+                     description: `סטטוס הזמנה ${orderId.substring(orderId.length -6)} שונה ל: "התקבלה".`,
+                   });
                 }
               } catch (viewError) {
-                console.error("Failed to mark order as viewed:", viewError);
-                // Not critical enough to show a toast to the user for this
+                console.error("Failed to mark order as viewed/received:", viewError);
               }
             }
           } else {
@@ -64,11 +71,11 @@ export default function AdminOrderDetailPage() {
       const updatedOrder = await updateOrderStatusService(updatedOrderId, newStatus);
       if (updatedOrder) {
         if (order && order.id === updatedOrderId) {
-          setOrder(updatedOrder); // Update with the full updated order from service
+          setOrder(updatedOrder);
         }
         toast({
           title: "סטטוס הזמנה עודכן",
-          description: `הסטטוס של הזמנה ${updatedOrderId.substring(updatedOrderId.length -6)} שונה ל: ${newStatus === 'new' ? 'חדשה' : newStatus === 'completed' ? 'הושלמה' : 'בוטלה'}.`,
+          description: `הסטטוס של הזמנה ${updatedOrderId.substring(updatedOrderId.length -6)} שונה ל: ${statusTranslationsToast[newStatus]}.`,
         });
       } else {
         toast({ variant: 'destructive', title: 'שגיאה', description: 'לא ניתן היה לעדכן את סטטוס ההזמנה.' });
@@ -117,3 +124,4 @@ export default function AdminOrderDetailPage() {
     </>
   );
 }
+

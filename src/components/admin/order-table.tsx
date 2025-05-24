@@ -6,7 +6,7 @@ import type { Order } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, Eye, Edit, CheckCircle, XCircle, Hourglass } from 'lucide-react'; 
+import { MoreHorizontal, Eye, Edit, CheckCircle, XCircle, Hourglass, ClipboardCheck } from 'lucide-react'; 
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,68 +23,41 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
-// cn is not used after removing conditional classNames for rows/cells based on isNewUnviewed
-// import { cn } from '@/lib/utils';
+
 
 interface OrderTableProps {
   orders: Order[];
   onUpdateStatus: (orderId: string, newStatus: Order['status']) => void; 
 }
 
-// Base status properties, used by OrderDetailView and as a base here
 const baseStatusTranslations: Record<Order['status'], string> = {
   new: 'חדשה',
+  received: 'התקבלה',
   completed: 'הושלמה',
   cancelled: 'בוטלה',
 };
 
 const baseStatusColors: Record<Order['status'], string> = {
   new: 'bg-blue-500 hover:bg-blue-600',
+  received: 'bg-sky-500 hover:bg-sky-600',
   completed: 'bg-green-500 hover:bg-green-600',
   cancelled: 'bg-red-500 hover:bg-red-600',
 };
 
 const baseStatusIcons: Record<Order['status'], React.ElementType> = {
   new: Hourglass,
+  received: ClipboardCheck,
   completed: CheckCircle,
   cancelled: XCircle,
 }
 
-// Function to determine the display properties for the status badge in the table
 const getDisplayStatus = (order: Order): { text: string; colorClass: string; icon: React.ElementType } => {
-  if (order.status === 'new') {
-    if (!order.isViewedByAgent) {
-      // New and unviewed
-      return { 
-        text: baseStatusTranslations['new'], 
-        colorClass: baseStatusColors['new'], 
-        icon: baseStatusIcons['new'] 
-      };
-    } else {
-      // New and viewed
-      return { 
-        text: `${baseStatusTranslations['new']} (נצפתה)`, 
-        colorClass: baseStatusColors['new'], // Same color as 'new'
-        icon: Eye // Different icon
-      }; 
-    }
-  }
-  if (order.status === 'completed') {
-    return { 
-      text: baseStatusTranslations['completed'], 
-      colorClass: baseStatusColors['completed'], 
-      icon: baseStatusIcons['completed'] 
-    };
-  }
-  if (order.status === 'cancelled') {
-    return { 
-      text: baseStatusTranslations['cancelled'], 
-      colorClass: baseStatusColors['cancelled'], 
-      icon: baseStatusIcons['cancelled'] 
-    };
-  }
-  // Fallback, should ideally not happen with strict types
-  return { text: order.status, colorClass: 'bg-gray-500 hover:bg-gray-600', icon: MoreHorizontal };
+  const statusKey = order.status;
+  return { 
+    text: baseStatusTranslations[statusKey] || statusKey, 
+    colorClass: baseStatusColors[statusKey] || 'bg-gray-500 hover:bg-gray-600', 
+    icon: baseStatusIcons[statusKey] || MoreHorizontal 
+  };
 };
 
 
@@ -111,18 +84,18 @@ export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
           const DisplayStatusIcon = displayStatus.icon;
           
           return (
-          <TableRow key={order.id} > {/* Removed conditional className for row background */}
+          <TableRow key={order.id} className={order.status === 'new' ? 'bg-primary/5' : ''}>
             <TableCell className="font-medium">
-              {/* Removed AlertCircle icon */}
+              {order.status === 'new' && <Hourglass className="h-4 w-4 mr-2 inline-block text-blue-500" />}
               <Link href={`/admin/orders/${order.id}`} className="hover:underline text-primary">
                 #{order.id.substring(order.id.length - 6)}
               </Link>
             </TableCell>
-            <TableCell>{order.customerName}</TableCell> {/* Removed conditional font-semibold */}
-            <TableCell className="hidden md:table-cell"> {/* Removed conditional font-semibold */}
+            <TableCell>{order.customerName}</TableCell>
+            <TableCell className="hidden md:table-cell">
               {format(new Date(order.orderTimestamp), 'dd/MM/yyyy HH:mm', { locale: he })}
             </TableCell>
-            <TableCell className="hidden sm:table-cell">{formatPrice(order.totalAmount)}</TableCell> {/* Removed conditional font-semibold */}
+            <TableCell className="hidden sm:table-cell">{formatPrice(order.totalAmount)}</TableCell>
             <TableCell>
               <Badge variant="default" className={`${displayStatus.colorClass} text-white`}>
                 <DisplayStatusIcon className="h-3 w-3 mr-1.5" />
@@ -156,7 +129,7 @@ export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
                           value={order.status} 
                           onValueChange={(newStatus) => onUpdateStatus(order.id, newStatus as Order['status'])}
                         >
-                          {(['new', 'completed', 'cancelled'] as Order['status'][]).map((statusKey) => (
+                          {(['new', 'received', 'completed', 'cancelled'] as Order['status'][]).map((statusKey) => (
                             <DropdownMenuRadioItem key={statusKey} value={statusKey} className="cursor-pointer">
                               {baseStatusTranslations[statusKey]}
                             </DropdownMenuRadioItem>
@@ -174,3 +147,4 @@ export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
     </Table>
   );
 }
+

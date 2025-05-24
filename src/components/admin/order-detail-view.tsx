@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
-import { Printer, CheckCircle, XCircle, Hourglass, Phone, MapPin, FileText } from 'lucide-react'; // Removed Edit, Truck
+import { Printer, CheckCircle, XCircle, Hourglass, Phone, MapPin, FileText, ClipboardCheck } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,18 +25,21 @@ interface OrderDetailViewProps {
 
 const statusTranslations: Record<Order['status'], string> = {
   new: 'חדשה',
+  received: 'התקבלה',
   completed: 'הושלמה',
   cancelled: 'בוטלה',
 };
 
 const statusColors: Record<Order['status'], string> = {
   new: 'bg-blue-500 hover:bg-blue-600',
+  received: 'bg-sky-500 hover:bg-sky-600',
   completed: 'bg-green-500 hover:bg-green-600',
   cancelled: 'bg-red-500 hover:bg-red-600',
 };
 
 const statusIcons: Record<Order['status'], React.ElementType> = {
   new: Hourglass,
+  received: ClipboardCheck,
   completed: CheckCircle,
   cancelled: XCircle,
 }
@@ -70,7 +73,7 @@ export function OrderDetailView({ order, onUpdateStatus }: OrderDetailViewProps)
                     value={order.status} 
                     onValueChange={(newStatus) => onUpdateStatus(order.id, newStatus as Order['status'])}
                     >
-                    {(['new', 'completed', 'cancelled'] as Order['status'][]).map((statusKey) => (
+                    {(['new', 'received', 'completed', 'cancelled'] as Order['status'][]).map((statusKey) => (
                         <DropdownMenuRadioItem key={statusKey} value={statusKey} className="cursor-pointer">
                         {statusTranslations[statusKey]}
                         </DropdownMenuRadioItem>
@@ -142,3 +145,4 @@ export function OrderDetailView({ order, onUpdateStatus }: OrderDetailViewProps)
     </div>
   );
 }
+

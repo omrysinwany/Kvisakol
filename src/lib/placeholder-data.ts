@@ -1,8 +1,6 @@
 
 import type { Product, Order, AdminUser } from './types';
 
-// For simplicity in this placeholder, passwords are plain text.
-// In a real app, NEVER store plain text passwords. Always store hashed passwords.
 export const placeholderAdminUsers: AdminUser[] = [
   {
     id: 'su1',
@@ -861,7 +859,7 @@ export let placeholderProducts: Product[] = [
     id: 'kwp3',
     name: 'מארז מגבונים לחים ארומטי לניקוי כללי',
     description: 'מארז 3 חבילות מגבונים לניקוי כללי בניחוח ארומטי.',
-    price: 22.90, // Was 24.90, now 22.90
+    price: 22.90,
     imageUrl: '/images/products/kwp3.jpeg',
     dataAiHint: 'cleaning wipes aromatic',
     category: 'מגבונים',
@@ -871,7 +869,7 @@ export let placeholderProducts: Product[] = [
     id: 'kwp4',
     name: 'מארז מגבונים לחים בייבי לניקוי כללי',
     description: 'מארז 3 חבילות מגבונים לניקוי כללי בניחוח בייבי עדין.',
-    price: 22.90, // Was 24.90, now 22.90
+    price: 22.90,
     imageUrl: '/images/products/kwp4.jpeg',
     dataAiHint: 'cleaning wipes baby',
     category: 'מגבונים',
@@ -881,7 +879,7 @@ export let placeholderProducts: Product[] = [
     id: 'kwp5',
     name: 'מארז מגבונים לחים ספא לניקוי כללי',
     description: 'מארז 3 חבילות מגבונים לניקוי כללי בניחוח ספא יוקרתי.',
-    price: 22.90, // Was 24.90, now 22.90
+    price: 22.90,
     imageUrl: '/images/products/kwp5.jpeg',
     dataAiHint: 'cleaning wipes spa',
     category: 'מגבונים',
@@ -891,7 +889,7 @@ export let placeholderProducts: Product[] = [
     id: 'kwp6',
     name: 'מארז מגבונים לחים רוז לניקוי כללי',
     description: 'מארז 3 חבילות מגבונים לניקוי כללי בניחוח רוז קלאסי.',
-    price: 22.90, // Was 24.90, now 22.90
+    price: 22.90,
     imageUrl: '/images/products/kwp6.jpeg',
     dataAiHint: 'cleaning wipes rose',
     category: 'מגבונים',
@@ -980,7 +978,7 @@ export let placeholderProducts: Product[] = [
     isActive: true,
   },
   {
-    id: 'pold1', // מוצר ישן ולא פעיל, לשם הדגמה
+    id: 'pold1', 
     name: 'אבקת כביסה "כביסכל קלאסי הישן"',
     description: 'אבקת כביסה איכותית לכל סוגי הבדים, בניחוח מרענן. (מוצר ישן, לא פעיל)',
     price: 39.90,
@@ -991,7 +989,6 @@ export let placeholderProducts: Product[] = [
   },
 ];
 
-// We use 'let' here so we can modify it in service functions (for demo purposes)
 export let placeholderOrders: Order[] = [
   {
     id: 'o1',
@@ -1003,7 +1000,7 @@ export let placeholderOrders: Order[] = [
       { productId: 'kmb1', productName: 'מבשם אלגנס 750 מ"ל', quantity: 1, priceAtOrder: 25.00 },
     ],
     totalAmount: (43.00 * 2) + 25.00,
-    orderTimestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // Yesterday
+    orderTimestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
     status: 'new',
     isViewedByAgent: false,
   },
@@ -1032,6 +1029,19 @@ export let placeholderOrders: Order[] = [
       { productId: 'kds1', productName: 'נוזל כלים פרוביוטי לבנדר פרש', quantity: 2, priceAtOrder: 16.50 },
     ],
     totalAmount: 19.90 + (16.50 * 2),
+    orderTimestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // Yesterday
+    status: 'received', // Changed from 'new' to 'received' for variety
+    isViewedByAgent: true, // Consistent with 'received'
+  },
+  {
+    id: 'o4',
+    customerName: 'דנה ברק',
+    customerPhone: '053-9876543',
+    customerAddress: 'הנשיא 20, באר שבע',
+    items: [
+      { productId: 'kmb16', productName: 'BRONZE – מבשם קפסולרי מרוכז 350 מ"ל', quantity: 1, priceAtOrder: 45.00 },
+    ],
+    totalAmount: 45.00,
     orderTimestamp: new Date(), // Today
     status: 'new',
     isViewedByAgent: false,
@@ -1103,3 +1113,4 @@ export function deletePlaceholderAdminUser(userId: string) {
     placeholderAdminUsers.splice(index, 1);
   }
 }
+

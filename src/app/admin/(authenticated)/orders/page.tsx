@@ -16,6 +16,7 @@ type StatusFilterValue = Order['status'] | 'all';
 const statusTranslationsForFilter: Record<StatusFilterValue, string> = {
   all: 'כל הסטטוסים',
   new: 'חדשה',
+  received: 'התקבלה',
   completed: 'הושלמה',
   cancelled: 'בוטלה',
 };
@@ -48,7 +49,7 @@ export default function AdminOrdersPage() {
       const updatedOrder = await updateOrderStatusService(orderId, newStatus);
       if (updatedOrder) {
         setAllOrders(prevOrders =>
-          prevOrders.map(o => (o.id === orderId ? { ...updatedOrder } : o)) // Use updatedOrder from service
+          prevOrders.map(o => (o.id === orderId ? { ...updatedOrder } : o)) 
         );
         toast({
           title: "סטטוס הזמנה עודכן",
@@ -84,7 +85,7 @@ export default function AdminOrdersPage() {
               <SelectValue placeholder="סנן לפי סטטוס" />
             </SelectTrigger>
             <SelectContent>
-              {(['all', 'new', 'completed', 'cancelled'] as StatusFilterValue[]).map((statusKey) => (
+              {(['all', 'new', 'received', 'completed', 'cancelled'] as StatusFilterValue[]).map((statusKey) => (
                 <SelectItem key={statusKey} value={statusKey}>
                   {statusTranslationsForFilter[statusKey]}
                 </SelectItem>
@@ -119,3 +120,4 @@ export default function AdminOrdersPage() {
     </>
   );
 }
+

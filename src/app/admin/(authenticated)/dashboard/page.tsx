@@ -13,10 +13,10 @@ import { useToast } from "@/hooks/use-toast";
 interface DashboardSummary {
   totalProducts: number;
   totalOrders: number;
-  newOrders: number;
+  newOrders: number; // Strictly status 'new' (unviewed)
   totalRevenue: number;
   latestOrders: Order[];
-  popularProducts: Product[]; // Simplified for now
+  popularProducts: Product[]; 
 }
 
 export default function AdminDashboardPage() {
@@ -35,14 +35,12 @@ export default function AdminDashboardPage() {
 
         const totalProducts = products.filter(p => p.isActive).length;
         const totalOrders = orders.length;
-        const newOrders = orders.filter(o => o.status === 'new').length;
+        const newOrders = orders.filter(o => o.status === 'new').length; // Only count 'new' status
         const totalRevenue = orders
-          .filter(o => o.status === 'completed') // Only count completed orders for revenue
+          .filter(o => o.status === 'completed') 
           .reduce((sum, order) => sum + order.totalAmount, 0);
         
-        // For "popular products", just take the first 3 for this example
         const popularProducts = products.slice(0, 3);
-        // For "latest orders", take the first 5 (already sorted by service)
         const latestOrders = orders.slice(0, 5);
 
         setSummary({
@@ -99,7 +97,7 @@ export default function AdminDashboardPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">הזמנות חדשות</CardTitle>
+            <CardTitle className="text-sm font-medium">הזמנות חדשות (טרם נצפו)</CardTitle>
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -123,7 +121,6 @@ export default function AdminDashboardPage() {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {/* Placeholder: Number of orders in last 24 hours - requires more complex logic or timestamp comparison */}
             <div className="text-2xl font-bold">{summary.latestOrders.filter(o => new Date(o.orderTimestamp) > new Date(Date.now() - 24*60*60*1000)).length}</div> 
             <p className="text-xs text-muted-foreground">הזמנות ב-24 שעות אחרונות</p>
           </CardContent>
@@ -176,3 +173,4 @@ export default function AdminDashboardPage() {
     </>
   );
 }
+
