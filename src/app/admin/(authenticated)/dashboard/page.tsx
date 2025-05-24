@@ -17,7 +17,6 @@ interface DashboardSummary {
   receivedOrders: number; // Status 'received' (viewed but not completed/cancelled)
   totalRevenue: number;
   latestOrders: Order[];
-  // popularProducts: Product[]; // Removed as per request
 }
 
 export default function AdminDashboardPage() {
@@ -51,7 +50,6 @@ export default function AdminDashboardPage() {
           receivedOrders,
           totalRevenue,
           latestOrders,
-          // popularProducts: [] // Removed
         });
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
@@ -86,8 +84,8 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card> {/* Removed md:col-span-2 */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Card> {/* Total Revenue - no longer full width */}
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">סה"כ הכנסות (שהושלמו)</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -143,7 +141,7 @@ export default function AdminDashboardPage() {
         </Card>
       </div>
 
-      <div className="mt-8 grid gap-6"> {/* Removed md:grid-cols-2 to make the single card full width by default */}
+      <div className="mt-8 grid gap-6"> 
         <Card>
           <CardHeader>
             <CardTitle>הזמנות אחרונות</CardTitle>
@@ -167,8 +165,6 @@ export default function AdminDashboardPage() {
             </Button>
           </CardContent>
         </Card>
-
-        {/* Removed "Popular Products" card section */}
       </div>
     </>
   );
