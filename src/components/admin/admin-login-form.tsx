@@ -11,9 +11,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { AppLogo } from '../shared/app-logo';
-import { KeyRound, User } from 'lucide-react';
+import { KeyRound, User, ArrowRight } from 'lucide-react';
 import { getAdminUserByUsername, verifyAdminPassword } from '@/services/admin-user-service';
 import type { AdminUser } from '@/lib/types';
+import Link from 'next/link';
 
 const loginFormSchema = z.object({
   username: z.string().min(3, { message: 'שם משתמש חייב להכיל לפחות 3 תווים.' }),
@@ -134,6 +135,14 @@ export function AdminLoginForm() {
               </Button>
             </form>
           </Form>
+          <div className="mt-6 text-center">
+            <Button variant="link" asChild className="text-muted-foreground hover:text-primary">
+              <Link href="/">
+                <ArrowRight className="ml-1.5 h-4 w-4" />
+                חזרה לקטלוג המוצרים
+              </Link>
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
