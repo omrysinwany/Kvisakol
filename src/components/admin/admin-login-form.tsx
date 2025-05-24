@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { AppLogo } from '../shared/app-logo';
 import { KeyRound, User } from 'lucide-react';
-import { placeholderAdminUsers } from '@/lib/placeholder-data'; // Import admin users
+import { placeholderAdminUsers } from '@/lib/placeholder-data';
 import type { AdminUser } from '@/lib/types';
 
 const loginFormSchema = z.object({
@@ -35,36 +35,41 @@ export function AdminLoginForm() {
   });
 
   const onSubmit = async (data: LoginFormValues) => {
-    console.log('Admin login attempt:', data);
-    
-    const foundUser = placeholderAdminUsers.find(
-      (user) => user.username === data.username && user.passwordHash === data.password // In real app, compare hashed password
-    );
+    console.log('Admin login attempt:', data); // For debugging in browser console
+    try {
+      const foundUser = placeholderAdminUsers.find(
+        (user) => user.username === data.username && user.passwordHash === data.password
+      );
 
-    if (foundUser) {
-      // Store user info in localStorage
-      // Note: Storing sensitive info like full user object in localStorage is not recommended for production.
-      // For this demo, we store a simplified version.
-      const loggedInUserDetails = {
-        id: foundUser.id,
-        username: foundUser.username,
-        isSuperAdmin: foundUser.isSuperAdmin,
-        displayName: foundUser.displayName || foundUser.username,
-      };
-      localStorage.setItem('loggedInKviskalAdmin', JSON.stringify(loggedInUserDetails));
+      if (foundUser) {
+        const loggedInUserDetails = {
+          id: foundUser.id,
+          username: foundUser.username,
+          isSuperAdmin: foundUser.isSuperAdmin,
+          displayName: foundUser.displayName || foundUser.username,
+        };
+        localStorage.setItem('loggedInKviskalAdmin', JSON.stringify(loggedInUserDetails));
 
-      toast({
-        title: 'התחברות מוצלחת',
-        description: `ברוך הבא, ${foundUser.displayName || foundUser.username}!`,
-      });
-      router.push('/admin/dashboard');
-    } else {
+        toast({
+          title: 'התחברות מוצלחת',
+          description: `ברוך הבא, ${foundUser.displayName || foundUser.username}!`,
+        });
+        router.push('/admin/dashboard');
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'שגיאת התחברות',
+          description: 'שם משתמש או סיסמה שגויים. אנא נסה שנית.',
+        });
+        form.resetField("password");
+      }
+    } catch (error) {
+      console.error('Error during admin login:', error);
       toast({
         variant: 'destructive',
-        title: 'שגיאת התחברות',
-        description: 'שם משתמש או סיסמה שגויים. אנא נסה שנית.',
+        title: 'שגיאה בתהליך ההתחברות',
+        description: 'אירעה שגיאה לא צפויה. אנא נסה שוב מאוחר יותר או פנה לתמיכה.',
       });
-      form.resetField("password");
     }
   };
 

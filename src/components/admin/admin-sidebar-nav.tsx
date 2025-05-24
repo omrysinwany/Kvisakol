@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, Package, ShoppingBasket, UsersGroup, Settings } from 'lucide-react'; // Added UsersGroup
+import { LayoutDashboard, Package, ShoppingBasket, Users, Settings } from 'lucide-react'; // Changed UsersGroup to Users
 import type { LucideIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -19,7 +19,7 @@ const baseNavItems: NavItem[] = [
   { href: '/admin/dashboard', label: 'לוח בקרה', icon: LayoutDashboard },
   { href: '/admin/products', label: 'ניהול מוצרים', icon: Package },
   { href: '/admin/orders', label: 'ניהול הזמנות', icon: ShoppingBasket },
-  { href: '/admin/agents', label: 'ניהול סוכנים', icon: UsersGroup, isSuperAdminOnly: true },
+  { href: '/admin/agents', label: 'ניהול סוכנים', icon: Users, isSuperAdminOnly: true }, // Changed UsersGroup to Users
   // { href: '/admin/settings', label: 'הגדרות', icon: Settings }, // Example for future extension
 ];
 
