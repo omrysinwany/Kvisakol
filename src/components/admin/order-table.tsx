@@ -6,7 +6,7 @@ import type { Order } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, Eye, Edit, CheckCircle, XCircle, Hourglass, AlertCircle } from 'lucide-react'; 
+import { MoreHorizontal, Eye, Edit, CheckCircle, XCircle, Hourglass } from 'lucide-react'; 
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,30 +23,69 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
+// cn is not used after removing conditional classNames for rows/cells based on isNewUnviewed
+// import { cn } from '@/lib/utils';
 
 interface OrderTableProps {
   orders: Order[];
   onUpdateStatus: (orderId: string, newStatus: Order['status']) => void; 
 }
 
-const statusTranslations: Record<Order['status'], string> = {
+// Base status properties, used by OrderDetailView and as a base here
+const baseStatusTranslations: Record<Order['status'], string> = {
   new: 'חדשה',
   completed: 'הושלמה',
   cancelled: 'בוטלה',
 };
 
-const statusColors: Record<Order['status'], string> = {
+const baseStatusColors: Record<Order['status'], string> = {
   new: 'bg-blue-500 hover:bg-blue-600',
   completed: 'bg-green-500 hover:bg-green-600',
   cancelled: 'bg-red-500 hover:bg-red-600',
 };
 
-const statusIcons: Record<Order['status'], React.ElementType> = {
+const baseStatusIcons: Record<Order['status'], React.ElementType> = {
   new: Hourglass,
   completed: CheckCircle,
   cancelled: XCircle,
 }
+
+// Function to determine the display properties for the status badge in the table
+const getDisplayStatus = (order: Order): { text: string; colorClass: string; icon: React.ElementType } => {
+  if (order.status === 'new') {
+    if (!order.isViewedByAgent) {
+      // New and unviewed
+      return { 
+        text: baseStatusTranslations['new'], 
+        colorClass: baseStatusColors['new'], 
+        icon: baseStatusIcons['new'] 
+      };
+    } else {
+      // New and viewed
+      return { 
+        text: `${baseStatusTranslations['new']} (נצפתה)`, 
+        colorClass: baseStatusColors['new'], // Same color as 'new'
+        icon: Eye // Different icon
+      }; 
+    }
+  }
+  if (order.status === 'completed') {
+    return { 
+      text: baseStatusTranslations['completed'], 
+      colorClass: baseStatusColors['completed'], 
+      icon: baseStatusIcons['completed'] 
+    };
+  }
+  if (order.status === 'cancelled') {
+    return { 
+      text: baseStatusTranslations['cancelled'], 
+      colorClass: baseStatusColors['cancelled'], 
+      icon: baseStatusIcons['cancelled'] 
+    };
+  }
+  // Fallback, should ideally not happen with strict types
+  return { text: order.status, colorClass: 'bg-gray-500 hover:bg-gray-600', icon: MoreHorizontal };
+};
 
 
 export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
@@ -68,32 +107,26 @@ export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
       </TableHeader>
       <TableBody>
         {orders.map((order) => {
-          const StatusIcon = statusIcons[order.status];
-          const isNewUnviewed = order.status === 'new' && !order.isViewedByAgent;
+          const displayStatus = getDisplayStatus(order);
+          const DisplayStatusIcon = displayStatus.icon;
+          
           return (
-          <TableRow 
-            key={order.id} 
-            className={cn(isNewUnviewed && "bg-primary/5")}
-          >
+          <TableRow key={order.id} > {/* Removed conditional className for row background */}
             <TableCell className="font-medium">
-              <div className="flex items-center">
-                {isNewUnviewed && (
-                  <AlertCircle className="h-4 w-4 text-blue-500 mr-2" title="הזמנה חדשה שלא נצפתה"/>
-                )}
-                <Link href={`/admin/orders/${order.id}`} className="hover:underline text-primary">
-                  #{order.id.substring(order.id.length - 6)}
-                </Link>
-              </div>
+              {/* Removed AlertCircle icon */}
+              <Link href={`/admin/orders/${order.id}`} className="hover:underline text-primary">
+                #{order.id.substring(order.id.length - 6)}
+              </Link>
             </TableCell>
-            <TableCell className={cn(isNewUnviewed && "font-semibold")}>{order.customerName}</TableCell>
-            <TableCell className={cn("hidden md:table-cell", isNewUnviewed && "font-semibold")}>
+            <TableCell>{order.customerName}</TableCell> {/* Removed conditional font-semibold */}
+            <TableCell className="hidden md:table-cell"> {/* Removed conditional font-semibold */}
               {format(new Date(order.orderTimestamp), 'dd/MM/yyyy HH:mm', { locale: he })}
             </TableCell>
-            <TableCell className={cn("hidden sm:table-cell", isNewUnviewed && "font-semibold")}>{formatPrice(order.totalAmount)}</TableCell>
+            <TableCell className="hidden sm:table-cell">{formatPrice(order.totalAmount)}</TableCell> {/* Removed conditional font-semibold */}
             <TableCell>
-              <Badge variant="default" className={`${statusColors[order.status]} text-white`}>
-                <StatusIcon className="h-3 w-3 mr-1.5" /> {/* Changed ml-1.5 to mr-1.5 for RTL */}
-                {statusTranslations[order.status]}
+              <Badge variant="default" className={`${displayStatus.colorClass} text-white`}>
+                <DisplayStatusIcon className="h-3 w-3 mr-1.5" />
+                {displayStatus.text}
               </Badge>
             </TableCell>
             <TableCell className="text-left">
@@ -125,7 +158,7 @@ export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
                         >
                           {(['new', 'completed', 'cancelled'] as Order['status'][]).map((statusKey) => (
                             <DropdownMenuRadioItem key={statusKey} value={statusKey} className="cursor-pointer">
-                              {statusTranslations[statusKey]}
+                              {baseStatusTranslations[statusKey]}
                             </DropdownMenuRadioItem>
                           ))}
                         </DropdownMenuRadioGroup>
