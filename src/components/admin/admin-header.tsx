@@ -1,16 +1,46 @@
+
 'use client';
 import { AppLogo } from '@/components/shared/app-logo';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, UserCircle, LogOut } from 'lucide-react';
 import Link from 'next/link';
-import { AdminSidebarNav } from './admin-sidebar-nav'; // We'll create this next
+import { AdminSidebarNav } from './admin-sidebar-nav';
+import { useRouter } from 'next/navigation'; // Import useRouter
+import { useEffect, useState } from 'react';
+
+interface LoggedInAdmin {
+  username: string;
+  displayName?: string;
+  isSuperAdmin: boolean;
+}
 
 export function AdminHeader() {
-  // Placeholder for actual logout logic
+  const router = useRouter();
+  const [loggedInUser, setLoggedInUser] = useState<LoggedInAdmin | null>(null);
+
+  useEffect(() => {
+    // Ensure this runs only on client side
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem('loggedInKviskalAdmin');
+      if (storedUser) {
+        try {
+          setLoggedInUser(JSON.parse(storedUser));
+        } catch (error) {
+          console.error("Failed to parse loggedInKviskalAdmin from localStorage", error);
+          localStorage.removeItem('loggedInKviskalAdmin'); // Clear corrupted data
+        }
+      }
+    }
+  }, []);
+
+
   const handleLogout = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('loggedInKviskalAdmin');
+    }
     console.log('Logout triggered');
-    // router.push('/admin/login'); // Example redirect
+    router.push('/admin/login'); 
   };
 
   return (
@@ -39,7 +69,9 @@ export function AdminHeader() {
         </div>
         
         <div className="flex items-center gap-3">
-          <span className="text-sm text-muted-foreground hidden sm:inline">סוכן מנהל</span>
+          <span className="text-sm text-muted-foreground hidden sm:inline">
+            {loggedInUser ? (loggedInUser.displayName || loggedInUser.username) : 'סוכן מנהל'}
+          </span>
           <UserCircle className="h-7 w-7 text-muted-foreground" />
           <Button variant="ghost" size="sm" onClick={handleLogout}>
             <LogOut className="ml-2 h-4 w-4" />

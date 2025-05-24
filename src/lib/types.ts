@@ -1,9 +1,11 @@
+
 export interface Product {
   id: string;
   name: string;
   description: string;
   price: number;
   imageUrl: string;
+  dataAiHint?: string;
   category?: string; // Optional: if filtering by category is needed later
   isActive: boolean; // For admin to toggle visibility
 }
@@ -29,4 +31,13 @@ export interface Order {
   totalAmount: number;
   orderTimestamp: Date;
   status: 'new' | 'processed' | 'shipped' | 'completed' | 'cancelled';
+}
+
+export interface AdminUser {
+  id: string;
+  username: string;
+  passwordHash: string; // Storing plain text passwords is not secure. This should be a hash.
+                        // For this placeholder, we'll keep it simple but flag it.
+  isSuperAdmin: boolean;
+  displayName?: string; // Optional display name
 }

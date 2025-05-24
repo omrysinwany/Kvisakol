@@ -1,8 +1,27 @@
 
-import type { Product, Order } from './types';
+import type { Product, Order, AdminUser } from './types';
+
+// For simplicity in this placeholder, passwords are plain text.
+// In a real app, NEVER store plain text passwords. Always store hashed passwords.
+export const placeholderAdminUsers: AdminUser[] = [
+  {
+    id: 'su1',
+    username: 'superadmin',
+    passwordHash: 'superpassword', // Plain text for demo. Should be hashed.
+    isSuperAdmin: true,
+    displayName: 'מנהל ראשי',
+  },
+  {
+    id: 'agent1',
+    username: 'agentk',
+    passwordHash: 'agentpass', // Plain text for demo. Should be hashed.
+    isSuperAdmin: false,
+    displayName: 'סוכן כביסכל',
+  },
+];
 
 export const placeholderProducts: Product[] = [
-  // מוצרי ה- Bio שלנו - עכשיו תחת "נוזלי כביסה"
+  // נוזלי כביסה (כולל מוצרי Bio לשעבר)
   {
     id: 'kbio1',
     name: 'כביסכל Bio אלגנס – 2 ליטר',
@@ -10,7 +29,7 @@ export const placeholderProducts: Product[] = [
     price: 43.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bio elegance',
-    category: 'נוזלי כביסה', // שונה מ"מוצרי ה- Bio שלנו"
+    category: 'נוזלי כביסה',
     isActive: true,
   },
   {
@@ -20,7 +39,7 @@ export const placeholderProducts: Product[] = [
     price: 45.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bio sport',
-    category: 'נוזלי כביסה', // שונה מ"מוצרי ה- Bio שלנו"
+    category: 'נוזלי כביסה',
     isActive: true,
   },
   {
@@ -30,7 +49,7 @@ export const placeholderProducts: Product[] = [
     price: 43.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bio soft',
-    category: 'נוזלי כביסה', // שונה מ"מוצרי ה- Bio שלנו"
+    category: 'נוזלי כביסה',
     isActive: true,
   },
   {
@@ -40,7 +59,7 @@ export const placeholderProducts: Product[] = [
     price: 43.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bio freedom',
-    category: 'נוזלי כביסה', // שונה מ"מוצרי ה- Bio שלנו"
+    category: 'נוזלי כביסה',
     isActive: true,
   },
   {
@@ -50,7 +69,7 @@ export const placeholderProducts: Product[] = [
     price: 43.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bio oriental',
-    category: 'נוזלי כביסה', // שונה מ"מוצרי ה- Bio שלנו"
+    category: 'נוזלי כביסה',
     isActive: true,
   },
   {
@@ -60,7 +79,7 @@ export const placeholderProducts: Product[] = [
     price: 43.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bio spa',
-    category: 'נוזלי כביסה', // שונה מ"מוצרי ה- Bio שלנו"
+    category: 'נוזלי כביסה',
     isActive: true,
   },
   {
@@ -70,7 +89,7 @@ export const placeholderProducts: Product[] = [
     price: 43.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bio baby',
-    category: 'נוזלי כביסה', // שונה מ"מוצרי ה- Bio שלנו"
+    category: 'נוזלי כביסה',
     isActive: true,
   },
   {
@@ -80,7 +99,7 @@ export const placeholderProducts: Product[] = [
     price: 43.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bio musk flowers',
-    category: 'נוזלי כביסה', // שונה מ"מוצרי ה- Bio שלנו"
+    category: 'נוזלי כביסה',
     isActive: true,
   },
   {
@@ -90,7 +109,7 @@ export const placeholderProducts: Product[] = [
     price: 43.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bio rose',
-    category: 'נוזלי כביסה', // שונה מ"מוצרי ה- Bio שלנו"
+    category: 'נוזלי כביסה',
     isActive: true,
   },
   {
@@ -100,7 +119,7 @@ export const placeholderProducts: Product[] = [
     price: 43.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bio aromatic',
-    category: 'נוזלי כביסה', // שונה מ"מוצרי ה- Bio שלנו"
+    category: 'נוזלי כביסה',
     isActive: true,
   },
   {
@@ -110,7 +129,17 @@ export const placeholderProducts: Product[] = [
     price: 43.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bio red rose',
-    category: 'נוזלי כביסה', // שונה מ"מוצרי ה- Bio שלנו"
+    category: 'נוזלי כביסה',
+    isActive: true,
+  },
+  {
+    id: 'kcat7',
+    name: 'נוזל כביסה קלאסי "כביסכל"',
+    description: 'נוזל כביסה לשימוש יומיומי, יעיל וחסכוני לכל סוגי הבדים.',
+    price: 35.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'classic laundry',
+    category: 'נוזלי כביסה', 
     isActive: true,
   },
 
@@ -235,7 +264,6 @@ export const placeholderProducts: Product[] = [
     category: 'חבילות',
     isActive: true,
   },
-
 
   // מוצרי ניקוי מקצועיים
   {
@@ -436,7 +464,7 @@ export const placeholderProducts: Product[] = [
     description: 'מפיץ ריח בצורת פרח בניחוח וניל מתוק. 100 מ"ל.',
     price: 20.00,
     imageUrl: 'https://placehold.co/600x400.png',
-    dataAiHint: 'flower diffuser vanilla',
+    dataAiHint: 'flower diffuser vanilla only',
     category: 'מפיצי ריח',
     isActive: true,
   },
@@ -501,29 +529,7 @@ export const placeholderProducts: Product[] = [
     isActive: true,
   },
 
-  //נוזלי כביסה (קלאסי)
-  {
-    id: 'kcat7', // ID נשאר זהה אך הקטגוריה מעודכנת
-    name: 'נוזל כביסה קלאסי "כביסכל"',
-    description: 'נוזל כביסה לשימוש יומיומי, יעיל וחסכוני לכל סוגי הבדים.',
-    price: 35.00,
-    imageUrl: 'https://placehold.co/600x400.png',
-    dataAiHint: 'classic laundry',
-    category: 'נוזלי כביסה', 
-    isActive: true,
-  },
-  {
-    id: 'pold1',
-    name: 'אבקת כביסה "כביסכל קלאסי הישן"',
-    description: 'אבקת כביסה איכותית לכל סוגי הבדים, בניחוח מרענן. (מוצר ישן, לא פעיל)',
-    price: 39.90,
-    imageUrl: 'https://placehold.co/600x400.png',
-    dataAiHint: 'laundry powder',
-    category: 'אבקות כביסה',
-    isActive: false,
-  },
-
-  // קטגוריית מבשמים
+  // מבשמים
   {
     id: 'kmb1',
     name: 'מבשם אלגנס 750 מ"ל',
@@ -555,12 +561,62 @@ export const placeholderProducts: Product[] = [
     isActive: true,
   },
   {
+    id: 'kmb16',
+    name: 'BRONZE – מבשם קפסולרי מרוכז 350 מ"ל',
+    description: 'מבשם קפסולרי יוקרתי בניחוח BRONZE. טכנולוגיית שחרור מושהה לניחוח מתמשך.',
+    price: 45.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'bronze capsule',
+    category: 'מבשמים',
+    isActive: true,
+  },
+  {
+    id: 'kmb17',
+    name: 'PLATINUM – מבשם קפסולרי מרוכז 350 מ"ל',
+    description: 'מבשם קפסולרי יוקרתי בניחוח PLATINUM. טכנולוגיית שחרור מושהה לניחוח מתמשך.',
+    price: 45.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'platinum capsule',
+    category: 'מבשמים',
+    isActive: true,
+  },
+  {
+    id: 'kmb18',
+    name: 'SILVER – מבשם קפסולרי מרוכז 350 מ"ל',
+    description: 'מבשם קפסולרי יוקרתי בניחוח SILVER. טכנולוגיית שחרור מושהה לניחוח מתמשך.',
+    price: 45.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'silver capsule',
+    category: 'מבשמים',
+    isActive: true,
+  },
+  {
+    id: 'kmb19',
+    name: 'GOLD – מבשם קפסולרי מרוכז 350 מ"ל',
+    description: 'מבשם קפסולרי יוקרתי בניחוח GOLD. טכנולוגיית שחרור מושהה לניחוח מתמשך.',
+    price: 45.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'gold capsule',
+    category: 'מבשמים',
+    isActive: true,
+  },
+  {
     id: 'kmb4',
     name: 'אוריינטל 750 מ"ל',
     description: 'מבשם אריגים מרוכז בניחוח אוריינטלי עשיר ומפנק.',
     price: 25.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'oriental perfume',
+    category: 'מבשמים',
+    isActive: true,
+  },
+  {
+    id: 'kmb20',
+    name: 'מבשם אוריינטל 350 מ"ל',
+    description: 'מבשם אריגים מרוכז בניחוח אוריינטלי עשיר. גודל קומפקטי.',
+    price: 16.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'oriental perfume small',
     category: 'מבשמים',
     isActive: true,
   },
@@ -573,6 +629,36 @@ export const placeholderProducts: Product[] = [
     dataAiHint: 'vanilla perfume',
     category: 'מבשמים',
     isActive: true,
+  },
+  {
+    id: 'kmb21',
+    name: 'מבשם ספא 350 מ"ל',
+    description: 'מבשם אריגים מרוכז בניחוח ספא מרגיע. גודל קומפקטי.',
+    price: 16.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'spa perfume small',
+    category: 'מבשמים',
+    isActive: true,
+  },
+  {
+    id: 'kmb22',
+    name: 'מבשם מאסק פלאוורס 350 מ"ל',
+    description: 'מבשם אריגים מרוכז בניחוח מאסק ופרחים. גודל קומפקטי.',
+    price: 16.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'muskflowers perfume small',
+    category: 'מבשמים',
+    isActive: true,
+  },
+  {
+    id: 'kmb23',
+    name: 'מבשם בוטיק סטייל 350 מ"ל',
+    description: 'מבשם אריגים מרוכז בניחוח בוטיק יוקרתי. (אזל מהמלאי)',
+    price: 16.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'boutique perfume small',
+    category: 'מבשמים',
+    isActive: false, 
   },
   {
     id: 'kmb6',
@@ -674,86 +760,6 @@ export const placeholderProducts: Product[] = [
     category: 'מבשמים',
     isActive: true,
   },
-  {
-    id: 'kmb16',
-    name: 'BRONZE – מבשם קפסולרי מרוכז 350 מ"ל',
-    description: 'מבשם קפסולרי יוקרתי בניחוח BRONZE. טכנולוגיית שחרור מושהה לניחוח מתמשך.',
-    price: 45.00,
-    imageUrl: 'https://placehold.co/600x400.png',
-    dataAiHint: 'bronze capsule',
-    category: 'מבשמים',
-    isActive: true,
-  },
-  {
-    id: 'kmb17',
-    name: 'PLATINUM – מבשם קפסולרי מרוכז 350 מ"ל',
-    description: 'מבשם קפסולרי יוקרתי בניחוח PLATINUM. טכנולוגיית שחרור מושהה לניחוח מתמשך.',
-    price: 45.00,
-    imageUrl: 'https://placehold.co/600x400.png',
-    dataAiHint: 'platinum capsule',
-    category: 'מבשמים',
-    isActive: true,
-  },
-  {
-    id: 'kmb18',
-    name: 'SILVER – מבשם קפסולרי מרוכז 350 מ"ל',
-    description: 'מבשם קפסולרי יוקרתי בניחוח SILVER. טכנולוגיית שחרור מושהה לניחוח מתמשך.',
-    price: 45.00,
-    imageUrl: 'https://placehold.co/600x400.png',
-    dataAiHint: 'silver capsule',
-    category: 'מבשמים',
-    isActive: true,
-  },
-  {
-    id: 'kmb19',
-    name: 'GOLD – מבשם קפסולרי מרוכז 350 מ"ל',
-    description: 'מבשם קפסולרי יוקרתי בניחוח GOLD. טכנולוגיית שחרור מושהה לניחוח מתמשך.',
-    price: 45.00,
-    imageUrl: 'https://placehold.co/600x400.png',
-    dataAiHint: 'gold capsule',
-    category: 'מבשמים',
-    isActive: true,
-  },
-  {
-    id: 'kmb20',
-    name: 'מבשם אוריינטל 350 מ"ל',
-    description: 'מבשם אריגים מרוכז בניחוח אוריינטלי עשיר. גודל קומפקטי.',
-    price: 16.00,
-    imageUrl: 'https://placehold.co/600x400.png',
-    dataAiHint: 'oriental perfume small',
-    category: 'מבשמים',
-    isActive: true,
-  },
-  {
-    id: 'kmb21',
-    name: 'מבשם ספא 350 מ"ל',
-    description: 'מבשם אריגים מרוכז בניחוח ספא מרגיע. גודל קומפקטי.',
-    price: 16.00,
-    imageUrl: 'https://placehold.co/600x400.png',
-    dataAiHint: 'spa perfume small',
-    category: 'מבשמים',
-    isActive: true,
-  },
-  {
-    id: 'kmb22',
-    name: 'מבשם מאסק פלאוורס 350 מ"ל',
-    description: 'מבשם אריגים מרוכז בניחוח מאסק ופרחים. גודל קומפקטי.',
-    price: 16.00,
-    imageUrl: 'https://placehold.co/600x400.png',
-    dataAiHint: 'muskflowers perfume small',
-    category: 'מבשמים',
-    isActive: true,
-  },
-  {
-    id: 'kmb23',
-    name: 'מבשם בוטיק סטייל 350 מ"ל',
-    description: 'מבשם אריגים מרוכז בניחוח בוטיק יוקרתי. (אזל מהמלאי)',
-    price: 16.00,
-    imageUrl: 'https://placehold.co/600x400.png',
-    dataAiHint: 'boutique perfume small',
-    category: 'מבשמים',
-    isActive: false, // אזל מהמלאי
-  },
 
   // פרפלור מבשמי רצפות
   {
@@ -841,7 +847,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp1',
     name: 'מגבונים רכים לתינוק בניחוח סופט קייר',
-    description: 'מגבונים עדינים במיוחד לתינוקות בניחוח סופט קייר, לשמירה על עורו הרגיש של תינוקך. 72 יחידות.',
+    description: 'מגבונים עדינים במיוחד לתינוקות בניחוח סופט קייר. 72 יחידות.',
     price: 5.90,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'baby wipes softcare',
@@ -851,7 +857,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp2',
     name: 'מגבונים רכים לתינוק בניחוח בייבי',
-    description: 'מגבונים עדינים במיוחד לתינוקות בניחוח בייבי הקלאסי והאהוב. 72 יחידות.',
+    description: 'מגבונים עדינים במיוחד לתינוקות בניחוח בייבי הקלאסי. 72 יחידות.',
     price: 5.90,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'baby wipes classic',
@@ -861,7 +867,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp3',
     name: 'מארז מגבונים לחים ארומטי לניקוי כללי',
-    description: 'מארז 3 חבילות מגבונים לניקוי כללי בניחוח ארומטי מרענן, לניקוי מהיר ויעיל של משטחים.',
+    description: 'מארז 3 חבילות מגבונים לניקוי כללי בניחוח ארומטי.',
     price: 22.90,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'cleaning wipes aromatic',
@@ -871,7 +877,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp4',
     name: 'מארז מגבונים לחים בייבי לניקוי כללי',
-    description: 'מארז 3 חבילות מגבונים לניקוי כללי בניחוח בייבי עדין, מתאים לניקוי בסביבת ילדים.',
+    description: 'מארז 3 חבילות מגבונים לניקוי כללי בניחוח בייבי עדין.',
     price: 22.90,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'cleaning wipes baby',
@@ -881,7 +887,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp5',
     name: 'מארז מגבונים לחים ספא לניקוי כללי',
-    description: 'מארז 3 חבילות מגבונים לניקוי כללי בניחוח ספא יוקרתי, לחווית ניקיון מפנקת.',
+    description: 'מארז 3 חבילות מגבונים לניקוי כללי בניחוח ספא יוקרתי.',
     price: 22.90,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'cleaning wipes spa',
@@ -891,7 +897,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp6',
     name: 'מארז מגבונים לחים רוז לניקוי כללי',
-    description: 'מארז 3 חבילות מגבונים לניקוי כללי בניחוח רוז קלאסי ונעים.',
+    description: 'מארז 3 חבילות מגבונים לניקוי כללי בניחוח רוז קלאסי.',
     price: 22.90,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'cleaning wipes rose',
@@ -901,7 +907,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp7',
     name: 'דלי מגבונים לניקוי כללי בניחוח ארומטי',
-    description: 'דלי מגבונים (400 יח\') לניקוי כללי בניחוח ארומטי, לשימוש ממושך ונוח.',
+    description: 'דלי מגבונים (400 יח\') לניקוי כללי בניחוח ארומטי.',
     price: 35.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bucket wipes aromatic',
@@ -911,7 +917,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp8',
     name: 'דלי מגבונים לניקוי כללי בניחוח ספא',
-    description: 'דלי מגבונים (400 יח\') לניקוי כללי בניחוח ספא, לחווית ניקיון יוקרתית.',
+    description: 'דלי מגבונים (400 יח\') לניקוי כללי בניחוח ספא.',
     price: 35.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bucket wipes spa',
@@ -921,7 +927,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp9',
     name: 'דלי מגבונים לניקוי כללי בניחוח בייבי',
-    description: 'דלי מגבונים (400 יח\') לניקוי כללי בניחוח בייבי, אידיאלי לבתים עם ילדים.',
+    description: 'דלי מגבונים (400 יח\') לניקוי כללי בניחוח בייבי.',
     price: 35.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bucket wipes baby',
@@ -931,13 +937,14 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp10',
     name: 'דלי מגבונים לניקוי כללי בניחוח רוז',
-    description: 'דלי מגבונים (400 יח\') לניקוי כללי בניחוח רוז, לניחוח נעים ומתמשך.',
+    description: 'דלי מגבונים (400 יח\') לניקוי כללי בניחוח רוז.',
     price: 35.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bucket wipes rose',
     category: 'מגבונים',
     isActive: true,
   },
+
   // נוזלי כלים
   {
     id: 'kds1',
@@ -978,6 +985,16 @@ export const placeholderProducts: Product[] = [
     dataAiHint: 'dish soap spa',
     category: 'נוזלי כלים',
     isActive: true,
+  },
+  {
+    id: 'pold1', // מוצר ישן ולא פעיל, לשם הדגמה
+    name: 'אבקת כביסה "כביסכל קלאסי הישן"',
+    description: 'אבקת כביסה איכותית לכל סוגי הבדים, בניחוח מרענן. (מוצר ישן, לא פעיל)',
+    price: 39.90,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'laundry powder',
+    category: 'אבקות כביסה', // קטגוריה שכרגע לא בשימוש פעיל אבל יכולה להיות
+    isActive: false,
   },
 ];
 
@@ -1026,5 +1043,3 @@ export const placeholderOrders: Order[] = [
     status: 'completed',
   },
 ];
-
-    

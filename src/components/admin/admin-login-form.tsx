@@ -5,13 +5,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { AppLogo } from '../shared/app-logo';
 import { KeyRound, User } from 'lucide-react';
+import { placeholderAdminUsers } from '@/lib/placeholder-data'; // Import admin users
+import type { AdminUser } from '@/lib/types';
 
 const loginFormSchema = z.object({
   username: z.string().min(3, { message: 'שם משתמש חייב להכיל לפחות 3 תווים.' }),
@@ -19,10 +21,6 @@ const loginFormSchema = z.object({
 });
 
 type LoginFormValues = z.infer<typeof loginFormSchema>;
-
-// הגדרת נתוני כניסה חדשים
-const DEMO_USERNAME = "admin";
-const DEMO_PASSWORD = "password";
 
 export function AdminLoginForm() {
   const router = useRouter();
@@ -38,11 +36,26 @@ export function AdminLoginForm() {
 
   const onSubmit = async (data: LoginFormValues) => {
     console.log('Admin login attempt:', data);
-    // בדיקה מול נתוני הכניסה החדשים
-    if (data.username === DEMO_USERNAME && data.password === DEMO_PASSWORD) {
+    
+    const foundUser = placeholderAdminUsers.find(
+      (user) => user.username === data.username && user.passwordHash === data.password // In real app, compare hashed password
+    );
+
+    if (foundUser) {
+      // Store user info in localStorage
+      // Note: Storing sensitive info like full user object in localStorage is not recommended for production.
+      // For this demo, we store a simplified version.
+      const loggedInUserDetails = {
+        id: foundUser.id,
+        username: foundUser.username,
+        isSuperAdmin: foundUser.isSuperAdmin,
+        displayName: foundUser.displayName || foundUser.username,
+      };
+      localStorage.setItem('loggedInKviskalAdmin', JSON.stringify(loggedInUserDetails));
+
       toast({
         title: 'התחברות מוצלחת',
-        description: 'ברוך הבא, מנהל!',
+        description: `ברוך הבא, ${foundUser.displayName || foundUser.username}!`,
       });
       router.push('/admin/dashboard');
     } else {
@@ -75,7 +88,7 @@ export function AdminLoginForm() {
                     <FormControl>
                       <div className="relative">
                         <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input placeholder="לדוגמה: admin" {...field} className="pl-10" />
+                        <Input placeholder="לדוגמה: superadmin" {...field} className="pl-10" />
                       </div>
                     </FormControl>
                     <FormMessage />
