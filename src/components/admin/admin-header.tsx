@@ -2,7 +2,7 @@
 'use client';
 import { AppLogo } from '@/components/shared/app-logo';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'; // Added SheetTitle
 import { Menu, UserCircle, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { AdminSidebarNav } from './admin-sidebar-nav';
@@ -56,6 +56,8 @@ export function AdminHeader() {
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-[280px] p-0">
+                  {/* Adding a visually hidden title for accessibility, as required by Radix Dialog (used by Sheet) */}
+                  <SheetTitle className="sr-only">תפריט ניווט נייד</SheetTitle>
                   <div className="p-4 border-b">
                     <AppLogo />
                   </div>
