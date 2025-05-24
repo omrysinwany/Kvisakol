@@ -6,7 +6,7 @@ import type { Order } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, Eye, Edit, CheckCircle, XCircle, Hourglass, RadioTower } from 'lucide-react'; 
+import { MoreHorizontal, Eye, Edit, CheckCircle, XCircle, Hourglass, AlertCircle } from 'lucide-react'; 
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -78,7 +78,7 @@ export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
             <TableCell className="font-medium">
               <div className="flex items-center">
                 {isNewUnviewed && (
-                  <RadioTower className="h-4 w-4 text-blue-500 ml-2 animate-pulse" title="הזמנה חדשה שלא נצפתה"/>
+                  <AlertCircle className="h-4 w-4 text-blue-500 mr-2 animate-pulse" title="הזמנה חדשה שלא נצפתה"/>
                 )}
                 <Link href={`/admin/orders/${order.id}`} className="hover:underline text-primary">
                   #{order.id.substring(order.id.length - 6)}
@@ -92,7 +92,7 @@ export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
             <TableCell className={cn("hidden sm:table-cell", isNewUnviewed && "font-semibold")}>{formatPrice(order.totalAmount)}</TableCell>
             <TableCell>
               <Badge variant="default" className={`${statusColors[order.status]} text-white`}>
-                <StatusIcon className="h-3 w-3 ml-1.5" />
+                <StatusIcon className="h-3 w-3 mr-1.5" /> {/* Changed ml-1.5 to mr-1.5 for RTL */}
                 {statusTranslations[order.status]}
               </Badge>
             </TableCell>
