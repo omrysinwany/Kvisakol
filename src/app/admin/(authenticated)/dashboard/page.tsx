@@ -188,7 +188,7 @@ export default function AdminDashboardPage() {
       <div className="flex items-center justify-between space-y-2 mb-6">
         <h1 className="text-3xl font-bold tracking-tight">לוח בקרה</h1>
         <div className="flex items-center space-x-2">
-          <Button asChild>
+          <Button asChild size="sm">
             <Link href="/admin/products/new">הוסף מוצר חדש</Link>
           </Button>
         </div>

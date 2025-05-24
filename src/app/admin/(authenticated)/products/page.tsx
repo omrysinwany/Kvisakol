@@ -133,7 +133,7 @@ export default function AdminProductsPage() {
     <>
       <div className="flex items-center justify-between space-y-2 mb-6">
         <h1 className="text-3xl font-bold tracking-tight">ניהול מוצרים</h1>
-        <Button asChild>
+        <Button asChild size="sm">
           <Link href="/admin/products/new">
             <PlusCircle className="ml-2 h-4 w-4" />
             הוסף מוצר חדש
@@ -195,7 +195,7 @@ export default function AdminProductsPage() {
                 {allProducts.length === 0 ? 'לא קיימים מוצרים במערכת. התחל על ידי הוספת מוצר חדש.' : 'לא נמצאו מוצרים התואמים את החיפוש או הסינון.'}
               </p>
               {allProducts.length === 0 && (
-                <Button asChild>
+                <Button asChild size="sm">
                   <Link href="/admin/products/new">הוסף מוצר</Link>
                 </Button>
               )}
@@ -206,4 +206,3 @@ export default function AdminProductsPage() {
     </>
   );
 }
-

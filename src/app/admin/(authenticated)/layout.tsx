@@ -27,9 +27,9 @@ export default function AdminAuthenticatedLayout({
           </div> */}
         </div>
       </aside>
-      <div className="flex flex-col overflow-x-hidden"> {/* Added overflow-x-hidden here */}
+      <div className="flex flex-col min-w-0"> {/* Added min-w-0 here */}
         <AdminHeader />
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-muted/20">
+        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-muted/20 min-w-0 overflow-x-hidden text-sm"> {/* Added text-sm */}
           {children}
         </main>
       </div>
