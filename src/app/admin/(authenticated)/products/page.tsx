@@ -15,13 +15,14 @@ import { PlusCircle, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const ITEMS_PER_PAGE = 15;
+const ALL_CATEGORIES_VALUE = "all"; // Define a constant for "all categories"
 
 export default function AdminProductsPage() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>(ALL_CATEGORIES_VALUE); // Default to "all"
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   
@@ -50,7 +51,7 @@ export default function AdminProductsPage() {
   useEffect(() => {
     let productsToFilter = allProducts;
 
-    if (selectedCategory) {
+    if (selectedCategory && selectedCategory !== ALL_CATEGORIES_VALUE) { // Check against "all"
       productsToFilter = productsToFilter.filter(p => p.category === selectedCategory);
     }
 
@@ -165,7 +166,7 @@ export default function AdminProductsPage() {
                   <SelectValue placeholder="סינון לפי קטגוריה" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">כל הקטגוריות</SelectItem>
+                  <SelectItem value={ALL_CATEGORIES_VALUE}>כל הקטגוריות</SelectItem> {/* Use constant value */}
                   {categories.map((category) => (
                     <SelectItem key={category} value={category}>
                       {category}
@@ -205,3 +206,4 @@ export default function AdminProductsPage() {
     </>
   );
 }
+
