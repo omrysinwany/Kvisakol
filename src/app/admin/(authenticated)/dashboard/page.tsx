@@ -8,7 +8,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { getAllProductsForAdmin } from "@/services/product-service";
 import { getOrdersForAdmin } from "@/services/order-service";
 import type { Product, Order } from "@/lib/types";
-import { DollarSign, Package, ShoppingCart, Activity, ClipboardCheck, Eye, Users, CalendarDays, CalendarCheck, CalendarIcon, X } from "lucide-react";
+import { DollarSign, Package, ShoppingCart, Activity, ClipboardCheck, Eye, Users, CalendarDays, CalendarCheck, CalendarIcon, X, Hourglass } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -37,7 +37,7 @@ interface DashboardSummary {
   totalOrders: number;
   newOrdersUnviewed: number;
   receivedOrders: number;
-  allTimeRevenue: number; // Renamed from totalRevenue for clarity
+  allTimeRevenue: number; 
   latestOrders: Order[];
   ordersToday: number;
   ordersThisWeek: number;
@@ -159,8 +159,6 @@ export default function AdminDashboardPage() {
   const handleClearCustomDates = () => {
     setCustomRevenueStartDate(undefined);
     setCustomRevenueEndDate(undefined);
-    // Optionally, switch back to 'allTime' or another default period
-    // setSelectedRevenuePeriod('allTime'); 
   };
 
   if (isLoading) {
@@ -212,7 +210,7 @@ export default function AdminDashboardPage() {
                       variant={"outline"}
                       size="sm"
                       className={cn(
-                        "w-full sm:w-auto justify-start text-left font-normal text-xs flex-grow",
+                        "w-full sm:w-[170px] justify-start text-left font-normal text-xs",
                         !customRevenueStartDate && "text-muted-foreground"
                       )}
                     >
@@ -236,7 +234,7 @@ export default function AdminDashboardPage() {
                       variant={"outline"}
                        size="sm"
                       className={cn(
-                        "w-full sm:w-auto justify-start text-left font-normal text-xs flex-grow",
+                        "w-full sm:w-[170px] justify-start text-left font-normal text-xs",
                         !customRevenueEndDate && "text-muted-foreground"
                       )}
                     >
@@ -255,7 +253,7 @@ export default function AdminDashboardPage() {
                   </PopoverContent>
                 </Popover>
                 {(customRevenueStartDate || customRevenueEndDate) && (
-                    <Button variant="ghost" size="icon" onClick={handleClearCustomDates} className="h-8 w-8">
+                    <Button variant="ghost" size="sm" onClick={handleClearCustomDates} className="p-2">
                         <X className="h-4 w-4" />
                         <span className="sr-only">נקה תאריכים</span>
                     </Button>
@@ -265,7 +263,7 @@ export default function AdminDashboardPage() {
             <div className="text-3xl font-bold mt-1">{formatPrice(filteredRevenue)}</div>
             <p className="text-xs text-muted-foreground">
                 סה"כ מהזמנות <span className="font-medium">שהושלמו</span> בתקופה שנבחרה.
-                {selectedRevenuePeriod !== 'allTime' && ` (הכנסות כל הזמן: ${formatPrice(summary.allTimeRevenue)})`}
+                {selectedRevenuePeriod !== 'allTime' && summary.allTimeRevenue > 0 && ` (הכנסות כל הזמן: ${formatPrice(summary.allTimeRevenue)})`}
             </p>
           </CardContent>
         </Card>
@@ -273,7 +271,7 @@ export default function AdminDashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">הזמנות חדשות (טרם נצפו)</CardTitle>
-            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+            <Hourglass className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{summary.newOrdersUnviewed}</div>
@@ -370,3 +368,4 @@ export default function AdminDashboardPage() {
     </>
   );
 }
+
