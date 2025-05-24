@@ -296,16 +296,16 @@ export default function AdminDashboardPage() {
       <div className="mt-8">
         <Card className="col-span-2">
             <CardHeader className="pb-3">
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                   <div className="flex items-center">
                       <DollarSign className="h-6 w-6 text-muted-foreground ml-2" />
-                      <CardTitle className="text-xl font-semibold">
+                      <CardTitle className="text-2xl font-bold">
                           הכנסות בתקופה הנבחרת
                       </CardTitle>
                   </div>
                   <DropdownMenu dir="rtl">
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="min-w-[130px] justify-between">
+                      <Button variant="outline" size="sm" className="min-w-[130px] justify-between self-start sm:self-center">
                         {revenuePeriodTranslations[selectedRevenuePeriod]}
                         <ChevronDown className="h-4 w-4 opacity-50 mr-1" />
                       </Button>
@@ -326,7 +326,7 @@ export default function AdminDashboardPage() {
             </CardHeader>
             <CardContent>
               {selectedRevenuePeriod === 'custom' && (
-                <div className="flex flex-col sm:flex-row gap-2 my-3 items-center p-2 border rounded-md bg-muted/30">
+                <div className="flex flex-col sm:flex-row gap-2 my-4 items-center p-3 border rounded-lg bg-muted/40 shadow-sm">
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -383,10 +383,9 @@ export default function AdminDashboardPage() {
                   )}
                 </div>
               )}
-              <div className="text-3xl font-bold mt-1">{formatPrice(filteredRevenue)}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-3xl font-bold mt-2">{formatPrice(filteredRevenue)}</div>
+              <p className="text-sm text-muted-foreground">
                   סה"כ מהזמנות <span className="font-medium">שהושלמו</span> בתקופה שנבחרה.
-                  {selectedRevenuePeriod !== 'allTime' && summary.allTimeRevenue > 0 && ` (הכנסות כל הזמן: ${formatPrice(summary.allTimeRevenue)})`}
               </p>
             </CardContent>
           </Card>
@@ -394,3 +393,6 @@ export default function AdminDashboardPage() {
     </>
   );
 }
+
+
+    
