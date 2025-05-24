@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, Package, ShoppingBasket, Settings } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingBasket, Users, Settings } from 'lucide-react'; // Changed UsersGroup to Users
 import type { LucideIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -23,7 +23,13 @@ const baseNavItems: NavItem[] = [
   // { href: '/admin/settings', label: 'הגדרות', icon: Settings }, // Example for future extension
 ];
 
-export function AdminSidebarNav({ isMobile = false }: { isMobile?: boolean }) {
+export function AdminSidebarNav({ 
+  isMobile = false, 
+  onMobileLinkClick 
+}: { 
+  isMobile?: boolean;
+  onMobileLinkClick?: () => void;
+}) {
   const pathname = usePathname();
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -63,6 +69,7 @@ export function AdminSidebarNav({ isMobile = false }: { isMobile?: boolean }) {
         <Link
           key={item.href}
           href={item.href}
+          onClick={isMobile ? onMobileLinkClick : undefined}
           className={cn(
             'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:bg-accent',
             pathname === item.href && 'bg-accent text-primary font-semibold',
@@ -76,4 +83,3 @@ export function AdminSidebarNav({ isMobile = false }: { isMobile?: boolean }) {
     </nav>
   );
 }
-

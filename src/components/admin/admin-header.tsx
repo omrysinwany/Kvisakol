@@ -18,6 +18,7 @@ interface LoggedInAdmin {
 export function AdminHeader() {
   const router = useRouter();
   const [loggedInUser, setLoggedInUser] = useState<LoggedInAdmin | null>(null);
+  const [openMobile, setOpenMobile] = useState(false); // State for mobile sheet
 
   useEffect(() => {
     // Ensure this runs only on client side
@@ -48,20 +49,19 @@ export function AdminHeader() {
       <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-4">
           <div className="lg:hidden">
-             <Sheet>
+             <Sheet open={openMobile} onOpenChange={setOpenMobile}>
                 <SheetTrigger asChild>
-                  <Button variant="outline" size="icon">
+                  <Button variant="outline" size="icon" onClick={() => setOpenMobile(true)}>
                     <Menu className="h-5 w-5" />
                     <span className="sr-only">פתח תפריט ניווט</span>
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-[280px] p-0">
-                  {/* Adding a visually hidden title for accessibility, as required by Radix Dialog (used by Sheet) */}
                   <SheetTitle className="sr-only">תפריט ניווט נייד</SheetTitle>
                   <div className="p-4 border-b">
                     <AppLogo />
                   </div>
-                  <AdminSidebarNav isMobile={true} />
+                  <AdminSidebarNav isMobile={true} onMobileLinkClick={() => setOpenMobile(false)} />
                 </SheetContent>
               </Sheet>
           </div>
