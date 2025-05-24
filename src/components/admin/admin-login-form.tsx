@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { AppLogo } from '../shared/app-logo';
 import { KeyRound, User } from 'lucide-react';
-import { placeholderAdminUsers } from '@/lib/placeholder-data';
+import { getAdminUserByUsername, verifyAdminPassword } from '@/services/admin-user-service';
 import type { AdminUser } from '@/lib/types';
 
 const loginFormSchema = z.object({
@@ -35,26 +35,35 @@ export function AdminLoginForm() {
   });
 
   const onSubmit = async (data: LoginFormValues) => {
-    console.log('Admin login attempt:', data); // For debugging in browser console
+    console.log('Admin login attempt with username:', data.username); 
+    form.formState.isSubmitting = true;
     try {
-      const foundUser = placeholderAdminUsers.find(
-        (user) => user.username === data.username && user.passwordHash === data.password
-      );
+      const foundUser = await getAdminUserByUsername(data.username);
 
       if (foundUser) {
-        const loggedInUserDetails = {
-          id: foundUser.id,
-          username: foundUser.username,
-          isSuperAdmin: foundUser.isSuperAdmin,
-          displayName: foundUser.displayName || foundUser.username,
-        };
-        localStorage.setItem('loggedInKviskalAdmin', JSON.stringify(loggedInUserDetails));
+        const isPasswordCorrect = await verifyAdminPassword(foundUser, data.password);
+        if (isPasswordCorrect) {
+          const loggedInUserDetails = {
+            id: foundUser.id,
+            username: foundUser.username,
+            isSuperAdmin: foundUser.isSuperAdmin,
+            displayName: foundUser.displayName || foundUser.username,
+          };
+          localStorage.setItem('loggedInKviskalAdmin', JSON.stringify(loggedInUserDetails));
 
-        toast({
-          title: 'התחברות מוצלחת',
-          description: `ברוך הבא, ${foundUser.displayName || foundUser.username}!`,
-        });
-        router.push('/admin/dashboard');
+          toast({
+            title: 'התחברות מוצלחת',
+            description: `ברוך הבא, ${foundUser.displayName || foundUser.username}!`,
+          });
+          router.push('/admin/dashboard');
+        } else {
+          toast({
+            variant: 'destructive',
+            title: 'שגיאת התחברות',
+            description: 'שם משתמש או סיסמה שגויים. אנא נסה שנית.',
+          });
+          form.resetField("password");
+        }
       } else {
         toast({
           variant: 'destructive',
@@ -70,6 +79,8 @@ export function AdminLoginForm() {
         title: 'שגיאה בתהליך ההתחברות',
         description: 'אירעה שגיאה לא צפויה. אנא נסה שוב מאוחר יותר או פנה לתמיכה.',
       });
+    } finally {
+      form.formState.isSubmitting = false;
     }
   };
 
@@ -93,7 +104,7 @@ export function AdminLoginForm() {
                     <FormControl>
                       <div className="relative">
                         <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input placeholder="לדוגמה: superadmin" {...field} className="pl-10" />
+                        <Input placeholder="הזן שם משתמש" {...field} className="pl-10" />
                       </div>
                     </FormControl>
                     <FormMessage />

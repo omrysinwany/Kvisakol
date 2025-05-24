@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -15,36 +16,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useToast } from '@/hooks/use-toast';
+// useToast removed as it's handled by the parent page (AdminProductsPage)
 
 interface ProductTableProps {
   products: Product[];
-  onDeleteProduct: (productId: string) => void; // Placeholder for delete action
-  onToggleActive: (productId: string, isActive: boolean) => void; // Placeholder for toggle active
+  onDeleteProduct: (productId: string, productName: string) => void;
+  onToggleActive: (productId: string, productName: string, currentStatus: boolean) => void;
 }
 
 export function ProductTable({ products, onDeleteProduct, onToggleActive }: ProductTableProps) {
-  const { toast } = useToast();
-
-  const handleDelete = (productId: string, productName: string) => {
-    // Confirm deletion
-    if (window.confirm(`האם אתה בטוח שברצונך למחוק את המוצר "${productName}"?`)) {
-      onDeleteProduct(productId);
-      toast({
-        title: "מוצר נמחק",
-        description: `המוצר "${productName}" נמחק בהצלחה.`,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleToggleActive = (productId: string, productName: string, currentStatus: boolean) => {
-    onToggleActive(productId, !currentStatus);
-    toast({
-        title: "סטטוס מוצר עודכן",
-        description: `המוצר "${productName}" כעת ${!currentStatus ? "פעיל" : "לא פעיל"}.`,
-      });
-  }
 
   const formatPrice = (price: number) => {
     return `₪${price.toFixed(2)}`;
@@ -102,12 +82,12 @@ export function ProductTable({ products, onDeleteProduct, onToggleActive }: Prod
                       ערוך מוצר
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleToggleActive(product.id, product.name, product.isActive)} className="flex items-center gap-2 cursor-pointer">
+                  <DropdownMenuItem onClick={() => onToggleActive(product.id, product.name, product.isActive)} className="flex items-center gap-2 cursor-pointer">
                     {product.isActive ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     {product.isActive ? 'הפוך ללא פעיל' : 'הפוך לפעיל'}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleDelete(product.id, product.name)} className="text-destructive flex items-center gap-2 cursor-pointer">
+                  <DropdownMenuItem onClick={() => onDeleteProduct(product.id, product.name)} className="text-destructive flex items-center gap-2 cursor-pointer">
                     <Trash2 className="h-4 w-4" />
                     מחק מוצר
                   </DropdownMenuItem>

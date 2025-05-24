@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,6 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { useCart } from '@/contexts/cart-context';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { createOrderService } from '@/services/order-service';
+import type { OrderItem } from '@/lib/types';
 
 const orderFormSchema = z.object({
   customerName: z.string().min(2, { message: 'שם חייב להכיל לפחות 2 תווים.' }),
@@ -37,29 +40,48 @@ export function OrderForm() {
   });
 
   const onSubmit = async (data: OrderFormValues) => {
-    // In a real app, this would send data to a server action / API endpoint
-    // which then saves to Firebase Firestore.
-    console.log('Order submitted:', { ...data, items: cartItems, totalAmount: totalPrice });
-    
-    // Simulate order creation and get an ID
-    const mockOrderId = `KV-${Date.now().toString().slice(-6)}`;
+    form.formState.isSubmitting = true;
+    try {
+      const orderItems: OrderItem[] = cartItems.map(item => ({
+        productId: item.id,
+        productName: item.name,
+        quantity: item.quantity,
+        priceAtOrder: item.price,
+      }));
 
-    toast({
-      title: "הזמנה נשלחה בהצלחה!",
-      description: `תודה רבה, ${data.customerName}. הזמנתך התקבלה ומספרה ${mockOrderId}. הסוכן ייצור עמך קשר בהקדם.`,
-      duration: 5000,
-    });
-    
-    clearCart();
-    router.push(`/order-confirmation/${mockOrderId}`);
+      const createdOrder = await createOrderService({
+        ...data,
+        items: orderItems,
+        totalAmount: totalPrice,
+      });
+
+      toast({
+        title: "הזמנה נשלחה בהצלחה!",
+        description: `תודה רבה, ${data.customerName}. הזמנתך התקבלה ומספרה ${createdOrder.id}. הסוכן ייצור עמך קשר בהקדם.`,
+        duration: 5000,
+      });
+      
+      clearCart();
+      router.push(`/order-confirmation/${createdOrder.id}`);
+
+    } catch (error) {
+      console.error('Failed to submit order:', error);
+      toast({
+        variant: 'destructive',
+        title: 'שגיאה בשליחת ההזמנה',
+        description: 'אירעה שגיאה לא צפויה. אנא נסה שוב מאוחר יותר או פנה לתמיכה.',
+      });
+    } finally {
+      form.formState.isSubmitting = false;
+    }
   };
   
   const formatPrice = (price: number) => {
     return `₪${price.toFixed(2)}`;
   }
 
-  if (cartItems.length === 0) {
-    router.push('/cart'); // Redirect if cart is empty
+  if (cartItems.length === 0 && typeof window !== 'undefined') { // Ensure router.push only runs client-side
+    router.push('/cart'); 
     return null;
   }
 
@@ -124,7 +146,7 @@ export function OrderForm() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" size="lg" className="w-full" disabled={form.formState.isSubmitting}>
+              <Button type="submit" size="lg" className="w-full" disabled={form.formState.isSubmitting || cartItems.length === 0}>
                 {form.formState.isSubmitting ? 'שולח הזמנה...' : 'שלח הזמנה לסוכן'}
               </Button>
             </form>

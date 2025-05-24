@@ -1,16 +1,12 @@
-'use client'; // Required for useParams
+
+'use client'; 
 
 import { ProductForm } from '@/components/admin/product-form';
-import { placeholderProducts } from '@/lib/placeholder-data';
+import { getProductById, updateProductService } from '@/services/product-service';
 import type { Product } from '@/lib/types';
-import { useParams, useRouter } from 'next/navigation'; // Changed from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-
-// Simulate fetching a product by ID
-async function getProductById(productId: string): Promise<Product | null> {
-  return placeholderProducts.find(p => p.id === productId) || null;
-}
 
 export default function EditProductPage() {
   const params = useParams();
@@ -23,8 +19,10 @@ export default function EditProductPage() {
 
   useEffect(() => {
     if (productId) {
-      getProductById(productId)
-        .then(product => {
+      const fetchProduct = async () => {
+        setIsLoading(true);
+        try {
+          const product = await getProductById(productId);
           if (product) {
             setInitialData(product);
           } else {
@@ -32,25 +30,45 @@ export default function EditProductPage() {
             toast({ variant: 'destructive', title: 'שגיאה', description: 'המוצר המבוקש לא נמצא.' });
             router.push('/admin/products');
           }
-        })
-        .catch(err => {
+        } catch (err) {
           console.error("Failed to fetch product:", err);
           setError('שגיאה בטעינת המוצר.');
           toast({ variant: 'destructive', title: 'שגיאה', description: 'אירעה שגיאה בטעינת המוצר.' });
-        })
-        .finally(() => setIsLoading(false));
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchProduct();
     }
   }, [productId, router, toast]);
 
-  const handleSubmitSuccess = (product: Product) => {
-    console.log("Product updated (client-side simulation):", product);
-    // In a real app, this would call a server action to update in Firebase.
-    // Navigation is handled inside ProductForm or here if needed.
-    toast({
-      title: 'מוצר עודכן!',
-      description: `המוצר "${product.name}" עודכן בהצלחה.`,
-    });
-    router.push('/admin/products');
+  const handleSubmitSuccess = async (updatedProductData: Product) => {
+    // The ProductForm might pass the full product object, but we only need to send changed fields ideally.
+    // For simplicity with placeholder data, we'll pass essential fields for update.
+    try {
+      const productToUpdate: Partial<Omit<Product, 'id'>> = {
+        name: updatedProductData.name,
+        description: updatedProductData.description,
+        price: updatedProductData.price,
+        category: updatedProductData.category,
+        isActive: updatedProductData.isActive,
+        imageUrl: updatedProductData.imageUrl,
+        // dataAiHint is usually not updated by form
+      };
+      const updatedProduct = await updateProductService(updatedProductData.id, productToUpdate);
+      if (updatedProduct) {
+        toast({
+          title: 'מוצר עודכן!',
+          description: `המוצר "${updatedProduct.name}" עודכן בהצלחה.`,
+        });
+        router.push('/admin/products');
+      } else {
+         toast({ variant: 'destructive', title: 'שגיאה', description: 'לא ניתן היה לעדכן את המוצר.' });
+      }
+    } catch (error) {
+        console.error("Failed to update product:", error);
+        toast({ variant: 'destructive', title: 'שגיאה', description: 'אירעה שגיאה בעדכון המוצר.' });
+    }
   };
   
   if (isLoading) {
@@ -62,7 +80,6 @@ export default function EditProductPage() {
   }
 
   if (!initialData) {
-     // Should be caught by error state, but as a fallback
     return <div className="container mx-auto px-4 py-8"><p>לא ניתן לטעון את המוצר.</p></div>;
   }
 

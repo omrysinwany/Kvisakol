@@ -1,37 +1,75 @@
-'use client'; // Required for useState, useEffect, event handlers
+
+'use client'; 
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProductTable } from '@/components/admin/product-table';
-import { placeholderProducts } from '@/lib/placeholder-data';
+import { getAllProductsForAdmin, deleteProductService, toggleProductActiveStatusService } from '@/services/product-service';
 import type { Product } from '@/lib/types';
 import { PlusCircle } from 'lucide-react';
-
-// Simulate API calls or state management for product data
-// In a real app, these would interact with Firebase/backend
+import { useToast } from '@/hooks/use-toast';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
-    // Simulate fetching products
-    setProducts(placeholderProducts);
-    setIsLoading(false);
-  }, []);
+    const fetchProducts = async () => {
+      setIsLoading(true);
+      try {
+        const fetchedProducts = await getAllProductsForAdmin();
+        setProducts(fetchedProducts);
+      } catch (error) {
+        console.error("Failed to fetch products for admin:", error);
+        toast({ variant: "destructive", title: "שגיאה", description: "לא ניתן היה לטעון את רשימת המוצרים."});
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProducts();
+  }, [toast]);
 
-  const handleDeleteProduct = (productId: string) => {
-    setProducts(prevProducts => prevProducts.filter(p => p.id !== productId));
-    // Here you would also call your backend to delete the product
+  const handleDeleteProduct = async (productId: string, productName: string) => {
+     if (window.confirm(`האם אתה בטוח שברצונך למחוק את המוצר "${productName}"?`)) {
+        try {
+            const success = await deleteProductService(productId);
+            if (success) {
+                setProducts(prevProducts => prevProducts.filter(p => p.id !== productId));
+                toast({
+                    title: "מוצר נמחק",
+                    description: `המוצר "${productName}" נמחק בהצלחה.`,
+                });
+            } else {
+                 toast({ variant: "destructive", title: "שגיאה", description: "לא ניתן היה למחוק את המוצר."});
+            }
+        } catch (error) {
+            console.error("Failed to delete product:", error);
+            toast({ variant: "destructive", title: "שגיאה", description: "אירעה תקלה במחיקת המוצר."});
+        }
+     }
   };
 
-  const handleToggleActive = (productId: string, isActive: boolean) => {
-    setProducts(prevProducts => 
-      prevProducts.map(p => p.id === productId ? { ...p, isActive } : p)
-    );
-    // Here you would also call your backend to update the product's active status
+  const handleToggleActive = async (productId: string, productName: string, currentIsActive: boolean) => {
+    try {
+        const updatedProduct = await toggleProductActiveStatusService(productId, !currentIsActive);
+        if (updatedProduct) {
+            setProducts(prevProducts => 
+              prevProducts.map(p => p.id === productId ? { ...p, isActive: updatedProduct.isActive } : p)
+            );
+            toast({
+                title: "סטטוס מוצר עודכן",
+                description: `המוצר "${productName}" כעת ${updatedProduct.isActive ? "פעיל" : "לא פעיל"}.`,
+            });
+        } else {
+            toast({ variant: "destructive", title: "שגיאה", description: "לא ניתן היה לעדכן את סטטוס המוצר."});
+        }
+    } catch (error) {
+        console.error("Failed to toggle product active status:", error);
+        toast({ variant: "destructive", title: "שגיאה", description: "אירעה תקלה בעדכון סטטוס המוצר."});
+    }
   };
   
   if (isLoading) {

@@ -1,16 +1,14 @@
-'use client'; // Required for useState, useEffect, event handlers
+
+'use client';
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { OrderTable } from '@/components/admin/order-table';
-import { placeholderOrders } from '@/lib/placeholder-data';
+import { getOrdersForAdmin, updateOrderStatusService } from '@/services/order-service';
 import type { Order } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-// Simulate API calls or state management for order data
-// In a real app, these would interact with Firebase/backend
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -18,23 +16,39 @@ export default function AdminOrdersPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Simulate fetching orders, sort by newest first
-    const sortedOrders = [...placeholderOrders].sort((a, b) => 
-      new Date(b.orderTimestamp).getTime() - new Date(a.orderTimestamp).getTime()
-    );
-    setOrders(sortedOrders);
-    setIsLoading(false);
-  }, []);
+    const fetchOrders = async () => {
+      setIsLoading(true);
+      try {
+        const fetchedOrders = await getOrdersForAdmin();
+        setOrders(fetchedOrders);
+      } catch (error) {
+        console.error("Failed to fetch orders:", error);
+        toast({ variant: "destructive", title: "שגיאה", description: "לא ניתן היה לטעון את רשימת ההזמנות." });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchOrders();
+  }, [toast]);
 
-  const handleUpdateStatus = (orderId: string, newStatus: Order['status']) => {
-    setOrders(prevOrders =>
-      prevOrders.map(o => (o.id === orderId ? { ...o, status: newStatus } : o))
-    );
-    // Here you would also call your backend to update the order status
-    toast({
-      title: "סטטוס הזמנה עודכן",
-      description: `הסטטוס של הזמנה ${orderId.substring(orderId.length -6)} שונה ל: ${newStatus}.`,
-    });
+  const handleUpdateStatus = async (orderId: string, newStatus: Order['status']) => {
+    try {
+      const updatedOrder = await updateOrderStatusService(orderId, newStatus);
+      if (updatedOrder) {
+        setOrders(prevOrders =>
+          prevOrders.map(o => (o.id === orderId ? { ...o, status: newStatus } : o))
+        );
+        toast({
+          title: "סטטוס הזמנה עודכן",
+          description: `הסטטוס של הזמנה ${orderId.substring(orderId.length - 6)} שונה ל: ${newStatus}.`,
+        });
+      } else {
+        toast({ variant: "destructive", title: "שגיאה", description: "לא ניתן היה לעדכן את סטטוס ההזמנה." });
+      }
+    } catch (error) {
+      console.error("Failed to update order status:", error);
+      toast({ variant: "destructive", title: "שגיאה", description: "אירעה תקלה בעדכון סטטוס ההזמנה." });
+    }
   };
 
   if (isLoading) {

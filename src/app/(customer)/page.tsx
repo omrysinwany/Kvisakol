@@ -2,7 +2,7 @@
 'use client';
 
 import { ProductList } from '@/components/customer/product-list';
-import { placeholderProducts } from '@/lib/placeholder-data';
+import { getProductsForCatalog } from '@/services/product-service';
 import type { Product } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
@@ -10,13 +10,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { CategoryFilter } from '@/components/customer/category-filter';
 import { PaginationControls } from '@/components/customer/pagination-controls';
 
-const ITEMS_PER_PAGE = 10; // Changed from 5 to 10
-
-// Function to get products (simulated)
-async function getProducts(): Promise<Product[]> {
-  // In a real app, fetch from your backend/Firebase
-  return placeholderProducts.filter(p => p.isActive);
-}
+const ITEMS_PER_PAGE = 10;
 
 export default function CatalogPage() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -29,10 +23,16 @@ export default function CatalogPage() {
   useEffect(() => {
     const fetchProducts = async () => {
       setIsLoading(true);
-      const products = await getProducts();
-      setAllProducts(products);
-      setFilteredProducts(products);
-      setIsLoading(false);
+      try {
+        const products = await getProductsForCatalog();
+        setAllProducts(products);
+        setFilteredProducts(products); // Initially, all products are shown
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+        // Handle error appropriately, e.g., show a message to the user
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchProducts();
   }, []);
@@ -84,7 +84,6 @@ export default function CatalogPage() {
       </div>
     );
   }
-
 
   return (
     <div className="container mx-auto px-4 py-8">

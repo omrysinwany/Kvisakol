@@ -1,20 +1,15 @@
-'use client'; // Required for useParams, useState, useEffect
+
+'use client'; 
 
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { OrderDetailView } from '@/components/admin/order-detail-view';
-import { placeholderOrders } from '@/lib/placeholder-data';
+import { getOrderByIdForAdmin, updateOrderStatusService } from '@/services/order-service';
 import type { Order } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
-
-
-// Simulate fetching an order by ID
-async function getOrderById(orderId: string): Promise<Order | null> {
-  return placeholderOrders.find(o => o.id === orderId) || null;
-}
 
 export default function AdminOrderDetailPage() {
   const params = useParams();
@@ -28,8 +23,10 @@ export default function AdminOrderDetailPage() {
 
   useEffect(() => {
     if (orderId) {
-      getOrderById(orderId)
-        .then(fetchedOrder => {
+      const fetchOrder = async () => {
+        setIsLoading(true);
+        try {
+          const fetchedOrder = await getOrderByIdForAdmin(orderId);
           if (fetchedOrder) {
             setOrder(fetchedOrder);
           } else {
@@ -37,25 +34,36 @@ export default function AdminOrderDetailPage() {
             toast({ variant: 'destructive', title: 'שגיאה', description: 'ההזמנה המבוקשת לא נמצאה.' });
             // router.push('/admin/orders'); // Optional: redirect if not found
           }
-        })
-        .catch(err => {
+        } catch (err) {
           console.error("Failed to fetch order:", err);
           setError('שגיאה בטעינת ההזמנה.');
-           toast({ variant: 'destructive', title: 'שגיאה', description: 'אירעה שגיאה בטעינת ההזמנה.' });
-        })
-        .finally(() => setIsLoading(false));
+          toast({ variant: 'destructive', title: 'שגיאה', description: 'אירעה שגיאה בטעינת ההזמנה.' });
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchOrder();
     }
   }, [orderId, router, toast]);
 
-  const handleUpdateStatus = (updatedOrderId: string, newStatus: Order['status']) => {
-    if (order && order.id === updatedOrderId) {
-      setOrder({ ...order, status: newStatus });
+  const handleUpdateStatus = async (updatedOrderId: string, newStatus: Order['status']) => {
+    try {
+      const updatedOrder = await updateOrderStatusService(updatedOrderId, newStatus);
+      if (updatedOrder) {
+        if (order && order.id === updatedOrderId) {
+          setOrder({ ...order, status: newStatus });
+        }
+        toast({
+          title: "סטטוס הזמנה עודכן",
+          description: `הסטטוס של הזמנה ${updatedOrderId.substring(updatedOrderId.length -6)} שונה ל: ${newStatus}.`,
+        });
+      } else {
+        toast({ variant: 'destructive', title: 'שגיאה', description: 'לא ניתן היה לעדכן את סטטוס ההזמנה.' });
+      }
+    } catch (error) {
+      console.error("Failed to update order status:", error);
+      toast({ variant: 'destructive', title: 'שגיאה', description: 'אירעה תקלה בעדכון סטטוס ההזמנה.' });
     }
-    // In a real app, this would also trigger a backend update
-    toast({
-      title: "סטטוס הזמנה עודכן",
-      description: `הסטטוס של הזמנה ${updatedOrderId.substring(updatedOrderId.length -6)} שונה ל: ${newStatus}.`,
-    });
   };
 
   if (isLoading) {
@@ -79,7 +87,6 @@ export default function AdminOrderDetailPage() {
   }
 
   if (!order) {
-    // Should be caught by error state, but as a fallback
     return <div className="container mx-auto px-4 py-8"><p>לא ניתן לטעון את ההזמנה.</p></div>;
   }
 
