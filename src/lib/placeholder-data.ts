@@ -114,7 +114,7 @@ export const placeholderProducts: Product[] = [
     isActive: true,
   },
 
-  // קטגוריות נוספות (למעט מבשמים שיעודכנו למטה)
+  // קטגוריות נוספות
   {
     id: 'kcat1',
     name: 'מארז כביסה משתלם "כביסכל הכל כלול"',
@@ -135,16 +135,79 @@ export const placeholderProducts: Product[] = [
     category: 'מגבונים',
     isActive: true,
   },
+
+  // מוצרי ניקוי מקצועיים
   {
-    id: 'kcat4',
-    name: 'נוזל ניקוי רב תכליתי מקצועי',
-    description: 'תרכיז נוזל ניקוי מקצועי למגוון שימושים בבית ובעסק.',
-    price: 55.00,
+    id: 'kprof1',
+    name: 'נוזל אורנים',
+    description: 'נוזל ניקוי בניחוח אורנים מרענן.',
+    price: 19.90,
     imageUrl: 'https://placehold.co/600x400.png',
-    dataAiHint: 'pro cleaner',
+    dataAiHint: 'pine cleaner',
     category: 'מוצרי ניקוי מקצועיים',
     isActive: true,
   },
+  {
+    id: 'kprof2',
+    name: 'מנקה ומבריק שמשות ומשטחי זכוכית',
+    description: 'מנקה ביעילות ומבריק משטחי זכוכית ושמשות ללא סימנים.',
+    price: 25.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'glass cleaner',
+    category: 'מוצרי ניקוי מקצועיים',
+    isActive: true,
+  },
+  {
+    id: 'kprof3',
+    name: 'ניקוי והיגיינה למכונות כביסה',
+    description: 'מנקה את מכונת הכביסה, מסיר אבנית ושומר על היגיינה.',
+    price: 45.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'washing machine cleaner',
+    category: 'מוצרי ניקוי מקצועיים',
+    isActive: true,
+  },
+  {
+    id: 'kprof4',
+    name: 'חזק נגד שומנים קשים',
+    description: 'מסיר שומנים עוצמתי לניקוי תנורים, כיריים ומשטחים עם שומן קשה.',
+    price: 45.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'grease remover',
+    category: 'מוצרי ניקוי מקצועיים',
+    isActive: true,
+  },
+  {
+    id: 'kprof5',
+    name: 'מסיר אבנית חלודה ולכלוך קשה',
+    description: 'מסיר ביעילות אבנית, חלודה ולכלוך קשה מכלים סניטריים ומשטחים.',
+    price: 45.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'limescale remover',
+    category: 'מוצרי ניקוי מקצועיים',
+    isActive: true,
+  },
+  {
+    id: 'kprof6',
+    name: 'מנקה, מבריק משטחים , רהיטים ומשטחי פורמייקה',
+    description: 'נוזל לניקוי והברקת משטחים, רהיטים ופורמייקה.',
+    price: 35.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'surface cleaner',
+    category: 'מוצרי ניקוי מקצועיים',
+    isActive: true,
+  },
+  {
+    id: 'kprof7',
+    name: 'מסיר כתמים לפני כביסה',
+    description: 'תרסיס להסרת כתמים יעילה לפני הכנסת הבגד למכונת הכביסה.',
+    price: 40.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'stain remover',
+    category: 'מוצרי ניקוי מקצועיים',
+    isActive: true,
+  },
+
   {
     id: 'kcat5',
     name: 'מפיץ ריח אוטומטי "לבנדר"',
@@ -478,11 +541,12 @@ export const placeholderOrders: Order[] = [
     customerPhone: '054-1122333',
     customerAddress: 'דרך השלום 10, חיפה',
     items: [
-      { productId: 'kcat7', productName: 'נוזל כביסה קלאסי "כביסכל"', quantity: 1, priceAtOrder: 35.00 },
+      { productId: 'kprof1', productName: 'נוזל אורנים', quantity: 1, priceAtOrder: 19.90 },
       { productId: 'kcat8', productName: 'נוזל כלים "לימון וג\'ינג\'ר"', quantity: 2, priceAtOrder: 18.00 },
     ],
-    totalAmount: 35.00 + (18.00 * 2),
+    totalAmount: 19.90 + (18.00 * 2),
     orderTimestamp: new Date(), // Today
     status: 'completed',
   },
 ];
+
