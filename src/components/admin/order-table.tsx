@@ -67,7 +67,7 @@ export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
   }
 
   return (
-    <Table>
+    <Table className="text-xs">
       <TableHeader>
         <TableRow>
           <TableHead>מספר הזמנה</TableHead>
@@ -86,7 +86,6 @@ export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
           return (
           <TableRow key={order.id} className={order.status === 'new' && !order.isViewedByAgent ? 'bg-primary/5' : ''}>
             <TableCell className="font-medium">
-              {/* Hourglass icon removed from here */}
               <Link href={`/admin/orders/${order.id}`} className="hover:underline text-primary">
                 #{order.id.substring(order.id.length - 6)}
               </Link>
@@ -147,4 +146,3 @@ export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
     </Table>
   );
 }
-

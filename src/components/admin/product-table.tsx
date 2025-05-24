@@ -31,7 +31,7 @@ export function ProductTable({ products, onDeleteProduct, onToggleActive }: Prod
   }
 
   return (
-    <Table>
+    <Table className="text-xs">
       <TableHeader>
         <TableRow>
           <TableHead className="hidden w-[100px] sm:table-cell">תמונה</TableHead>

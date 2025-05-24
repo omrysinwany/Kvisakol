@@ -145,7 +145,7 @@ export default function AdminProductsPage() {
         <CardHeader>
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <div>
-              <CardTitle>רשימת מוצרים</CardTitle>
+              <CardTitle className="text-xl">רשימת מוצרים</CardTitle>
               <CardDescription>
                 נהל את כל המוצרים בקטלוג שלך.
               </CardDescription>

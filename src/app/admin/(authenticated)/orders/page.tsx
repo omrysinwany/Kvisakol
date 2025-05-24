@@ -193,7 +193,7 @@ export default function AdminOrdersPage() {
       <Card className="shadow-lg">
         <CardHeader className="flex flex-row items-center justify-between space-x-2">
           <div>
-            <CardTitle>רשימת הזמנות ({filteredOrders.length})</CardTitle>
+            <CardTitle className="text-xl">רשימת הזמנות ({filteredOrders.length})</CardTitle>
             <CardDescription>
               נהל את כל ההזמנות שהתקבלו מלקוחות. עקוב אחר סטטוסים ופרטי הזמנות.
             </CardDescription>
