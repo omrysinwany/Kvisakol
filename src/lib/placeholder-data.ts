@@ -6,17 +6,10 @@ import type { Product, Order, AdminUser } from './types';
 export const placeholderAdminUsers: AdminUser[] = [
   {
     id: 'su1',
-    username: 'superadmin',
-    passwordHash: 'superpassword', // Plain text for demo. Should be hashed.
+    username: 'kviskaladmin', // שם משתמש פשוט וברור
+    passwordHash: 'adminpass123', // סיסמה פשוטה לדוגמה. במערכת אמיתית יש להשתמש ב-hash.
     isSuperAdmin: true,
-    displayName: 'מנהל ראשי',
-  },
-  {
-    id: 'agent1',
-    username: 'agentk',
-    passwordHash: 'agentpass', // Plain text for demo. Should be hashed.
-    isSuperAdmin: false,
-    displayName: 'סוכן כביסכל',
+    displayName: 'מנהל כביסכל',
   },
 ];
 
@@ -1043,3 +1036,4 @@ export const placeholderOrders: Order[] = [
     status: 'completed',
   },
 ];
+
