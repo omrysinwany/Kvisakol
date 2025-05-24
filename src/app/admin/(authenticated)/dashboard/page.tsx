@@ -2,16 +2,20 @@
 'use client';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { getAllProductsForAdmin } from "@/services/product-service";
 import { getOrdersForAdmin } from "@/services/order-service";
 import type { Product, Order } from "@/lib/types";
-import { DollarSign, Package, ShoppingCart, Activity, ClipboardCheck, Eye, Users, CalendarDays, CalendarCheck } from "lucide-react";
+import { DollarSign, Package, ShoppingCart, Activity, ClipboardCheck, Eye, Users, CalendarDays, CalendarCheck, CalendarIcon, X } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { format, isToday, isWithinInterval, startOfWeek, endOfWeek, subDays } from 'date-fns';
+import { format, isToday, isWithinInterval, startOfWeek, endOfWeek, subDays, startOfMonth, endOfMonth, startOfDay, endOfDay } from 'date-fns';
 import { he } from 'date-fns/locale';
+import { cn } from "@/lib/utils";
 
 
 const statusTranslationsForDashboard: Record<Order['status'], string> = {
@@ -33,16 +37,24 @@ interface DashboardSummary {
   totalOrders: number;
   newOrdersUnviewed: number;
   receivedOrders: number;
-  totalRevenue: number;
+  allTimeRevenue: number; // Renamed from totalRevenue for clarity
   latestOrders: Order[];
   ordersToday: number;
   ordersThisWeek: number;
 }
 
+type RevenuePeriod = 'allTime' | 'today' | 'thisWeek' | 'thisMonth' | 'custom';
+
 export default function AdminDashboardPage() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const [allOrders, setAllOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+
+  const [selectedRevenuePeriod, setSelectedRevenuePeriod] = useState<RevenuePeriod>('allTime');
+  const [customRevenueStartDate, setCustomRevenueStartDate] = useState<Date | undefined>();
+  const [customRevenueEndDate, setCustomRevenueEndDate] = useState<Date | undefined>();
+  const [filteredRevenue, setFilteredRevenue] = useState<number>(0);
 
   useEffect(() => {
     async function fetchDashboardData() {
@@ -52,6 +64,7 @@ export default function AdminDashboardPage() {
           getAllProductsForAdmin(),
           getOrdersForAdmin()
         ]);
+        setAllOrders(orders);
 
         const totalProducts = products.filter(p => p.isActive).length;
         const totalOrders = orders.length;
@@ -59,13 +72,13 @@ export default function AdminDashboardPage() {
         const receivedOrdersCount = orders.filter(o => o.status === 'received').length;
         
         const ordersTodayCount = orders.filter(o => isToday(new Date(o.orderTimestamp))).length;
-        const sevenDaysAgo = subDays(new Date(), 6); // From today up to 6 days ago (inclusive of today makes 7 days)
+        const sevenDaysAgo = subDays(new Date(), 6); 
         const today = new Date();
         const ordersThisWeekCount = orders.filter(o => 
-            isWithinInterval(new Date(o.orderTimestamp), { start: sevenDaysAgo, end: today })
+            isWithinInterval(new Date(o.orderTimestamp), { start: startOfDay(sevenDaysAgo), end: endOfDay(today) })
         ).length;
         
-        const totalRevenue = orders
+        const allTimeRevenue = orders
           .filter(o => o.status === 'completed')
           .reduce((sum, order) => sum + order.totalAmount, 0);
 
@@ -76,7 +89,7 @@ export default function AdminDashboardPage() {
           totalOrders,
           newOrdersUnviewed: newOrdersUnviewedCount,
           receivedOrders: receivedOrdersCount,
-          totalRevenue,
+          allTimeRevenue,
           latestOrders,
           ordersToday: ordersTodayCount,
           ordersThisWeek: ordersThisWeekCount,
@@ -91,9 +104,64 @@ export default function AdminDashboardPage() {
     fetchDashboardData();
   }, [toast]);
 
+  useEffect(() => {
+    if (!allOrders.length && summary?.allTimeRevenue === undefined) {
+        setFilteredRevenue(0);
+        return;
+    }
+
+    let relevantOrders = allOrders.filter(o => o.status === 'completed');
+    const now = new Date();
+
+    switch (selectedRevenuePeriod) {
+        case 'today':
+            relevantOrders = relevantOrders.filter(o => isToday(new Date(o.orderTimestamp)));
+            break;
+        case 'thisWeek': 
+            const lastSevenDaysStart = startOfDay(subDays(now, 6));
+            relevantOrders = relevantOrders.filter(o => 
+                isWithinInterval(new Date(o.orderTimestamp), { start: lastSevenDaysStart, end: endOfDay(now) })
+            );
+            break;
+        case 'thisMonth':
+            relevantOrders = relevantOrders.filter(o => 
+                isWithinInterval(new Date(o.orderTimestamp), { start: startOfMonth(now), end: endOfMonth(now) })
+            );
+            break;
+        case 'custom':
+            if (customRevenueStartDate && customRevenueEndDate) {
+                relevantOrders = relevantOrders.filter(o => 
+                    isWithinInterval(new Date(o.orderTimestamp), { start: startOfDay(customRevenueStartDate), end: endOfDay(customRevenueEndDate) })
+                );
+            } else if (customRevenueStartDate) {
+                 relevantOrders = relevantOrders.filter(o => new Date(o.orderTimestamp) >= startOfDay(customRevenueStartDate));
+            } else if (customRevenueEndDate) {
+                 relevantOrders = relevantOrders.filter(o => new Date(o.orderTimestamp) <= endOfDay(customRevenueEndDate));
+            } else {
+                 relevantOrders = []; 
+            }
+            break;
+        case 'allTime':
+        default:
+            // No additional date filtering beyond 'completed' status - uses all completed orders
+            break;
+    }
+    const newFilteredRevenue = relevantOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+    setFilteredRevenue(newFilteredRevenue);
+
+}, [allOrders, selectedRevenuePeriod, customRevenueStartDate, customRevenueEndDate, summary]);
+
+
   const formatPrice = (price: number) => {
     return `₪${price.toFixed(2)}`;
   }
+
+  const handleClearCustomDates = () => {
+    setCustomRevenueStartDate(undefined);
+    setCustomRevenueEndDate(undefined);
+    // Optionally, switch back to 'allTime' or another default period
+    // setSelectedRevenuePeriod('allTime'); 
+  };
 
   if (isLoading) {
     return <div className="container mx-auto px-4 py-8"><p>טוען נתוני לוח בקרה...</p></div>;
@@ -116,13 +184,89 @@ export default function AdminDashboardPage() {
 
       <div className="grid grid-cols-2 gap-4">
         <Card className="col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">סה"כ הכנסות (שהושלמו)</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="pb-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center">
+                    <DollarSign className="h-5 w-5 text-muted-foreground ml-2" />
+                    <CardTitle className="text-lg font-semibold">
+                        הכנסות בתקופה הנבחרת
+                    </CardTitle>
+                </div>
+                <Tabs value={selectedRevenuePeriod} onValueChange={(value) => setSelectedRevenuePeriod(value as RevenuePeriod)} className="w-full sm:w-auto">
+                    <TabsList className="grid grid-cols-3 sm:grid-cols-5 h-auto sm:h-10 w-full">
+                        <TabsTrigger value="allTime" className="text-xs px-2 sm:px-3">כל הזמן</TabsTrigger>
+                        <TabsTrigger value="today" className="text-xs px-2 sm:px-3">היום</TabsTrigger>
+                        <TabsTrigger value="thisWeek" className="text-xs px-2 sm:px-3">שבוע</TabsTrigger>
+                        <TabsTrigger value="thisMonth" className="text-xs px-2 sm:px-3">חודש</TabsTrigger>
+                        <TabsTrigger value="custom" className="text-xs px-2 sm:px-3">מותאם</TabsTrigger>
+                    </TabsList>
+                </Tabs>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatPrice(summary.totalRevenue)}</div>
-            <p className="text-xs text-muted-foreground">מהזמנות שהושלמו</p>
+            {selectedRevenuePeriod === 'custom' && (
+              <div className="flex flex-col sm:flex-row gap-2 my-3 items-center p-2 border rounded-md bg-muted/30">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      size="sm"
+                      className={cn(
+                        "w-full sm:w-auto justify-start text-left font-normal text-xs flex-grow",
+                        !customRevenueStartDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-1 h-3.5 w-3.5" />
+                      {customRevenueStartDate ? format(customRevenueStartDate, "PPP", { locale: he }) : <span>מתאריך</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={customRevenueStartDate}
+                      onSelect={setCustomRevenueStartDate}
+                      initialFocus
+                      disabled={(date) => customRevenueEndDate ? date > customRevenueEndDate : false}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                       size="sm"
+                      className={cn(
+                        "w-full sm:w-auto justify-start text-left font-normal text-xs flex-grow",
+                        !customRevenueEndDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-1 h-3.5 w-3.5" />
+                      {customRevenueEndDate ? format(customRevenueEndDate, "PPP", { locale: he }) : <span>עד תאריך</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={customRevenueEndDate}
+                      onSelect={setCustomRevenueEndDate}
+                      initialFocus
+                      disabled={(date) => customRevenueStartDate ? date < customRevenueStartDate : false}
+                    />
+                  </PopoverContent>
+                </Popover>
+                {(customRevenueStartDate || customRevenueEndDate) && (
+                    <Button variant="ghost" size="icon" onClick={handleClearCustomDates} className="h-8 w-8">
+                        <X className="h-4 w-4" />
+                        <span className="sr-only">נקה תאריכים</span>
+                    </Button>
+                )}
+              </div>
+            )}
+            <div className="text-3xl font-bold mt-1">{formatPrice(filteredRevenue)}</div>
+            <p className="text-xs text-muted-foreground">
+                סה"כ מהזמנות <span className="font-medium">שהושלמו</span> בתקופה שנבחרה.
+                {selectedRevenuePeriod !== 'allTime' && ` (הכנסות כל הזמן: ${formatPrice(summary.allTimeRevenue)})`}
+            </p>
           </CardContent>
         </Card>
 
