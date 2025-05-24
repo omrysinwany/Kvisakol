@@ -125,16 +125,6 @@ export const placeholderProducts: Product[] = [
     category: 'חבילות',
     isActive: true,
   },
-  {
-    id: 'kcat3',
-    name: 'מגבונים לחים לניקוי כללי',
-    description: 'מארז 100 מגבונים לחים לניקוי משטחים.',
-    price: 15.00,
-    imageUrl: 'https://placehold.co/600x400.png',
-    dataAiHint: 'cleaning wipes',
-    category: 'מגבונים',
-    isActive: true,
-  },
 
   // מוצרי ניקוי מקצועיים
   {
@@ -259,8 +249,7 @@ export const placeholderProducts: Product[] = [
     isActive: false,
   },
 
-  // קטגוריית מבשמים - מעודכנת
-  // 750ml - 25.00 ILS
+  // קטגוריית מבשמים
   {
     id: 'kmb1',
     name: 'מבשם אלגנס 750 מ"ל',
@@ -411,8 +400,6 @@ export const placeholderProducts: Product[] = [
     category: 'מבשמים',
     isActive: true,
   },
-
-  // 350ml - קפסולרי מרוכז - 45.00 ILS
   {
     id: 'kmb16',
     name: 'BRONZE – מבשם קפסולרי מרוכז 350 מ"ל',
@@ -453,8 +440,6 @@ export const placeholderProducts: Product[] = [
     category: 'מבשמים',
     isActive: true,
   },
-
-  // 350ml - 16.00 ILS
   {
     id: 'kmb20',
     name: 'מבשם אוריינטל 350 מ"ל',
@@ -493,8 +478,9 @@ export const placeholderProducts: Product[] = [
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'boutique perfume small',
     category: 'מבשמים',
-    isActive: false, // Out of stock
+    isActive: false,
   },
+
   // פרפלור מבשמי רצפות
   {
     id: 'kpff1',
@@ -574,6 +560,108 @@ export const placeholderProducts: Product[] = [
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'floor freshener aromatic',
     category: 'פרפלור מבשמי רצפות',
+    isActive: true,
+  },
+
+  // מגבונים - קטגוריה חדשה
+  {
+    id: 'kwp1',
+    name: 'מגבונים רכים לתינוק בניחוח סופט קייר',
+    description: 'מגבונים עדינים במיוחד לתינוקות בניחוח סופט קייר.',
+    price: 5.90,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'baby wipes softcare',
+    category: 'מגבונים',
+    isActive: true,
+  },
+  {
+    id: 'kwp2',
+    name: 'מגבונים רכים לתינוק בניחוח בייבי',
+    description: 'מגבונים עדינים במיוחד לתינוקות בניחוח בייבי הקלאסי.',
+    price: 5.90,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'baby wipes classic',
+    category: 'מגבונים',
+    isActive: true,
+  },
+  {
+    id: 'kwp3',
+    name: 'מארז מגבונים לחים ארומטי לניקוי כללי',
+    description: 'מארז מגבונים לניקוי כללי בניחוח ארומטי מרענן.',
+    price: 22.90,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'cleaning wipes aromatic',
+    category: 'מגבונים',
+    isActive: true,
+  },
+  {
+    id: 'kwp4',
+    name: 'מארז מגבונים לחים בייבי לניקוי כללי',
+    description: 'מארז מגבונים לניקוי כללי בניחוח בייבי עדין.',
+    price: 22.90,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'cleaning wipes baby',
+    category: 'מגבונים',
+    isActive: true,
+  },
+  {
+    id: 'kwp5',
+    name: 'מארז מגבונים לחים ספא לניקוי כללי',
+    description: 'מארז מגבונים לניקוי כללי בניחוח ספא יוקרתי.',
+    price: 22.90,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'cleaning wipes spa',
+    category: 'מגבונים',
+    isActive: true,
+  },
+  {
+    id: 'kwp6',
+    name: 'מארז מגבונים לחים רוז לניקוי כללי',
+    description: 'מארז מגבונים לניקוי כללי בניחוח רוז קלאסי.',
+    price: 22.90,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'cleaning wipes rose',
+    category: 'מגבונים',
+    isActive: true,
+  },
+  {
+    id: 'kwp7',
+    name: 'דלי מגבונים לניקוי כללי בניחוח ארומטי',
+    description: 'דלי מגבונים (400 יח\') לניקוי כללי בניחוח ארומטי.',
+    price: 35.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'bucket wipes aromatic',
+    category: 'מגבונים',
+    isActive: true,
+  },
+  {
+    id: 'kwp8',
+    name: 'דלי מגבונים לניקוי כללי בניחוח ספא',
+    description: 'דלי מגבונים (400 יח\') לניקוי כללי בניחוח ספא.',
+    price: 35.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'bucket wipes spa',
+    category: 'מגבונים',
+    isActive: true,
+  },
+  {
+    id: 'kwp9',
+    name: 'דלי מגבונים לניקוי כללי בניחוח בייבי',
+    description: 'דלי מגבונים (400 יח\') לניקוי כללי בניחוח בייבי.',
+    price: 35.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'bucket wipes baby',
+    category: 'מגבונים',
+    isActive: true,
+  },
+  {
+    id: 'kwp10',
+    name: 'דלי מגבונים לניקוי כללי בניחוח רוז',
+    description: 'דלי מגבונים (400 יח\') לניקוי כללי בניחוח רוז.',
+    price: 35.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'bucket wipes rose',
+    category: 'מגבונים',
     isActive: true,
   },
 ];
