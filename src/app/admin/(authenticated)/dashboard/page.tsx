@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { getAllProductsForAdmin } from "@/services/product-service";
 import { getOrdersForAdmin } from "@/services/order-service";
 import type { Product, Order } from "@/lib/types";
-import { DollarSign, Package, ShoppingCart, Activity } from "lucide-react";
+import { DollarSign, Package, ShoppingCart, Activity, ClipboardCheck, Eye } from "lucide-react"; // Added ClipboardCheck, Eye
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -14,9 +14,10 @@ interface DashboardSummary {
   totalProducts: number;
   totalOrders: number;
   newOrders: number; // Strictly status 'new' (unviewed)
+  receivedOrders: number; // Status 'received' (viewed but not completed/cancelled)
   totalRevenue: number;
   latestOrders: Order[];
-  popularProducts: Product[]; 
+  // popularProducts: Product[]; // Removed as per request
 }
 
 export default function AdminDashboardPage() {
@@ -36,21 +37,21 @@ export default function AdminDashboardPage() {
         const totalProducts = products.filter(p => p.isActive).length;
         const totalOrders = orders.length;
         const newOrders = orders.filter(o => o.status === 'new').length;
+        const receivedOrders = orders.filter(o => o.status === 'received').length;
         const totalRevenue = orders
           .filter(o => o.status === 'completed') 
           .reduce((sum, order) => sum + order.totalAmount, 0);
         
-        // Get first 3 active products as "popular" for demo
-        const popularProducts = products.filter(p => p.isActive).slice(0, 3);
         const latestOrders = orders.slice(0, 5); // Already sorted by newest in service
 
         setSummary({
           totalProducts,
           totalOrders,
           newOrders,
+          receivedOrders,
           totalRevenue,
           latestOrders,
-          popularProducts
+          // popularProducts: [] // Removed
         });
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
@@ -85,8 +86,8 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4"> {/* Changed lg:grid-cols-4 to lg:grid-cols-2 */}
-        <Card className="md:col-span-2"> {/* This will make "Total Revenue" take full width */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="md:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">סה"כ הכנסות (שהושלמו)</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -104,7 +105,18 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{summary.newOrders}</div>
-            <p className="text-xs text-muted-foreground">מתוך {summary.totalOrders} הזמנות בסה"כ</p>
+            <p className="text-xs text-muted-foreground">ממתינות לצפייה ראשונית</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">הזמנות שהתקבלו (נצפו)</CardTitle>
+            <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{summary.receivedOrders}</div>
+            <p className="text-xs text-muted-foreground">ממתינות להמשך טיפול</p>
           </CardContent>
         </Card>
         
@@ -125,21 +137,20 @@ export default function AdminDashboardPage() {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {/* Calculate orders in the last 24 hours from latestOrders */}
             <div className="text-2xl font-bold">{summary.latestOrders.filter(o => new Date(o.orderTimestamp) > new Date(Date.now() - 24*60*60*1000)).length}</div> 
             <p className="text-xs text-muted-foreground">הזמנות ב-24 שעות אחרונות</p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid gap-6 mt-8 md:grid-cols-2">
+      <div className="mt-8 grid gap-6"> {/* Removed md:grid-cols-2 to make the single card full width by default */}
         <Card>
           <CardHeader>
             <CardTitle>הזמנות אחרונות</CardTitle>
             <CardDescription>סקירה מהירה של {summary.latestOrders.length > 0 ? Math.min(summary.latestOrders.length, 5) : '0'} ההזמנות האחרונות.</CardDescription>
           </CardHeader>
           <CardContent>
-            {summary.latestOrders.length > 0 ? summary.latestOrders.slice(0,5).map(order => ( // Ensure we only map up to 5
+            {summary.latestOrders.length > 0 ? summary.latestOrders.slice(0,5).map(order => (
               <div key={order.id} className="flex items-center justify-between py-2 border-b last:border-0">
                 <div>
                   <p className="font-medium">{order.customerName}</p>
@@ -157,23 +168,7 @@ export default function AdminDashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>מוצרים לדוגמה</CardTitle>
-            <CardDescription>מדגם של {summary.popularProducts.length > 0 ? Math.min(summary.popularProducts.length, 3) : '0'} מוצרים מהקטלוג.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {summary.popularProducts.length > 0 ? summary.popularProducts.slice(0,3).map(product => ( // Ensure we only map up to 3
-              <div key={product.id} className="flex items-center justify-between py-2 border-b last:border-0">
-                <p className="font-medium">{product.name}</p>
-                <p className="text-sm text-muted-foreground">{formatPrice(product.price)}</p>
-              </div>
-            )) : <p className="text-muted-foreground text-center">אין מוצרים להצגה.</p>}
-            <Button variant="outline" className="w-full mt-4" asChild>
-                <Link href="/admin/products">כל המוצרים</Link>
-            </Button>
-          </CardContent>
-        </Card>
+        {/* Removed "Popular Products" card section */}
       </div>
     </>
   );
