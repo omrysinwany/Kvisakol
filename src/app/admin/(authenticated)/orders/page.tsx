@@ -7,12 +7,11 @@ import { OrderTable } from '@/components/admin/order-table';
 import { getOrdersForAdmin, updateOrderStatusService } from '@/services/order-service';
 import type { Order } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Download, CalendarIcon, X, Filter } from 'lucide-react'; // Added Filter icon
+import { Download, CalendarIcon, X, Filter } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-// Label removed as per new compact design
 import { format, startOfDay, endOfDay } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { cn } from "@/lib/utils";
@@ -111,12 +110,8 @@ export default function AdminOrdersPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-2 mb-4">
+      <div className="mb-4"> {/* Removed flex and justify-between */}
         <h1 className="text-3xl font-bold tracking-tight">ניהול הזמנות</h1>
-        <Button variant="outline" className="w-full sm:w-auto" onClick={handleExportOrders}>
-            <Download className="ml-2 h-4 w-4" />
-            ייצא הזמנות (CSV)
-        </Button>
       </div>
 
       {/* Filter Section - Compact Design */}
@@ -125,8 +120,6 @@ export default function AdminOrdersPage() {
           {/* Status Filter */}
           <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilterValue)}>
             <SelectTrigger className="h-9 px-3 text-xs w-auto min-w-[130px]">
-              {/* SelectValue will render the selected item's text. Placeholder is for when value is undefined or not matching any item. */}
-              {/* Here, statusFilter always has a value from availableStatuses, so SelectValue will render it. */}
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -143,7 +136,7 @@ export default function AdminOrdersPage() {
               <PopoverTrigger asChild>
                   <Button
                   variant={"outline"}
-                  size="sm" // h-9
+                  size="sm" 
                   className={cn(
                       "h-9 px-3 text-xs w-auto min-w-[110px] justify-start text-left font-normal",
                       !startDate && "text-muted-foreground"
@@ -169,7 +162,7 @@ export default function AdminOrdersPage() {
               <PopoverTrigger asChild>
                   <Button
                   variant={"outline"}
-                  size="sm" // h-9
+                  size="sm" 
                   className={cn(
                       "h-9 px-3 text-xs w-auto min-w-[110px] justify-start text-left font-normal",
                       !endDate && "text-muted-foreground"
@@ -201,11 +194,17 @@ export default function AdminOrdersPage() {
       </div>
       
       <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle>רשימת הזמנות ({filteredOrders.length})</CardTitle>
-          <CardDescription>
-            נהל את כל ההזמנות שהתקבלו מלקוחות. עקוב אחר סטטוסים ופרטי הזמנות.
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between space-x-2">
+          <div>
+            <CardTitle>רשימת הזמנות ({filteredOrders.length})</CardTitle>
+            <CardDescription>
+              נהל את כל ההזמנות שהתקבלו מלקוחות. עקוב אחר סטטוסים ופרטי הזמנות.
+            </CardDescription>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleExportOrders}>
+              <Download className="ml-2 h-4 w-4" />
+              ייצא הזמנות (CSV)
+          </Button>
         </CardHeader>
         <CardContent>
           {filteredOrders.length > 0 ? (
@@ -222,3 +221,4 @@ export default function AdminOrdersPage() {
     </>
   );
 }
+
