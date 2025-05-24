@@ -53,25 +53,24 @@ export function ProductCard({ product }: ProductCardProps) {
           />
         </div>
       </CardHeader>
-      <CardContent className="p-4 flex-grow">
-        <CardTitle className="text-lg font-semibold mb-1">{product.name}</CardTitle>
-        {product.category && <Badge variant="secondary" className="mb-2">{product.category}</Badge>}
-        {/* Removed CardDescription here */}
+      <CardContent className="p-3 flex-grow">
+        <CardTitle className="text-base font-semibold mb-1">{product.name}</CardTitle>
+        {product.category && <Badge variant="secondary" className="mb-1 text-xs">{product.category}</Badge>}
       </CardContent>
-      <CardFooter className="p-4 flex flex-col sm:flex-row justify-between items-center gap-2 mt-auto">
-        <p className="text-xl font-bold text-primary">{formatPrice(product.price)}</p>
+      <CardFooter className="p-3 flex flex-col sm:flex-row justify-between items-center gap-1 mt-auto">
+        <p className="text-lg font-bold text-primary">{formatPrice(product.price)}</p>
         {quantityInCart === 0 ? (
-          <Button onClick={handleAddToCart} className="w-full sm:w-auto">
-            <ShoppingCartIcon className="ml-2 h-4 w-4" />
-            הוספה לעגלה
+          <Button onClick={handleAddToCart} className="w-full sm:w-auto" size="sm">
+            <ShoppingCartIcon className="ml-1.5 h-4 w-4" />
+            הוספה
           </Button>
         ) : (
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={handleDecreaseQuantity}>
+          <div className="flex items-center gap-1.5">
+            <Button variant="outline" size="icon" onClick={handleDecreaseQuantity} className="h-7 w-7">
               <MinusCircle className="h-4 w-4" />
             </Button>
-            <span className="w-8 text-center font-medium">{quantityInCart}</span>
-            <Button variant="outline" size="icon" onClick={handleIncreaseQuantity}>
+            <span className="w-6 text-center font-medium text-sm">{quantityInCart}</span>
+            <Button variant="outline" size="icon" onClick={handleIncreaseQuantity} className="h-7 w-7">
               <PlusCircle className="h-4 w-4" />
             </Button>
           </div>
