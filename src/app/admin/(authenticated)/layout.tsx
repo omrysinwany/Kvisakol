@@ -1,3 +1,4 @@
+
 import { AdminHeader } from '@/components/admin/admin-header';
 import { AdminSidebarNav } from '@/components/admin/admin-sidebar-nav';
 import { AppLogo } from '@/components/shared/app-logo';
@@ -26,7 +27,7 @@ export default function AdminAuthenticatedLayout({
           </div> */}
         </div>
       </aside>
-      <div className="flex flex-col">
+      <div className="flex flex-col overflow-x-hidden"> {/* Added overflow-x-hidden here */}
         <AdminHeader />
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-muted/20">
           {children}
