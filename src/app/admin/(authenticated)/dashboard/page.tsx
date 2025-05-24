@@ -40,8 +40,9 @@ export default function AdminDashboardPage() {
           .filter(o => o.status === 'completed') 
           .reduce((sum, order) => sum + order.totalAmount, 0);
         
-        const popularProducts = products.slice(0, 3);
-        const latestOrders = orders.slice(0, 5);
+        // Get first 3 active products as "popular" for demo
+        const popularProducts = products.filter(p => p.isActive).slice(0, 3);
+        const latestOrders = orders.slice(0, 5); // Already sorted by newest in service
 
         setSummary({
           totalProducts,
@@ -84,8 +85,8 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="md:col-span-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4"> {/* Changed lg:grid-cols-4 to lg:grid-cols-2 */}
+        <Card className="md:col-span-2"> {/* This will make "Total Revenue" take full width */}
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">סה"כ הכנסות (שהושלמו)</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -124,6 +125,7 @@ export default function AdminDashboardPage() {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
+            {/* Calculate orders in the last 24 hours from latestOrders */}
             <div className="text-2xl font-bold">{summary.latestOrders.filter(o => new Date(o.orderTimestamp) > new Date(Date.now() - 24*60*60*1000)).length}</div> 
             <p className="text-xs text-muted-foreground">הזמנות ב-24 שעות אחרונות</p>
           </CardContent>
@@ -134,10 +136,10 @@ export default function AdminDashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>הזמנות אחרונות</CardTitle>
-            <CardDescription>סקירה מהירה של {summary.latestOrders.length} ההזמנות האחרונות.</CardDescription>
+            <CardDescription>סקירה מהירה של {summary.latestOrders.length > 0 ? Math.min(summary.latestOrders.length, 5) : '0'} ההזמנות האחרונות.</CardDescription>
           </CardHeader>
           <CardContent>
-            {summary.latestOrders.length > 0 ? summary.latestOrders.map(order => (
+            {summary.latestOrders.length > 0 ? summary.latestOrders.slice(0,5).map(order => ( // Ensure we only map up to 5
               <div key={order.id} className="flex items-center justify-between py-2 border-b last:border-0">
                 <div>
                   <p className="font-medium">{order.customerName}</p>
@@ -158,10 +160,10 @@ export default function AdminDashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>מוצרים לדוגמה</CardTitle>
-            <CardDescription>מספר מוצרים מהקטלוג.</CardDescription>
+            <CardDescription>מדגם של {summary.popularProducts.length > 0 ? Math.min(summary.popularProducts.length, 3) : '0'} מוצרים מהקטלוג.</CardDescription>
           </CardHeader>
           <CardContent>
-            {summary.popularProducts.length > 0 ? summary.popularProducts.map(product => (
+            {summary.popularProducts.length > 0 ? summary.popularProducts.slice(0,3).map(product => ( // Ensure we only map up to 3
               <div key={product.id} className="flex items-center justify-between py-2 border-b last:border-0">
                 <p className="font-medium">{product.name}</p>
                 <p className="text-sm text-muted-foreground">{formatPrice(product.price)}</p>

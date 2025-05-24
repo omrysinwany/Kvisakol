@@ -76,6 +76,18 @@ export default function AdminOrdersPage() {
     return allOrders.filter(order => order.status === statusFilter);
   }, [allOrders, statusFilter]);
 
+  const handleExportOrders = () => {
+    // Placeholder for future CSV export functionality
+    toast({
+      title: "ייצוא הזמנות",
+      description: "פונקציונליות ייצוא ל-CSV תתווסף בעתיד.",
+    });
+    // In a real implementation, you would:
+    // 1. Fetch/filter the orders to export.
+    // 2. Convert the data to CSV format.
+    // 3. Trigger a download of the CSV file.
+  };
+
   if (isLoading) {
     return <div className="container mx-auto px-4 py-8"><p>טוען הזמנות...</p></div>;
   }
@@ -97,7 +109,7 @@ export default function AdminOrdersPage() {
               ))}
             </SelectContent>
           </Select>
-          <Button variant="outline" className="w-full sm:w-auto">
+          <Button variant="outline" className="w-full sm:w-auto" onClick={handleExportOrders}>
               <Download className="ml-2 h-4 w-4" />
               ייצא הזמנות (CSV)
           </Button>
@@ -125,4 +137,3 @@ export default function AdminOrdersPage() {
     </>
   );
 }
-
