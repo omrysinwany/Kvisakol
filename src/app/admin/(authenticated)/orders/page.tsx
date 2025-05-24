@@ -10,9 +10,11 @@ import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { usePathname } from 'next/navigation'; // Import usePathname
 
 type StatusFilterValue = Order['status'] | 'all';
 
+// Updated status translations to match the allowed statuses
 const statusTranslationsForFilter: Record<StatusFilterValue, string> = {
   all: 'כל הסטטוסים',
   new: 'חדשה',
@@ -21,12 +23,15 @@ const statusTranslationsForFilter: Record<StatusFilterValue, string> = {
   cancelled: 'בוטלה',
 };
 
+const availableStatuses: StatusFilterValue[] = ['all', 'new', 'received', 'completed', 'cancelled'];
+
 
 export default function AdminOrdersPage() {
   const [allOrders, setAllOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<StatusFilterValue>('all');
   const { toast } = useToast();
+  const pathname = usePathname(); // Get current pathname
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -42,7 +47,7 @@ export default function AdminOrdersPage() {
       }
     };
     fetchOrders();
-  }, [toast]);
+  }, [toast, pathname]); // Add pathname to dependency array
 
   const handleUpdateStatus = async (orderId: string, newStatus: Order['status']) => {
     try {
@@ -85,7 +90,7 @@ export default function AdminOrdersPage() {
               <SelectValue placeholder="סנן לפי סטטוס" />
             </SelectTrigger>
             <SelectContent>
-              {(['all', 'new', 'received', 'completed', 'cancelled'] as StatusFilterValue[]).map((statusKey) => (
+              {availableStatuses.map((statusKey) => (
                 <SelectItem key={statusKey} value={statusKey}>
                   {statusTranslationsForFilter[statusKey]}
                 </SelectItem>
