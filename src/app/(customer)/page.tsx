@@ -1,3 +1,4 @@
+
 'use client';
 
 import { ProductList } from '@/components/customer/product-list';
@@ -7,6 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
 import { CategoryFilter } from '@/components/customer/category-filter';
+import { PaginationControls } from '@/components/customer/pagination-controls';
+
+const ITEMS_PER_PAGE = 5;
 
 // Function to get products (simulated)
 async function getProducts(): Promise<Product[]> {
@@ -20,6 +24,7 @@ export default function CatalogPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -50,8 +55,8 @@ export default function CatalogPage() {
         (p.description && p.description.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
-
     setFilteredProducts(productsToFilter);
+    setCurrentPage(1); // Reset to first page on filter change
   }, [selectedCategory, searchTerm, allProducts]);
 
   const handleSelectCategory = (category: string | null) => {
@@ -61,6 +66,16 @@ export default function CatalogPage() {
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
   
   if (isLoading) {
     return (
@@ -101,8 +116,17 @@ export default function CatalogPage() {
         />
       )}
 
-      {filteredProducts.length > 0 ? (
-         <ProductList products={filteredProducts} />
+      {paginatedProducts.length > 0 ? (
+         <>
+            <ProductList products={paginatedProducts} />
+            {totalPages > 1 && (
+              <PaginationControls
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            )}
+         </>
       ): (
         <p className="text-center text-muted-foreground py-8">
           לא נמצאו מוצרים התואמים את בחירתך.
