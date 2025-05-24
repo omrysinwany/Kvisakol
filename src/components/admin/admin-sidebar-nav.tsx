@@ -32,26 +32,25 @@ export function AdminSidebarNav({
 }) {
   const pathname = usePathname();
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); // isLoading is true initially
 
   useEffect(() => {
-    // Ensure this runs only on client side
-    if (typeof window !== 'undefined') {
-      const storedUser = localStorage.getItem('loggedInKviskalAdmin');
-      if (storedUser) {
-        try {
-          const user = JSON.parse(storedUser);
-          setIsSuperAdmin(user?.isSuperAdmin === true);
-        } catch (error) {
-          console.error("Failed to parse user from localStorage for sidebar", error);
-        }
+    // This effect runs on the client after hydration
+    const storedUser = localStorage.getItem('loggedInKviskalAdmin');
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        setIsSuperAdmin(user?.isSuperAdmin === true);
+      } catch (error) {
+        console.error("Failed to parse user from localStorage for sidebar", error);
       }
-      setIsLoading(false);
     }
+    setIsLoading(false); // Set isLoading to false after checking localStorage
   }, []);
 
-  if (isLoading && typeof window !== 'undefined') {
-    // Optional: Show a loading state or skeleton for nav items
+  // If still loading (e.g. initial render before useEffect runs), show skeleton.
+  // This will render on both server and client initially if isLoading is true.
+  if (isLoading) {
     return (
       <nav className={cn("flex flex-col gap-1 p-4", isMobile ? "" : "lg:gap-2 lg:p-4")}>
         {[...Array(3)].map((_, i) => (
