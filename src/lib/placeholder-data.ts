@@ -2,7 +2,7 @@
 import type { Product, Order } from './types';
 
 export const placeholderProducts: Product[] = [
-  // מוצרי ה- Bio שלנו
+  // מוצרי ה- Bio שלנו - עכשיו תחת "נוזלי כביסה"
   {
     id: 'kbio1',
     name: 'כביסכל Bio אלגנס – 2 ליטר',
@@ -10,7 +10,7 @@ export const placeholderProducts: Product[] = [
     price: 43.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bio elegance',
-    category: 'מוצרי ה- Bio שלנו',
+    category: 'נוזלי כביסה', // שונה מ"מוצרי ה- Bio שלנו"
     isActive: true,
   },
   {
@@ -20,7 +20,7 @@ export const placeholderProducts: Product[] = [
     price: 45.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bio sport',
-    category: 'מוצרי ה- Bio שלנו',
+    category: 'נוזלי כביסה', // שונה מ"מוצרי ה- Bio שלנו"
     isActive: true,
   },
   {
@@ -30,7 +30,7 @@ export const placeholderProducts: Product[] = [
     price: 43.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bio soft',
-    category: 'מוצרי ה- Bio שלנו',
+    category: 'נוזלי כביסה', // שונה מ"מוצרי ה- Bio שלנו"
     isActive: true,
   },
   {
@@ -40,7 +40,7 @@ export const placeholderProducts: Product[] = [
     price: 43.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bio freedom',
-    category: 'מוצרי ה- Bio שלנו',
+    category: 'נוזלי כביסה', // שונה מ"מוצרי ה- Bio שלנו"
     isActive: true,
   },
   {
@@ -50,7 +50,7 @@ export const placeholderProducts: Product[] = [
     price: 43.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bio oriental',
-    category: 'מוצרי ה- Bio שלנו',
+    category: 'נוזלי כביסה', // שונה מ"מוצרי ה- Bio שלנו"
     isActive: true,
   },
   {
@@ -60,7 +60,7 @@ export const placeholderProducts: Product[] = [
     price: 43.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bio spa',
-    category: 'מוצרי ה- Bio שלנו',
+    category: 'נוזלי כביסה', // שונה מ"מוצרי ה- Bio שלנו"
     isActive: true,
   },
   {
@@ -70,7 +70,7 @@ export const placeholderProducts: Product[] = [
     price: 43.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bio baby',
-    category: 'מוצרי ה- Bio שלנו',
+    category: 'נוזלי כביסה', // שונה מ"מוצרי ה- Bio שלנו"
     isActive: true,
   },
   {
@@ -80,7 +80,7 @@ export const placeholderProducts: Product[] = [
     price: 43.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bio musk flowers',
-    category: 'מוצרי ה- Bio שלנו',
+    category: 'נוזלי כביסה', // שונה מ"מוצרי ה- Bio שלנו"
     isActive: true,
   },
   {
@@ -90,7 +90,7 @@ export const placeholderProducts: Product[] = [
     price: 43.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bio rose',
-    category: 'מוצרי ה- Bio שלנו',
+    category: 'נוזלי כביסה', // שונה מ"מוצרי ה- Bio שלנו"
     isActive: true,
   },
   {
@@ -100,7 +100,7 @@ export const placeholderProducts: Product[] = [
     price: 43.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bio aromatic',
-    category: 'מוצרי ה- Bio שלנו',
+    category: 'נוזלי כביסה', // שונה מ"מוצרי ה- Bio שלנו"
     isActive: true,
   },
   {
@@ -110,7 +110,7 @@ export const placeholderProducts: Product[] = [
     price: 43.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bio red rose',
-    category: 'מוצרי ה- Bio שלנו',
+    category: 'נוזלי כביסה', // שונה מ"מוצרי ה- Bio שלנו"
     isActive: true,
   },
 
@@ -129,7 +129,7 @@ export const placeholderProducts: Product[] = [
     id: 'pkg2',
     name: 'מארזי יוקרה',
     description: 'מארזי יוקרה מפנקים. לפרטים נוספים יש לבחור אפשרויות בעמוד המוצר.',
-    price: 95.00, // Original: 105.00
+    price: 95.00, 
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'luxury bundle',
     category: 'חבילות',
@@ -139,7 +139,7 @@ export const placeholderProducts: Product[] = [
     id: 'pkg3',
     name: 'מארז חבילות',
     description: 'מארז חבילות משתלם במיוחד. לפרטים נוספים יש לבחור אפשרויות בעמוד המוצר.',
-    price: 199.00, // Original: 214.00
+    price: 199.00, 
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'package bundle',
     category: 'חבילות',
@@ -149,7 +149,7 @@ export const placeholderProducts: Product[] = [
     id: 'pkg4',
     name: 'מארז מאסק פלווארס',
     description: 'מארז בניחוח מאסק פלווארס הכולל מוצרים נבחרים.',
-    price: 130.00, // Original: 136.00
+    price: 130.00, 
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'musk flowers bundle',
     category: 'חבילות',
@@ -159,7 +159,7 @@ export const placeholderProducts: Product[] = [
     id: 'pkg5',
     name: 'חבילת מפיצי ריח ביו בניחוחות כביסכל',
     description: 'חבילה מרוכזת של מפיצי ריח Bio בניחוחות האהובים של כביסכל.',
-    price: 259.00, // Original: 270.00
+    price: 259.00, 
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bio diffuser bundle',
     category: 'חבילות',
@@ -169,7 +169,7 @@ export const placeholderProducts: Product[] = [
     id: 'pkg6',
     name: 'מארז נבחרת מוצרי הניקיון',
     description: 'מארז הכולל את נבחרת מוצרי הניקיון המקצועיים שלנו.',
-    price: 240.00, // Original: 253.00
+    price: 240.00, 
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'cleaning bundle',
     category: 'חבילות',
@@ -179,7 +179,7 @@ export const placeholderProducts: Product[] = [
     id: 'pkg7',
     name: 'מארז חבילת בייבי',
     description: 'מארז חבילת בייבי מפנק. לפרטים נוספים יש לבחור אפשרויות בעמוד המוצר.',
-    price: 160.00, // Range 160-190, taking lower
+    price: 160.00, 
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'baby bundle',
     category: 'חבילות',
@@ -189,7 +189,7 @@ export const placeholderProducts: Product[] = [
     id: 'pkg8',
     name: 'מארז חבילת רוז',
     description: 'מארז חבילת רוז בניחוח קלאסי. לפרטים נוספים יש לבחור אפשרויות בעמוד המוצר.',
-    price: 160.00, // Range 160-190, taking lower
+    price: 160.00, 
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'rose bundle',
     category: 'חבילות',
@@ -199,7 +199,7 @@ export const placeholderProducts: Product[] = [
     id: 'pkg9',
     name: 'מארז חבילת ארומטי',
     description: 'מארז חבילת ארומטי בניחוח עשיר. לפרטים נוספים יש לבחור אפשרויות בעמוד המוצר.',
-    price: 160.00, // Range 160-190, taking lower
+    price: 160.00, 
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'aromatic bundle',
     category: 'חבילות',
@@ -209,7 +209,7 @@ export const placeholderProducts: Product[] = [
     id: 'pkg10',
     name: 'מארז חבילת רד רוז',
     description: 'מארז חבילת רד רוז בניחוח עמוק וחושני.',
-    price: 130.00, // Original: 136.00
+    price: 130.00, 
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'red rose bundle',
     category: 'חבילות',
@@ -219,7 +219,7 @@ export const placeholderProducts: Product[] = [
     id: 'pkg11',
     name: 'מארז חבילת ספא',
     description: 'מארז חבילת ספא יוקרתי. לפרטים נוספים יש לבחור אפשרויות בעמוד המוצר.',
-    price: 160.00, // Range 160-190, taking lower
+    price: 160.00, 
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'spa bundle',
     category: 'חבילות',
@@ -229,7 +229,7 @@ export const placeholderProducts: Product[] = [
     id: 'pkg12',
     name: 'מארז PerfumeClean X2',
     description: 'מארז משתלם של PerfumeClean. לפרטים נוספים יש לבחור אפשרויות בעמוד המוצר.',
-    price: 110.00, // Original: 120.00
+    price: 110.00, 
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'perfume clean bundle',
     category: 'חבילות',
@@ -309,11 +309,11 @@ export const placeholderProducts: Product[] = [
     isActive: true,
   },
   
-  // מפיצי ריח - מעודכן לפי בקשת המשתמש האחרונה
+  // מפיצי ריח
   {
     id: 'kdf1',
     name: 'מפיץ ריח בניחוח כביסכל מאסק פלאוורס',
-    description: 'מפיץ ריח איכותי בניחוח מאסק פלאוורס של כביסכל.',
+    description: 'מפיץ ריח איכותי בניחוח מאסק פלאוורס של כביסכל. 250 מ"ל.',
     price: 25.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'musk flowers diffuser',
@@ -323,7 +323,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kdf2',
     name: 'מפיץ ריח בניחוח כביסכל סופט קייר',
-    description: 'מפיץ ריח עדין בניחוח סופט קייר של כביסכל.',
+    description: 'מפיץ ריח עדין בניחוח סופט קייר של כביסכל. 250 מ"ל.',
     price: 25.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'soft care diffuser',
@@ -333,7 +333,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kdf3',
     name: 'מתקן מפיץ ריח אטומטי',
-    description: 'מתקן אוטומטי להפצת ריח נעים בחלל החדר.',
+    description: 'מתקן אוטומטי להפצת ריח נעים בחלל החדר. מתאים למילויים סטנדרטיים.',
     price: 120.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'automatic diffuser',
@@ -343,7 +343,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kdf4',
     name: 'מפיץ ריח בניחוח כביסכל רוז',
-    description: 'מפיץ ריח קלאסי בניחוח ורדים של כביסכל.',
+    description: 'מפיץ ריח קלאסי בניחוח ורדים של כביסכל. 250 מ"ל.',
     price: 25.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'rose diffuser',
@@ -353,7 +353,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kdf5',
     name: 'מפיץ ריח בניחוח כביסכל ארומטי',
-    description: 'מפיץ ריח עשיר בניחוח ארומטי של כביסכל.',
+    description: 'מפיץ ריח עשיר בניחוח ארומטי של כביסכל. 250 מ"ל.',
     price: 25.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'aromatic diffuser',
@@ -363,7 +363,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kdf6',
     name: 'מפיץ ריח בניחוח כביסכל בייבי',
-    description: 'מפיץ ריח עדין במיוחד בניחוח בייבי של כביסכל.',
+    description: 'מפיץ ריח עדין במיוחד בניחוח בייבי של כביסכל. 250 מ"ל.',
     price: 25.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'baby diffuser',
@@ -373,7 +373,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kdf7',
     name: 'מפיץ ריח בניחוח כביסכל ספא',
-    description: 'מפיץ ריח יוקרתי בניחוח ספא של כביסכל.',
+    description: 'מפיץ ריח יוקרתי בניחוח ספא של כביסכל. 250 מ"ל.',
     price: 25.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'spa diffuser',
@@ -383,7 +383,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kdf8',
     name: 'דפיוזר מקלות שחורים – SILVER',
-    description: 'דפיוזר עם מקלות שחורים בניחוח SILVER יוקרתי.',
+    description: 'דפיוזר עם מקלות שחורים בניחוח SILVER יוקרתי. 100 מ"ל.',
     price: 60.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'silver sticks diffuser',
@@ -393,7 +393,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kdf9',
     name: 'דפיוזר מקלות שחורים – GOLD',
-    description: 'דפיוזר עם מקלות שחורים בניחוח GOLD יוקרתי.',
+    description: 'דפיוזר עם מקלות שחורים בניחוח GOLD יוקרתי. 100 מ"ל.',
     price: 60.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'gold sticks diffuser',
@@ -403,7 +403,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kdf10',
     name: 'דפיוזר מקלות שחורים – PLATINUM',
-    description: 'דפיוזר עם מקלות שחורים בניחוח PLATINUM יוקרתי.',
+    description: 'דפיוזר עם מקלות שחורים בניחוח PLATINUM יוקרתי. 100 מ"ל.',
     price: 60.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'platinum sticks diffuser',
@@ -413,7 +413,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kdf11',
     name: 'דפיוזר מקלות שחורים – BRONZE',
-    description: 'דפיוזר עם מקלות שחורים בניחוח BRONZE יוקרתי.',
+    description: 'דפיוזר עם מקלות שחורים בניחוח BRONZE יוקרתי. 100 מ"ל.',
     price: 60.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'bronze sticks diffuser',
@@ -423,7 +423,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kdf12',
     name: 'מפיץ ריח פרח – וניל לבנדר פצ\'ולי',
-    description: 'מפיץ ריח בצורת פרח בניחוח וניל, לבנדר ופצ\'ולי.',
+    description: 'מפיץ ריח בצורת פרח בניחוח וניל, לבנדר ופצ\'ולי. 100 מ"ל.',
     price: 20.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'flower diffuser vanilla',
@@ -433,7 +433,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kdf13',
     name: 'מפיץ ריח פרח – וניל',
-    description: 'מפיץ ריח בצורת פרח בניחוח וניל מתוק.',
+    description: 'מפיץ ריח בצורת פרח בניחוח וניל מתוק. 100 מ"ל.',
     price: 20.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'flower diffuser vanilla',
@@ -443,7 +443,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kdf14',
     name: 'מפיץ ריח פרח – ילדותי',
-    description: 'מפיץ ריח בצורת פרח בניחוח ילדותי ונעים.',
+    description: 'מפיץ ריח בצורת פרח בניחוח ילדותי ונעים. 100 מ"ל.',
     price: 20.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'flower diffuser kids',
@@ -453,7 +453,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kdf15',
     name: 'מפיץ ריח פרח – אושן בריז',
-    description: 'מפיץ ריח בצורת פרח בניחוח אושן בריז מרענן.',
+    description: 'מפיץ ריח בצורת פרח בניחוח אושן בריז מרענן. 100 מ"ל.',
     price: 20.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'flower diffuser ocean',
@@ -463,7 +463,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kdf16',
     name: 'מפיץ ריח פרח – למון גראס',
-    description: 'מפיץ ריח בצורת פרח בניחוח למון גראס ממריץ.',
+    description: 'מפיץ ריח בצורת פרח בניחוח למון גראס ממריץ. 100 מ"ל.',
     price: 20.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'flower diffuser lemongrass',
@@ -473,7 +473,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kdf17',
     name: 'מפיץ ריח פרח – בלאק אייס',
-    description: 'מפיץ ריח בצורת פרח בניחוח בלאק אייס קריר.',
+    description: 'מפיץ ריח בצורת פרח בניחוח בלאק אייס קריר. 100 מ"ל.',
     price: 20.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'flower diffuser blackice',
@@ -483,7 +483,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kdf18',
     name: 'מפיץ ריח פרח – זנזיבר',
-    description: 'מפיץ ריח בצורת פרח בניחוח זנזיבר אקזוטי.',
+    description: 'מפיץ ריח בצורת פרח בניחוח זנזיבר אקזוטי. 100 מ"ל.',
     price: 20.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'flower diffuser zanzibar',
@@ -493,7 +493,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kdf19',
     name: 'מפיץ ריח פרח – גולדן קאר',
-    description: 'מפיץ ריח בצורת פרח בניחוח גולדן קאר יוקרתי.',
+    description: 'מפיץ ריח בצורת פרח בניחוח גולדן קאר יוקרתי. 100 מ"ל.',
     price: 20.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'flower diffuser goldencar',
@@ -501,9 +501,9 @@ export const placeholderProducts: Product[] = [
     isActive: true,
   },
 
-  //נוזלי כביסה - קיימים ממוצרי הביו
+  //נוזלי כביסה (קלאסי)
   {
-    id: 'kcat7',
+    id: 'kcat7', // ID נשאר זהה אך הקטגוריה מעודכנת
     name: 'נוזל כביסה קלאסי "כביסכל"',
     description: 'נוזל כביסה לשימוש יומיומי, יעיל וחסכוני לכל סוגי הבדים.',
     price: 35.00,
@@ -752,14 +752,14 @@ export const placeholderProducts: Product[] = [
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'boutique perfume small',
     category: 'מבשמים',
-    isActive: false,
+    isActive: false, // אזל מהמלאי
   },
 
   // פרפלור מבשמי רצפות
   {
     id: 'kpff1',
     name: 'מבשם רצפות פרוביוטי מאסק פלאוורס',
-    description: 'מבשם רצפות פרוביוטי מרוכז בניחוח מאסק פלאוורס.',
+    description: 'מבשם רצפות פרוביוטי מרוכז בניחוח מאסק פלאוורס. 1 ליטר.',
     price: 25.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'floor freshener musk',
@@ -769,7 +769,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kpff2',
     name: 'מבשם רצפות פרקט ועץ רויאל',
-    description: 'מבשם רצפות מיוחד לפרקט ועץ בניחוח רויאל יוקרתי.',
+    description: 'מבשם רצפות מיוחד לפרקט ועץ בניחוח רויאל יוקרתי. 1 ליטר.',
     price: 25.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'floor freshener wood',
@@ -779,7 +779,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kpff3',
     name: 'מבשם רצפות פרוביוטי אלגנס',
-    description: 'מבשם רצפות פרוביוטי מרוכז בניחוח אלגנס קלאסי.',
+    description: 'מבשם רצפות פרוביוטי מרוכז בניחוח אלגנס קלאסי. 1 ליטר.',
     price: 25.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'floor freshener elegance',
@@ -789,7 +789,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kpff4',
     name: 'מבשם רצפות פרוביוטי בייבי',
-    description: 'מבשם רצפות פרוביוטי עדין בניחוח בייבי, מתאים לחדרי ילדים.',
+    description: 'מבשם רצפות פרוביוטי עדין בניחוח בייבי, מתאים לחדרי ילדים. 1 ליטר.',
     price: 25.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'floor freshener baby',
@@ -799,7 +799,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kpff5',
     name: 'מבשם רצפות פרוביוטי רוז',
-    description: 'מבשם רצפות פרוביוטי מרוכז בניחוח ורדים רומנטי.',
+    description: 'מבשם רצפות פרוביוטי מרוכז בניחוח ורדים רומנטי. 1 ליטר.',
     price: 25.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'floor freshener rose',
@@ -809,7 +809,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kpff6',
     name: 'מבשם רצפות רד רוז',
-    description: 'מבשם רצפות מרוכז בניחוח רד רוז עמוק וחושני.',
+    description: 'מבשם רצפות מרוכז בניחוח רד רוז עמוק וחושני. 1 ליטר.',
     price: 25.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'floor freshener redrose',
@@ -819,7 +819,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kpff7',
     name: 'מבשם רצפות פרוביוטי ספא',
-    description: 'מבשם רצפות פרוביוטי מרוכז בניחוח ספא מרגיע.',
+    description: 'מבשם רצפות פרוביוטי מרוכז בניחוח ספא מרגיע. 1 ליטר.',
     price: 25.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'floor freshener spa',
@@ -829,7 +829,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kpff8',
     name: 'מבשם רצפות פרוביוטי ארומטי',
-    description: 'מבשם רצפות פרוביוטי מרוכז בניחוח ארומטי עשיר.',
+    description: 'מבשם רצפות פרוביוטי מרוכז בניחוח ארומטי עשיר. 1 ליטר.',
     price: 25.00,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'floor freshener aromatic',
@@ -841,7 +841,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp1',
     name: 'מגבונים רכים לתינוק בניחוח סופט קייר',
-    description: 'מגבונים עדינים במיוחד לתינוקות בניחוח סופט קייר, לשמירה על עורו הרגיש של תינוקך.',
+    description: 'מגבונים עדינים במיוחד לתינוקות בניחוח סופט קייר, לשמירה על עורו הרגיש של תינוקך. 72 יחידות.',
     price: 5.90,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'baby wipes softcare',
@@ -851,7 +851,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp2',
     name: 'מגבונים רכים לתינוק בניחוח בייבי',
-    description: 'מגבונים עדינים במיוחד לתינוקות בניחוח בייבי הקלאסי והאהוב.',
+    description: 'מגבונים עדינים במיוחד לתינוקות בניחוח בייבי הקלאסי והאהוב. 72 יחידות.',
     price: 5.90,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'baby wipes classic',
@@ -861,8 +861,8 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp3',
     name: 'מארז מגבונים לחים ארומטי לניקוי כללי',
-    description: 'מארז מגבונים לניקוי כללי בניחוח ארומטי מרענן, לניקוי מהיר ויעיל של משטחים.',
-    price: 22.90, // Original 24.90
+    description: 'מארז 3 חבילות מגבונים לניקוי כללי בניחוח ארומטי מרענן, לניקוי מהיר ויעיל של משטחים.',
+    price: 22.90,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'cleaning wipes aromatic',
     category: 'מגבונים',
@@ -871,8 +871,8 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp4',
     name: 'מארז מגבונים לחים בייבי לניקוי כללי',
-    description: 'מארז מגבונים לניקוי כללי בניחוח בייבי עדין, מתאים לניקוי בסביבת ילדים.',
-    price: 22.90, // Original 24.90
+    description: 'מארז 3 חבילות מגבונים לניקוי כללי בניחוח בייבי עדין, מתאים לניקוי בסביבת ילדים.',
+    price: 22.90,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'cleaning wipes baby',
     category: 'מגבונים',
@@ -881,8 +881,8 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp5',
     name: 'מארז מגבונים לחים ספא לניקוי כללי',
-    description: 'מארז מגבונים לניקוי כללי בניחוח ספא יוקרתי, לחווית ניקיון מפנקת.',
-    price: 22.90, // Original 24.90
+    description: 'מארז 3 חבילות מגבונים לניקוי כללי בניחוח ספא יוקרתי, לחווית ניקיון מפנקת.',
+    price: 22.90,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'cleaning wipes spa',
     category: 'מגבונים',
@@ -891,8 +891,8 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kwp6',
     name: 'מארז מגבונים לחים רוז לניקוי כללי',
-    description: 'מארז מגבונים לניקוי כללי בניחוח רוז קלאסי ונעים.',
-    price: 22.90, // Original 24.90
+    description: 'מארז 3 חבילות מגבונים לניקוי כללי בניחוח רוז קלאסי ונעים.',
+    price: 22.90,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'cleaning wipes rose',
     category: 'מגבונים',
@@ -942,7 +942,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kds1',
     name: 'נוזל כלים פרוביוטי לבנדר פרש',
-    description: 'נוזל כלים פרוביוטי מרוכז בניחוח לבנדר פרש מרענן.',
+    description: 'נוזל כלים פרוביוטי מרוכז בניחוח לבנדר פרש מרענן. 750 מ"ל.',
     price: 16.50,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'dish soap lavender',
@@ -952,7 +952,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kds2',
     name: 'נוזל כלים פרוביוטי אושן',
-    description: 'נוזל כלים פרוביוטי מרוכז בניחוח אושן נקי ומרענן.',
+    description: 'נוזל כלים פרוביוטי מרוכז בניחוח אושן נקי ומרענן. 750 מ"ל.',
     price: 16.50,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'dish soap ocean',
@@ -962,7 +962,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kds3',
     name: 'נוזל כלים פרוביוטי מאסק פלאוורס',
-    description: 'נוזל כלים פרוביוטי מרוכז בניחוח מאסק פלאוורס קסום.',
+    description: 'נוזל כלים פרוביוטי מרוכז בניחוח מאסק פלאוורס קסום. 750 מ"ל.',
     price: 16.50,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'dish soap musk',
@@ -972,7 +972,7 @@ export const placeholderProducts: Product[] = [
   {
     id: 'kds4',
     name: 'נוזל כלים פרוביוטי ספא',
-    description: 'נוזל כלים פרוביוטי מרוכז בניחוח ספא מרגיע ויוקרתי.',
+    description: 'נוזל כלים פרוביוטי מרוכז בניחוח ספא מרגיע ויוקרתי. 750 מ"ל.',
     price: 16.50,
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'dish soap spa',
@@ -1005,9 +1005,9 @@ export const placeholderOrders: Order[] = [
     items: [
       { productId: 'kbio2', productName: 'כביסכל Bio ספורט 2 ליטר', quantity: 1, priceAtOrder: 45.00 },
       { productId: 'kmb16', productName: 'BRONZE – מבשם קפסולרי מרוכז 350 מ"ל', quantity: 1, priceAtOrder: 45.00 },
-      { productId: 'pkg4', productName: 'מארז מאסק פלווארס', quantity: 1, priceAtOrder: 130.00 },
+      { productId: 'kpff1', productName: 'מבשם רצפות פרוביוטי מאסק פלאוורס', quantity: 1, priceAtOrder: 25.00 },
     ],
-    totalAmount: 45.00 + 45.00 + 130.00,
+    totalAmount: 45.00 + 45.00 + 25.00,
     orderTimestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // Two days ago
     status: 'processed',
   },
@@ -1019,10 +1019,12 @@ export const placeholderOrders: Order[] = [
     items: [
       { productId: 'kprof1', productName: 'נוזל אורנים', quantity: 1, priceAtOrder: 19.90 },
       { productId: 'kds1', productName: 'נוזל כלים פרוביוטי לבנדר פרש', quantity: 2, priceAtOrder: 16.50 },
-      { productId: 'pkg6', productName: 'מארז נבחרת מוצרי הניקיון', quantity: 1, priceAtOrder: 240.00 },
+      { productId: 'kwp7', productName: 'דלי מגבונים לניקוי כללי בניחוח ארומטי', quantity: 1, priceAtOrder: 35.00 },
     ],
-    totalAmount: 19.90 + (16.50 * 2) + 240.00,
+    totalAmount: 19.90 + (16.50 * 2) + 35.00,
     orderTimestamp: new Date(), // Today
     status: 'completed',
   },
 ];
+
+    
