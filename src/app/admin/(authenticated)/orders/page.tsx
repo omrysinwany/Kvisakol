@@ -119,7 +119,7 @@ export default function AdminOrdersPage() {
       <div className="mb-4 p-2 border rounded-lg bg-muted/30 shadow-sm">
         <div className="flex flex-wrap items-center gap-2">
           <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilterValue)}>
-            <SelectTrigger className="h-9 px-3 text-xs w-auto min-w-[130px]">
+            <SelectTrigger className="h-9 px-3 text-xs w-auto">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -137,7 +137,7 @@ export default function AdminOrdersPage() {
                   variant={"outline"}
                   size="sm" 
                   className={cn(
-                      "h-9 px-3 text-xs w-auto min-w-[110px] justify-start text-left font-normal",
+                      "h-9 px-3 text-xs w-auto justify-start text-left font-normal",
                       !startDate && "text-muted-foreground"
                   )}
                   >
@@ -162,7 +162,7 @@ export default function AdminOrdersPage() {
                   variant={"outline"}
                   size="sm" 
                   className={cn(
-                      "h-9 px-3 text-xs w-auto min-w-[110px] justify-start text-left font-normal",
+                      "h-9 px-3 text-xs w-auto justify-start text-left font-normal",
                       !endDate && "text-muted-foreground"
                   )}
                   >
@@ -218,3 +218,4 @@ export default function AdminOrdersPage() {
     </>
   );
 }
+
