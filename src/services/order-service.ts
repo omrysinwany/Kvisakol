@@ -13,7 +13,7 @@ const orderFromDoc = (docSnap: any): Order => {
     customerName: data.customerName || '',
     customerPhone: data.customerPhone || '',
     customerAddress: data.customerAddress || '',
-    customerNotes: data.customerNotes || '', // Ensure it's an empty string if undefined
+    customerNotes: data.customerNotes || '', 
     items: data.items || [],
     totalAmount: data.totalAmount !== undefined ? Number(data.totalAmount) : 0,
     orderTimestamp: data.orderTimestamp instanceof Timestamp ? data.orderTimestamp.toDate() : new Date(0),
@@ -74,7 +74,7 @@ export async function createOrderService(orderDetails: {
       const docId = docSnap.id;
       if (docId.startsWith('o') && docId.length > 1) {
         const numericPartString = docId.substring(1);
-        if (/^\d+$/.test(numericPartString)) { // Check if the rest is a number
+        if (/^\d+$/.test(numericPartString)) { 
           const numericPart = parseInt(numericPartString, 10);
           if (numericPart > highestNumericId) {
             highestNumericId = numericPart;
@@ -117,13 +117,11 @@ export async function updateOrderStatusService(orderId: string, newStatus: Order
     const orderDocRef = doc(db, 'orders', orderId);
     const updateData: Partial<Order> = { status: newStatus };
     
-    // If status is changing to 'received', 'completed', or 'cancelled', ensure isViewedByAgent is true.
-    // This also handles cases where an order might be directly set to 'completed' or 'cancelled' from 'new'.
     if (newStatus === 'received' || newStatus === 'completed' || newStatus === 'cancelled') { 
       updateData.isViewedByAgent = true;
     }
 
-    await updateDoc(orderDocRef, updateData as any); // Type assertion needed for partial update
+    await updateDoc(orderDocRef, updateData as any); 
     const updatedDocSnap = await getDoc(orderDocRef);
      if (updatedDocSnap.exists()) {
       return orderFromDoc(updatedDocSnap);
@@ -149,16 +147,15 @@ export async function markOrderAsViewedService(orderId: string): Promise<Order |
     const orderData = docSnap.data() as Partial<Order>; 
     const updates: Partial<Order> = {};
 
-    // If the order status is 'new', change it to 'received' and mark as viewed.
     if (orderData.status === 'new') {
         updates.status = 'received';
-        updates.isViewedByAgent = true; // Always mark as viewed if status changes from new
-    } else if (!orderData.isViewedByAgent) { // If not new, but still not viewed (e.g., directly set to completed but not opened)
+        updates.isViewedByAgent = true; 
+    } else if (!orderData.isViewedByAgent) { 
         updates.isViewedByAgent = true;
     }
     
     if (Object.keys(updates).length > 0) {
-        await updateDoc(orderDocRef, updates as any); // Type assertion
+        await updateDoc(orderDocRef, updates as any); 
     }
 
     const updatedDocSnap = await getDoc(orderDocRef); 
@@ -233,7 +230,7 @@ export async function getUniqueCustomersFromOrders(): Promise<CustomerSummary[]>
 
 
 export async function getOrdersByCustomerPhone(phone: string): Promise<Order[]> {
-  console.log(`Fetching orders for customer phone: ${phone} from Firestore.`);
+  console.log(`Querying orders for phone (service): >>${phone}<<`); 
   try {
     const ordersCollectionRef = collection(db, 'orders');
     const q = query(
@@ -243,15 +240,12 @@ export async function getOrdersByCustomerPhone(phone: string): Promise<Order[]> 
     );
     const querySnapshot = await getDocs(q);
     const orders = querySnapshot.docs.map(docSnap => orderFromDoc(docSnap));
-    console.log(`Fetched ${orders.length} orders for customer ${phone}.`);
+    console.log(`Fetched ${orders.length} orders for customer phone: >>${phone}<<.`);
     return orders;
   } catch (error) {
     console.error(`Error fetching orders for customer ${phone}:`, error);
     return [];
   }
 }
-
-// This function is no longer needed as its logic is now in AdminCustomerDetailPage
-// export async function getCustomerSummaryByPhone(phone: string): Promise<CustomerSummary | null> { ... }
 
     

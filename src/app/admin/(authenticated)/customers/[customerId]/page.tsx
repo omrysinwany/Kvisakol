@@ -11,18 +11,14 @@ import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { CustomerDetailView } from '@/components/admin/customer-detail-view';
 
-const statusTranslationsForToast: Record<Order['status'], string> = {
-  new: 'חדשה',
-  received: 'התקבלה',
-  completed: 'הושלמה',
-  cancelled: 'בוטלה',
-};
+// Removed unused statusTranslationsForToast: Record<Order['status'], string> = { ... }
+
 
 export default function AdminCustomerDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  const customerId = params.customerId as string; // This is the customer's phone number
+  const customerId = params.customerId as string; 
 
   const [customer, setCustomer] = useState<CustomerSummary | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -31,20 +27,19 @@ export default function AdminCustomerDetailPage() {
 
   useEffect(() => {
     if (customerId) {
+      console.log('Customer ID from params:', customerId);
       const fetchCustomerData = async () => {
         setIsLoading(true);
         setError(null);
         try {
-          // First, fetch all orders for this customer
           const customerOrders = await getOrdersByCustomerPhone(customerId);
 
           if (customerOrders.length > 0) {
-            // If orders exist, derive customer summary from them
-            const latestOrder = customerOrders[0]; // Orders are sorted desc by timestamp from service
+            const latestOrder = customerOrders[0]; 
             const totalSpent = customerOrders.reduce((sum, order) => sum + order.totalAmount, 0);
             
             const customerSummaryData: CustomerSummary = {
-              id: customerId, // phone number is the ID
+              id: customerId, 
               phone: customerId,
               name: latestOrder.customerName,
               lastOrderDate: latestOrder.orderTimestamp,
@@ -55,9 +50,8 @@ export default function AdminCustomerDetailPage() {
             setCustomer(customerSummaryData);
             setOrders(customerOrders);
           } else {
-            // No orders found for this customer
             setError('לא נמצאו הזמנות עבור לקוח זה, או שהלקוח אינו קיים במערכת ההזמנות.');
-            toast({ variant: 'destructive', title: 'שגיאה', description: 'לא נמצאו הזמנות עבור לקוח זה או שהלקוח אינו קיים.' });
+            // Removed toast here as error message is displayed on page
             setCustomer(null);
             setOrders([]);
           }
@@ -74,6 +68,13 @@ export default function AdminCustomerDetailPage() {
   }, [customerId, toast]);
 
   const handleUpdateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
+    // Define statusTranslationsForToast locally or import if used more broadly
+    const statusTranslationsToast: Record<Order['status'], string> = {
+      new: 'חדשה',
+      received: 'התקבלה',
+      completed: 'הושלמה',
+      cancelled: 'בוטלה',
+    };
     try {
       const updatedOrder = await updateOrderStatusService(orderId, newStatus);
       if (updatedOrder) {
@@ -82,7 +83,7 @@ export default function AdminCustomerDetailPage() {
         );
         toast({
           title: "סטטוס הזמנה עודכן",
-          description: `הסטטוס של הזמנה ${orderId.substring(orderId.length - 6)} שונה ל: ${statusTranslationsForToast[newStatus]}.`,
+          description: `הסטטוס של הזמנה ${orderId.substring(orderId.length - 6)} שונה ל: ${statusTranslationsToast[newStatus]}.`,
         });
       } else {
         toast({ variant: "destructive", title: "שגיאה", description: "לא ניתן היה לעדכן את סטטוס ההזמנה." });
@@ -115,8 +116,6 @@ export default function AdminCustomerDetailPage() {
   }
 
   if (!customer) {
-    // This case should be handled by the error state if no orders are found,
-    // or if there was an issue creating the summary.
     return (
         <div className="container mx-auto px-4 py-8">
             <p className="text-center text-lg">לא ניתן לטעון את פרטי הלקוח המבוקש.</p>

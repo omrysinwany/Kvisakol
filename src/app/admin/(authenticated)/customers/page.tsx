@@ -123,21 +123,23 @@ export default function AdminCustomersPage() {
       </div>
       
       <div className="mb-4 p-3 border rounded-lg bg-muted/30 shadow-sm">
-        <div className="flex flex-col sm:flex-row gap-3 items-center sm:items-end">
-          <div className="relative w-full sm:w-auto sm:flex-grow">
-            <label htmlFor="customer-search" className="text-xs font-medium text-muted-foreground db-block mb-1.5">חיפוש לקוח</label>
-            <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 translate-y-[calc(50%-2px)] text-muted-foreground" />
-            <Input
-              id="customer-search"
-              type="search"
-              placeholder="חיפוש לפי שם או טלפון..."
-              className="pl-10 rtl:pr-10 w-full h-9 text-xs"
-              value={searchTerm}
-              onChange={handleSearchChange}
-            />
+        <div className="flex flex-col sm:flex-row flex-wrap gap-3 items-end">
+          <div className="relative flex-grow w-full sm:w-auto">
+            <label htmlFor="customer-search" className="text-xs font-medium text-muted-foreground block mb-1.5">חיפוש לקוח</label>
+            <div className="relative">
+              <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="customer-search"
+                type="search"
+                placeholder="חיפוש לפי שם או טלפון..."
+                className="pl-10 rtl:pr-10 w-full h-9 text-xs"
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+            </div>
           </div>
           <div className="w-full sm:w-auto sm:min-w-[200px]">
-            <label htmlFor="last-order-filter" className="text-xs font-medium text-muted-foreground db-block mb-1.5">סינון לפי הזמנה אחרונה</label>
+            <label htmlFor="last-order-filter" className="text-xs font-medium text-muted-foreground block mb-1.5">סינון לפי הזמנה אחרונה</label>
             <Select value={lastOrderFilter} onValueChange={handleLastOrderFilterChange}>
               <SelectTrigger id="last-order-filter" className="h-9 w-full px-3 text-xs">
                 <SelectValue />
