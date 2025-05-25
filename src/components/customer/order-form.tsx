@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { createOrderService } from '@/services/order-service';
 import type { OrderItem } from '@/lib/types';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const orderFormSchema = z.object({
   customerName: z.string().min(2, { message: 'שם חייב להכיל לפחות 2 תווים.' }),
@@ -29,6 +29,7 @@ export function OrderForm() {
   const { cartItems, totalPrice, clearCart } = useCart();
   const router = useRouter();
   const { toast } = useToast();
+  const [orderSubmitted, setOrderSubmitted] = useState(false);
 
   const form = useForm<OrderFormValues>({
     resolver: zodResolver(orderFormSchema),
@@ -42,10 +43,11 @@ export function OrderForm() {
 
   useEffect(() => {
     // Redirect to cart if cart is empty, runs only on client after mount
-    if (typeof window !== 'undefined' && cartItems.length === 0) {
+    // and only if an order has not just been submitted.
+    if (!orderSubmitted && typeof window !== 'undefined' && cartItems.length === 0) {
       router.push('/cart');
     }
-  }, [cartItems, router]);
+  }, [cartItems, router, orderSubmitted]);
 
 
   const onSubmit = async (data: OrderFormValues) => {
@@ -70,7 +72,7 @@ export function OrderForm() {
       });
       
       clearCart();
-      console.log('Attempting to redirect to / from OrderForm'); // For diagnostics
+      setOrderSubmitted(true); // Mark order as submitted to prevent redirect to /cart
       router.push('/'); // Redirect to homepage
 
     } catch (error) {
@@ -88,7 +90,7 @@ export function OrderForm() {
   }
 
   // Return null or a loading state while redirecting or if cart is empty
-  if (cartItems.length === 0 && typeof window !== 'undefined') { // Added typeof window check for initial render
+  if (!orderSubmitted && cartItems.length === 0 && typeof window !== 'undefined') { 
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <p className="text-lg text-muted-foreground">העגלה שלך ריקה, מעביר אותך לדף העגלה...</p>
@@ -194,4 +196,3 @@ export function OrderForm() {
     </div>
   );
 }
-
