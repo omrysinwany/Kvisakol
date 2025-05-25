@@ -103,11 +103,31 @@ export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
               {format(new Date(order.orderTimestamp), 'dd/MM/yyyy HH:mm', { locale: he })}
             </TableCell>
             <TableCell className="hidden sm:table-cell">{formatPrice(order.totalAmount)}</TableCell>
-            <TableCell>
-              <Badge variant="default" className={`${displayStatus.colorClass} text-white`}>
-                <DisplayStatusIcon className="h-3 w-3 mr-1.5" />
-                {displayStatus.text}
-              </Badge>
+            <TableCell onClick={(e) => e.stopPropagation()} className="cursor-default">
+              <DropdownMenu dir="rtl">
+                <DropdownMenuTrigger asChild>
+                  <Badge 
+                    variant="default" 
+                    className={`${displayStatus.colorClass} text-white cursor-pointer hover:opacity-80 transition-opacity`}
+                  >
+                    <DisplayStatusIcon className="h-3 w-3 mr-1.5" />
+                    {displayStatus.text}
+                  </Badge>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" onClick={(e) => e.stopPropagation()}>
+                  <DropdownMenuLabel>שנה סטטוס</DropdownMenuLabel>
+                  <DropdownMenuRadioGroup 
+                    value={order.status} 
+                    onValueChange={(newStatus) => onUpdateStatus(order.id, newStatus as Order['status'])}
+                  >
+                    {(['new', 'received', 'completed', 'cancelled'] as Order['status'][]).map((statusKey) => (
+                      <DropdownMenuRadioItem key={statusKey} value={statusKey} className="cursor-pointer">
+                        {baseStatusTranslations[statusKey]}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </TableCell>
             <TableCell className="text-left">
               <DropdownMenu dir="rtl">
@@ -116,15 +136,14 @@ export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
                     aria-haspopup="true" 
                     size="icon" 
                     variant="ghost"
-                    onClick={(e) => e.stopPropagation()} // Prevent row click when actions button is clicked
+                    onClick={(e) => e.stopPropagation()} 
                   >
                     <MoreHorizontal className="h-4 w-4" />
                     <span className="sr-only">פתח תפריט פעולות</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}> {/* Prevent row click for content too */}
+                <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}> 
                   <DropdownMenuLabel>פעולות עבור הזמנה</DropdownMenuLabel>
-                  {/* Direct navigation to order details is now handled by row click, so this item can be removed or kept for explicitness */}
                   <DropdownMenuItem onClick={() => router.push(`/admin/orders/${order.id}`)} className="flex items-center gap-2 cursor-pointer">
                     <Eye className="h-4 w-4" />
                     צפה בפרטי הזמנה
