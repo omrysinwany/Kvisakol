@@ -115,8 +115,8 @@ export function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
       </CardHeader>
-      <CardContent className="p-3 flex-1">
-        <CardTitle className="text-primary text-sm mb-1 h-10 leading-tight overflow-hidden text-center line-clamp-2">
+      <CardContent className="p-3 pb-1 flex-1"> {/* Changed padding-bottom */}
+        <CardTitle className="text-primary text-sm h-10 leading-tight overflow-hidden text-center line-clamp-2">
           {product.name}
         </CardTitle>
       </CardContent>
