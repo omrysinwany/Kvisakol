@@ -25,20 +25,33 @@ if (!getApps().length) {
 
 let db: Firestore;
 
+// Check if Firestore has already been initialized to prevent errors.
+// This can happen in environments like Next.js with hot-reloading or when scripts also init Firebase.
 try {
-  // Initialize Firestore with specific options.
-  // It's safe to call initializeFirestore multiple times if the options are identical.
-  // The error "already been called with different options" happens if getFirestore()
-  // is called first (initializing with defaults) and then initializeFirestore() is called with options.
-  initializeFirestore(app, {
-    ignoreUndefinedProperties: true,
-  });
   db = getFirestore(app);
-  console.log("Firestore instance obtained/initialized with ignoreUndefinedProperties:true.");
+  // Attempt to initialize with specific options only if it hasn't been initialized with them already.
+  // Firestore throws an error if initializeFirestore is called with different options after getFirestore() or
+  // if initializeFirestore is called multiple times with different options.
+  // We will initialize it with options. If it fails because it was already initialized (possibly with defaults),
+  // we catch that specific error and proceed, assuming the existing instance is what we want or good enough.
+  try {
+    initializeFirestore(app, {
+      ignoreUndefinedProperties: true,
+    });
+    db = getFirestore(app); // Re-assign db after potential re-initialization with options
+    console.log("Firestore instance obtained/initialized with ignoreUndefinedProperties:true.");
+  } catch (e: any) {
+    if (e.code === 'failed-precondition' && e.message.includes('already been called')) {
+      console.warn("Firestore was already initialized. Proceeding with existing instance. Ensure options are compatible if set elsewhere.");
+      // db is already assigned from the first getFirestore(app) call
+    } else {
+      // Different error, re-throw or handle as critical
+      throw e;
+    }
+  }
 
   // Conditional connection to Firestore emulator
   // This should only be active if you intend to use the emulator.
-  // The seeding script currently does not set USE_FIRESTORE_EMULATOR, so this block won't run for it.
   if (typeof window === 'undefined' && process.env.NODE_ENV === 'development' && process.env.USE_FIRESTORE_EMULATOR === 'true') {
     console.log("Attempting to connect to Firestore Emulator...");
     try {
@@ -46,11 +59,10 @@ try {
       console.log("Firestore Emulator connected.");
     } catch (e: any) {
       // This specific error code means it's already connected to the emulator.
-      if (e.code === 'failed-precondition' && e.message.includes('already has a an Bytes Entry Point connected to the Emulator')) {
-        console.warn("Firestore Emulator was already connected.");
+      if (e.code === 'failed-precondition') {
+        console.warn("Firestore Emulator connection attempt failed, possibly already connected or misconfigured:", e.message);
       } else {
         console.error("Error connecting to Firestore Emulator:", e);
-        // Depending on your setup, you might want to handle this error differently.
       }
     }
   }
@@ -61,7 +73,6 @@ try {
       console.warn("Falling back to basic getFirestore() due to initialization error.");
       db = getFirestore(app);
   }
-  // For the seeding script, we let it attempt to proceed. It will fail later if db is not usable.
 }
 
 

@@ -1,5 +1,8 @@
 
 // src/scripts/seed-firestore.ts
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' }); // Load environment variables from .env.local
+
 import { db } from '@/lib/firebase/config';
 import { placeholderProducts, placeholderOrders, placeholderAdminUsers } from '@/lib/placeholder-data';
 import type { Product, Order, AdminUser } from '@/lib/types';
