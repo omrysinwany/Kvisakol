@@ -16,7 +16,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { format, startOfDay, endOfDay, subDays } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { cn } from "@/lib/utils";
-import { useSearchParams, useRouter } from 'next/navigation'; // Added useRouter
+import { useSearchParams, useRouter } from 'next/navigation'; 
+import { Badge } from '@/components/ui/badge'; // Added missing import
 
 type StatusFilterValue = Order['status'] | 'all';
 
@@ -37,7 +38,7 @@ export default function AdminOrdersPage() {
   const [allOrders, setAllOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
-  const router = useRouter(); // Initialize router
+  const router = useRouter(); 
   const searchParams = useSearchParams(); 
   const initialStatusFilter = searchParams.get('status') as StatusFilterValue | null;
   const initialCustomerPhoneFilter = searchParams.get('customerPhone') as string | null;
@@ -90,8 +91,8 @@ export default function AdminOrdersPage() {
         setStartDate(startOfDay(sevenDaysAgo));
         setEndDate(endOfDay(today));
       }
-    } else if (!phoneFromUrl) { // Don't clear dates if filtering by customer phone
-      // setStartDate(undefined);
+    } else if (!phoneFromUrl) { 
+      // setStartDate(undefined); // Keep dates if they were set manually
       // setEndDate(undefined);
     }
     setCurrentPage(1);
@@ -155,7 +156,7 @@ export default function AdminOrdersPage() {
     setStartDate(undefined);
     setEndDate(undefined);
     setCurrentPage(1);
-    // Remove period from URL if dates are cleared manually
+    
     const newParams = new URLSearchParams(searchParams.toString());
     newParams.delete('period');
     router.replace(`/admin/orders?${newParams.toString()}`);
@@ -164,7 +165,6 @@ export default function AdminOrdersPage() {
   const handleClearCustomerFilter = () => {
     setCustomerPhoneFilter(null);
     setCurrentPage(1);
-    // Remove customerPhone from URL
     const newParams = new URLSearchParams(searchParams.toString());
     newParams.delete('customerPhone');
     router.replace(`/admin/orders?${newParams.toString()}`);
@@ -313,3 +313,5 @@ export default function AdminOrdersPage() {
     </>
   );
 }
+
+    
