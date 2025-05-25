@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CustomerTable } from '@/components/admin/customer-table';
 import { AdminPaginationControls } from '@/components/admin/admin-pagination-controls';
-import { getUniqueCustomersFromOrders } from '@/services/order-service';
+import { getUniqueCustomers } from '@/services/order-service'; // Updated to getUniqueCustomers
 import type { CustomerSummary } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
@@ -38,7 +38,7 @@ export default function AdminCustomersPage() {
     const fetchCustomers = async () => {
       setIsLoading(true);
       try {
-        const fetchedCustomers = await getUniqueCustomersFromOrders();
+        const fetchedCustomers = await getUniqueCustomers(); // Using the new service function
         setAllCustomers(fetchedCustomers);
         setFilteredCustomers(fetchedCustomers);
       } catch (error) {
@@ -65,13 +65,14 @@ export default function AdminCustomersPage() {
 
     if (lastOrderFilter !== 'all') {
       customersToFilter = customersToFilter.filter(customer => {
+        if (!customer.lastOrderDate) return false; // Handle cases where lastOrderDate might be undefined
         const customerLastOrderDate = new Date(customer.lastOrderDate);
         if (lastOrderFilter === 'last7days') {
-          const sevenDaysAgo = startOfDay(subDays(now, 6)); 
+          const sevenDaysAgo = startOfDay(subDays(now, 6));
           return isWithinInterval(customerLastOrderDate, { start: sevenDaysAgo, end: now });
         }
         if (lastOrderFilter === 'last30days') {
-          const thirtyDaysAgo = startOfDay(subDays(now, 29)); 
+          const thirtyDaysAgo = startOfDay(subDays(now, 29));
           return isWithinInterval(customerLastOrderDate, { start: thirtyDaysAgo, end: now });
         }
         if (lastOrderFilter === 'over90days') {
@@ -157,7 +158,7 @@ export default function AdminCustomersPage() {
       </div>
 
       <Card className="shadow-lg">
-        <CardHeader className="flex flex-row items-center justify-between space-x-2 rtl:space-x-reverse">
+      <CardHeader className="flex flex-row items-center justify-between space-x-2 rtl:space-x-reverse">
           <div>
             <CardTitle className="text-xl">רשימת לקוחות ({filteredCustomers.length})</CardTitle>
             <CardDescription>

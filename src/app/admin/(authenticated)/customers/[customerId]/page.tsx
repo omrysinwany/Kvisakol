@@ -3,14 +3,13 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { getOrdersByCustomerPhone } from '@/services/order-service';
+import { getOrdersByCustomerPhone, getCustomerSummaryById, updateOrderStatusService } from '@/services/order-service'; // Added getCustomerSummaryById
 import type { CustomerSummary, Order } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { CustomerDetailView } from '@/components/admin/customer-detail-view';
-import { updateOrderStatusService } from '@/services/order-service';
 
 
 export default function AdminCustomerDetailPage() {
@@ -31,45 +30,25 @@ export default function AdminCustomerDetailPage() {
         setIsLoading(true);
         setError(null);
         try {
-          // Fetch all orders for this customer phone number
-          const customerOrders = await getOrdersByCustomerPhone(customerId);
-          console.log(`AdminCustomerDetailPage: Fetched ${customerOrders.length} orders for customerId ${customerId}`);
-          
-          // Log the fetched orders to see their structure and actual customerPhone values
-          // customerOrders.forEach(order => {
-          //   console.log('AdminCustomerDetailPage: Order Detail:', JSON.stringify(order, null, 2));
-          // });
+          // Fetch customer summary directly from 'customers' collection
+          const customerSummaryData = await getCustomerSummaryById(customerId);
+          console.log('AdminCustomerDetailPage: Fetched customer summary:', customerSummaryData);
 
-
-          if (customerOrders.length > 0) {
-            // Sort orders to ensure the latest is first for correct latestAddress and lastOrderDate
-            const sortedOrders = [...customerOrders].sort((a, b) => new Date(b.orderTimestamp).getTime() - new Date(a.orderTimestamp).getTime());
-            const latestOrder = sortedOrders[0]; 
-            const totalSpent = sortedOrders.reduce((sum, order) => sum + order.totalAmount, 0);
-            
-            // Create CustomerSummary object from the orders
-            const customerSummaryData: CustomerSummary = {
-              id: customerId, // Assuming customerId from URL is the phone number
-              phone: customerId, 
-              name: latestOrder.customerName,
-              lastOrderDate: latestOrder.orderTimestamp,
-              totalOrders: sortedOrders.length,
-              totalSpent: totalSpent,
-              latestAddress: latestOrder.customerAddress,
-            };
+          if (customerSummaryData) {
             setCustomer(customerSummaryData);
-            setOrders(sortedOrders);
+            // Fetch all orders for this customer phone number
+            const customerOrders = await getOrdersByCustomerPhone(customerId);
+            console.log(`AdminCustomerDetailPage: Fetched ${customerOrders.length} orders for customerId ${customerId}`);
+            setOrders(customerOrders); // Already sorted by service
           } else {
-            // If no orders are found, it means the customer either has no orders or the ID (phone) doesn't match any orders.
-            setError('לא נמצאו הזמנות עבור לקוח זה, או שהלקוח אינו קיים במערכת ההזמנות.');
-            console.warn(`AdminCustomerDetailPage: No orders found for customerId ${customerId}. This could be an issue with data consistency or the query itself.`);
+            setError('הלקוח המבוקש לא נמצא במערכת הלקוחות.');
+            console.warn(`AdminCustomerDetailPage: No customer document found for ID ${customerId} in 'customers' collection.`);
             setCustomer(null);
             setOrders([]);
           }
         } catch (err) {
           console.error("AdminCustomerDetailPage: Failed to fetch customer data:", err);
           setError('שגיאה בטעינת נתוני הלקוח.');
-          // toast({ variant: 'destructive', title: 'שגיאה', description: 'אירעה שגיאה בטעינת נתוני הלקוח.' });
         } finally {
           setIsLoading(false);
         }
@@ -80,7 +59,7 @@ export default function AdminCustomerDetailPage() {
         setIsLoading(false);
         setError('שגיאה: מזהה לקוח חסר.');
     }
-  }, [customerId, toast]);
+  }, [customerId]);
 
   const handleUpdateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
     const statusTranslationsToast: Record<Order['status'], string> = {
@@ -130,7 +109,6 @@ export default function AdminCustomerDetailPage() {
   }
 
   if (!customer) {
-    // This covers the case where setError was called but also if customer just didn't get set for some other reason
     return (
         <div className="container mx-auto px-4 py-8">
             <p className="text-center text-lg">לא ניתן לטעון את פרטי הלקוח המבוקש.</p>

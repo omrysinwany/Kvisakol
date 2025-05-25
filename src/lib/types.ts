@@ -32,7 +32,7 @@ export interface Order {
   orderTimestamp: Date;
   status: 'new' | 'received' | 'completed' | 'cancelled';
   isViewedByAgent?: boolean;
-  agentNotes?: string; // Added for internal agent notes
+  agentNotes?: string;
 }
 
 export interface AdminUser {
@@ -47,6 +47,7 @@ export interface CustomerSummary {
   id: string; // Using phone number as ID for simplicity
   name: string;
   phone: string;
+  firstOrderDate?: Date; // Added
   lastOrderDate: Date;
   totalOrders: number;
   totalSpent: number;
