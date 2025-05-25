@@ -67,11 +67,11 @@ export default function AdminCustomersPage() {
       customersToFilter = customersToFilter.filter(customer => {
         const customerLastOrderDate = new Date(customer.lastOrderDate);
         if (lastOrderFilter === 'last7days') {
-          const sevenDaysAgo = startOfDay(subDays(now, 6)); // Corrected to include today, so 6 days back + today = 7 days
+          const sevenDaysAgo = startOfDay(subDays(now, 6)); 
           return isWithinInterval(customerLastOrderDate, { start: sevenDaysAgo, end: now });
         }
         if (lastOrderFilter === 'last30days') {
-          const thirtyDaysAgo = startOfDay(subDays(now, 29)); // Corrected to include today
+          const thirtyDaysAgo = startOfDay(subDays(now, 29)); 
           return isWithinInterval(customerLastOrderDate, { start: thirtyDaysAgo, end: now });
         }
         if (lastOrderFilter === 'over90days') {
