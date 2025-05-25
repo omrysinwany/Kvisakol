@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, Package, ShoppingBasket, Users, Settings, LayoutList } from 'lucide-react'; // Changed UsersGroup to Users, Added LayoutList
+import { LayoutDashboard, Package, ShoppingBasket, Users, Settings, LayoutList } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -13,15 +13,16 @@ interface NavItem {
   label: string;
   icon: LucideIcon;
   isSuperAdminOnly?: boolean;
-  target?: string; // Added target for new tab behavior
-  rel?: string;    // Added rel for new tab behavior
+  target?: string; 
+  rel?: string;    
 }
 
 const baseNavItems: NavItem[] = [
   { href: '/admin/dashboard', label: 'לוח בקרה', icon: LayoutDashboard },
-  { href: '/admin/catalog-preview', label: 'קטלוג', icon: LayoutList }, // Changed href, removed target and rel
+  { href: '/admin/catalog-preview', label: 'קטלוג', icon: LayoutList }, 
   { href: '/admin/products', label: 'ניהול מוצרים', icon: Package },
   { href: '/admin/orders', label: 'ניהול הזמנות', icon: ShoppingBasket },
+  { href: '/admin/customers', label: 'ניהול לקוחות', icon: Users },
   // { href: '/admin/settings', label: 'הגדרות', icon: Settings }, // Example for future extension
 ];
 

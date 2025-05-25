@@ -42,3 +42,13 @@ export interface AdminUser {
   isSuperAdmin: boolean;
   displayName?: string;
 }
+
+export interface CustomerSummary {
+  id: string; // Using phone number as ID for simplicity
+  name: string;
+  phone: string;
+  lastOrderDate: Date;
+  totalOrders: number;
+  totalSpent: number;
+  latestAddress?: string;
+}
