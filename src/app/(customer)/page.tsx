@@ -11,6 +11,8 @@ import { CategoryFilter } from '@/components/customer/category-filter';
 import { PaginationControls } from '@/components/customer/pagination-controls';
 
 const ITEMS_PER_PAGE = 10;
+const PRODUCT_ID_TO_MOVE_LAST = 'kbio1'; // ID for "כביסכל Bio אלגנס – 2 ליטר"
+const TARGET_CATEGORY_FOR_RESORT = 'נוזלי כביסה';
 
 export default function CatalogPage() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -27,9 +29,10 @@ export default function CatalogPage() {
       try {
         const products = await getProductsForCatalog();
         setAllProducts(products);
-        setFilteredProducts(products);
+        setFilteredProducts(products); // Initialize with all products
       } catch (error) {
         console.error("Failed to fetch products:", error);
+        // Optionally, set an error state here to display to the user
       } finally {
         setIsLoading(false);
       }
@@ -43,7 +46,7 @@ export default function CatalogPage() {
   }, [allProducts]);
 
   useEffect(() => {
-    let productsToFilter = allProducts;
+    let productsToFilter = [...allProducts]; // Start with a copy of all products
 
     if (selectedCategory) {
       productsToFilter = productsToFilter.filter(p => p.category === selectedCategory);
@@ -55,18 +58,23 @@ export default function CatalogPage() {
         (p.description && p.description.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
+
+    // Custom sort: if the target category is selected, move the specific product to the end
+    if (selectedCategory === TARGET_CATEGORY_FOR_RESORT) {
+      const targetProductIndex = productsToFilter.findIndex(p => p.id === PRODUCT_ID_TO_MOVE_LAST);
+      if (targetProductIndex > -1) {
+        const [targetProduct] = productsToFilter.splice(targetProductIndex, 1);
+        productsToFilter.push(targetProduct);
+      }
+    }
+    
     setFilteredProducts(productsToFilter);
     setCurrentPage(1); // Reset to first page on filter/search change
 
-    // Scroll to target when category or search term changes
-    // Only scroll if a specific category is selected OR a search term is active.
-    // Do not scroll if "All" categories is selected and search term is empty.
     if (scrollTargetRef.current && !isLoading && (selectedCategory !== null || searchTerm !== '')) {
-      const headerHeight = 64; // Assuming CustomerHeader height is h-16 (4rem = 64px)
-      
+      const headerHeight = 64; 
       const elementTopRelativeToDocument = scrollTargetRef.current.getBoundingClientRect().top + window.scrollY;
       const scrollToPosition = elementTopRelativeToDocument - headerHeight;
-
       window.scrollTo({
         top: scrollToPosition,
         behavior: 'smooth',
@@ -86,11 +94,9 @@ export default function CatalogPage() {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     if (scrollTargetRef.current) {
-      const headerHeight = 64; // Assuming CustomerHeader height is h-16 (4rem = 64px)
-      
+      const headerHeight = 64; 
       const elementTopRelativeToDocument = scrollTargetRef.current.getBoundingClientRect().top + window.scrollY;
       const scrollToPosition = elementTopRelativeToDocument - headerHeight;
-
       window.scrollTo({
         top: scrollToPosition,
         behavior: 'smooth',
