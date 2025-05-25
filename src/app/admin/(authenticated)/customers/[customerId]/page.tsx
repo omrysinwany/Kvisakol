@@ -23,12 +23,16 @@ export default function AdminCustomerDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  console.log('AdminCustomerDetailPage: Initializing. Customer ID from URL params:', customerId);
+
   useEffect(() => {
     console.log('AdminCustomerDetailPage: useEffect triggered. Customer ID from URL params:', customerId);
     if (customerId) {
       const fetchCustomerData = async () => {
         setIsLoading(true);
         setError(null);
+        setCustomer(null); // Reset customer state
+        setOrders([]); // Reset orders state
         try {
           console.log(`AdminCustomerDetailPage: Attempting to fetch customer summary for ID (phone): ${customerId} from 'customers' collection.`);
           const customerSummaryData = await getCustomerSummaryById(customerId);
@@ -37,12 +41,13 @@ export default function AdminCustomerDetailPage() {
           if (customerSummaryData) {
             setCustomer(customerSummaryData);
             
-            const phoneToQueryOrders = customerSummaryData.phone;
-            console.log(`AdminCustomerDetailPage: Phone number from customer summary to query orders: >>${phoneToQueryOrders}<< (Type: ${typeof phoneToQueryOrders})`);
+            // Directly use customerId (which is the phone number from URL) to fetch orders
+            const phoneToQueryOrders = customerId; 
+            console.log(`AdminCustomerDetailPage: Phone number to query orders (directly from customerId): >>${phoneToQueryOrders}<< (Type: ${typeof phoneToQueryOrders})`);
 
             if (!phoneToQueryOrders) {
-                console.error("AdminCustomerDetailPage: Customer summary found, but 'phone' field is missing or empty in the summary. Cannot fetch orders.");
-                setError("שגיאה: מספר טלפון חסר בפרטי הלקוח (בסיכום הלקוח) ולא ניתן לשלוף הזמנות.");
+                console.error("AdminCustomerDetailPage: customerId (phone) is missing or empty. Cannot fetch orders.");
+                setError("שגיאה: מזהה לקוח (טלפון) חסר ולא ניתן לשלוף הזמנות.");
                 setOrders([]);
             } else {
                 console.log(`AdminCustomerDetailPage: Attempting to fetch orders for customer phone: >>${phoneToQueryOrders}<< from 'orders' collection.`);
@@ -51,7 +56,7 @@ export default function AdminCustomerDetailPage() {
                 setOrders(customerOrders.sort((a, b) => new Date(b.orderTimestamp).getTime() - new Date(a.orderTimestamp).getTime()));
             }
           } else {
-            setError(`הלקוח המבוקש עם מזהה (טלפון) ${customerId} לא נמצא במערכת הלקוחות (בקולקציית 'customers').`);
+            setError(`הלקוח המבוקש עם מזהה (טלפון) ${customerId} לא נמצא במערכת הלקוחות (בקולקציית 'customers'). ייתכן שלא ביצע הזמנות עדיין או שהמזהה לא תקין.`);
             console.warn(`AdminCustomerDetailPage: No customer document found for ID ${customerId} in 'customers' collection.`);
             setCustomer(null); 
             setOrders([]); 
@@ -135,7 +140,7 @@ export default function AdminCustomerDetailPage() {
         <div className="container mx-auto px-4 py-8">
             <p className="text-center text-lg">לא נמצא לקוח עם המזהה (טלפון) שהתקבל: {customerId}.</p>
             <p className="text-center text-sm text-muted-foreground">
-                ייתכן שהלקוח עדיין לא ביצע הזמנות או שהמזהה אינו תקין.
+                ייתכן שהלקוח עדיין לא ביצע הזמנות או שהמזהה אינו תקין. בדוק אם הלקוח קיים בקולקציית 'customers'.
             </p>
             <div className="text-center mt-4">
             <Button asChild variant="outline">

@@ -3,7 +3,7 @@
 
 import { db } from '@/lib/firebase/config';
 import type { Order, OrderItem, CustomerSummary } from '@/lib/types';
-import { collection, getDocs, doc, getDoc, setDoc, updateDoc, query, orderBy, Timestamp, where, runTransaction, increment, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, setDoc, updateDoc, query, orderBy, Timestamp, where, runTransaction, increment } from 'firebase/firestore';
 
 // Helper function to convert Firestore doc data to Order
 const orderFromDoc = (docSnap: any): Order => {
@@ -26,7 +26,7 @@ const orderFromDoc = (docSnap: any): Order => {
 // Helper function to convert Firestore doc data to CustomerSummary
 const customerSummaryFromDoc = (docSnap: any): CustomerSummary => {
     const data = docSnap.data();
-    // console.log(`OrderService: customerSummaryFromDoc: data for ${docSnap.id}:`, data); // Kept for debugging if needed
+    // console.log(`OrderService: customerSummaryFromDoc: data for ${docSnap.id}:`, data);
     return {
       id: docSnap.id, // This is the customer's phone number
       name: data.name || '',
@@ -85,13 +85,12 @@ export async function createOrderService(orderDetails: {
   const currentTimestamp = Timestamp.fromDate(new Date());
   const ordersCollectionRef = collection(db, 'orders');
 
-  // Determine next order ID (e.g., o1, o2, ...)
-  let newOrderId = 'o1';
+  let newOrderId = 'o1'; // Default if no orders exist
   try {
-    const ordersSnapshot = await getDocs(query(ordersCollectionRef, orderBy('orderTimestamp', 'desc'))); // Order by timestamp for somewhat chronological IDs if numbers overlap
+    const ordersSnapshot = await getDocs(query(ordersCollectionRef, orderBy('orderTimestamp', 'desc')));
     let maxOrderNumber = 0;
-    ordersSnapshot.docs.forEach(doc => {
-      const id = doc.id;
+    ordersSnapshot.docs.forEach(docSnap => {
+      const id = docSnap.id;
       if (id.startsWith('o')) {
         const numPart = parseInt(id.substring(1), 10);
         if (!isNaN(numPart) && numPart > maxOrderNumber) {
@@ -101,8 +100,9 @@ export async function createOrderService(orderDetails: {
     });
     newOrderId = `o${maxOrderNumber + 1}`;
   } catch (e) {
-    console.error("OrderService: Error determining next order ID for 'oX' format, defaulting to potential collision or Firestore auto-ID logic if this fails:", e);
-    // Fallback or decide if strict 'oX' format is critical; for now, proceeding with calculated newOrderId
+    console.error("OrderService: Error determining next order ID for 'oX' format, defaulting. Error:", e);
+    // Fallback to Firestore auto-ID if 'oX' logic fails critically, or handle as needed.
+    // For now, we will proceed with the calculated newOrderId, but this indicates a potential issue.
   }
   console.log(`OrderService: Determined new order ID: ${newOrderId}`);
 
@@ -111,7 +111,7 @@ export async function createOrderService(orderDetails: {
 
   const newOrderData = {
     customerName: orderDetails.customerName,
-    customerPhone: orderDetails.customerPhone,
+    customerPhone: orderDetails.customerPhone, // Make sure this is consistent
     customerAddress: orderDetails.customerAddress,
     customerNotes: orderDetails.customerNotes || '',
     items: orderDetails.items,
@@ -121,18 +121,18 @@ export async function createOrderService(orderDetails: {
     isViewedByAgent: false,
     agentNotes: '', 
   };
-  console.log(`OrderService: Preparing to save new order ${newOrderId}. Customer details: Name='${orderDetails.customerName}', Phone='${orderDetails.customerPhone}'`);
+  console.log(`OrderService: Preparing to save new order ${newOrderId}. Customer details: Name='${orderDetails.customerName}', Phone='${newOrderData.customerPhone}'`);
 
   try {
-    const customerDocRef = doc(db, 'customers', orderDetails.customerPhone); // Use phone as customer ID
-    console.log(`OrderService: Attempting transaction for customer document: ${orderDetails.customerPhone}`);
+    const customerDocRef = doc(db, 'customers', newOrderData.customerPhone); // Use phone as customer ID
+    console.log(`OrderService: Attempting transaction for customer document: ${newOrderData.customerPhone}`);
     
     await runTransaction(db, async (transaction) => {
       const customerDocSnap = await transaction.get(customerDocRef);
       if (!customerDocSnap.exists()) {
         const newCustomerData = {
-          name: orderDetails.customerName,
-          phone: orderDetails.customerPhone, 
+          name: orderDetails.customerName, // Name from the first order
+          phone: newOrderData.customerPhone, 
           firstOrderDate: currentTimestamp,
           lastOrderDate: currentTimestamp,
           totalOrders: 1,
@@ -140,32 +140,33 @@ export async function createOrderService(orderDetails: {
           latestAddress: orderDetails.customerAddress,
         };
         transaction.set(customerDocRef, newCustomerData);
-        console.log(`OrderService: Created NEW customer document for ${orderDetails.customerPhone} with data:`, newCustomerData);
+        console.log(`OrderService: Created NEW customer document for ${newOrderData.customerPhone} with data:`, newCustomerData);
       } else {
         const existingCustomerData = customerDocSnap.data();
         const existingCustomerName = existingCustomerData.name;
         
         if (orderDetails.customerName !== existingCustomerName) {
             agentNoteForNameDiscrepancy = `הערת מערכת: שם בהזמנה זו ('${orderDetails.customerName}') שונה מהשם הרשום ללקוח זה ('${existingCustomerName}').`;
-            console.log(`OrderService: Customer name mismatch for phone ${orderDetails.customerPhone}. Order name: '${orderDetails.customerName}', Stored name: '${existingCustomerName}'. Agent note will be added.`);
+            console.log(`OrderService: Customer name mismatch for phone ${newOrderData.customerPhone}. Order name: '${orderDetails.customerName}', Stored name: '${existingCustomerName}'. Agent note will be added.`);
         }
 
-        const updatedCustomerData: any = { // Use 'any' or a more specific type for update data
+        const updatedCustomerData: any = { 
           lastOrderDate: currentTimestamp,
           totalOrders: increment(1),
           totalSpent: increment(orderDetails.totalAmount),
           latestAddress: orderDetails.customerAddress,
-          // name: existingCustomerName, // Keep original name in customers collection
+          // name: orderDetails.customerName, // Name IS NOT updated to keep original customer name
         };
-        // Ensure firstOrderDate is preserved and not overwritten if it exists
+         // Ensure firstOrderDate is preserved and not overwritten if it exists
         if (existingCustomerData.firstOrderDate) {
             updatedCustomerData.firstOrderDate = existingCustomerData.firstOrderDate;
         } else {
-            updatedCustomerData.firstOrderDate = currentTimestamp;
+            // This case should ideally not happen if customerDocSnap.exists() is true and structure is good
+            updatedCustomerData.firstOrderDate = currentTimestamp; 
         }
         
         transaction.update(customerDocRef, updatedCustomerData);
-        console.log(`OrderService: UPDATED existing customer document for ${orderDetails.customerPhone}. Update data:`, updatedCustomerData);
+        console.log(`OrderService: UPDATED existing customer document for ${newOrderData.customerPhone}. Update data:`, updatedCustomerData);
       }
     });
     
@@ -175,6 +176,8 @@ export async function createOrderService(orderDetails: {
     
     await setDoc(newOrderDocRef, newOrderData);
     console.log("OrderService: Order created with ID: ", newOrderId, "and data:", newOrderData);
+    console.log(`OrderService: New order saved to Firestore. Customer phone in order: ${newOrderData.customerPhone}`);
+
 
     const createdOrderSnap = await getDoc(newOrderDocRef);
     if (createdOrderSnap.exists()) {
@@ -302,7 +305,7 @@ export async function getOrdersByCustomerPhone(phone: string): Promise<Order[]> 
     );
     const querySnapshot = await getDocs(q);
     const orders = querySnapshot.docs.map(docSnap => orderFromDoc(docSnap));
-    console.log(`OrderService: getOrdersByCustomerPhone: Firestore query for 'customerPhone == "${phone}"' found ${orders.length} orders. Order IDs: [${orders.map(o=> o.id).join(', ')}]`);
+    console.log(`OrderService: Found ${orders.length} orders for phone ${phone}:`, orders.map(o => ({id: o.id, name: o.customerName, phoneInOrder: o.customerPhone})));
     return orders;
   } catch (error) {
     console.error(`OrderService: Error fetching orders for customer phone ${phone}:`, error);
@@ -332,3 +335,4 @@ export async function getCustomerSummaryById(customerId: string): Promise<Custom
       return null;
     }
   }
+
