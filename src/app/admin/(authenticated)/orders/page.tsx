@@ -8,15 +8,15 @@ import { AdminPaginationControls } from '@/components/admin/admin-pagination-con
 import { getOrdersForAdmin, updateOrderStatusService } from '@/services/order-service';
 import type { Order } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Download, CalendarIcon, X, Filter } from 'lucide-react';
+import { Download, CalendarIcon, X } from 'lucide-react'; // Removed Filter icon as it's not used
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { format, startOfDay, endOfDay, subDays, isToday } from 'date-fns';
+import { format, startOfDay, endOfDay, subDays } from 'date-fns'; // Removed isToday as it's not directly used here
 import { he } from 'date-fns/locale';
 import { cn } from "@/lib/utils";
-import { usePathname, useSearchParams } from 'next/navigation'; 
+import { useSearchParams } from 'next/navigation'; // Removed usePathname as it's not strictly needed for this logic
 
 type StatusFilterValue = Order['status'] | 'all';
 
@@ -37,10 +37,9 @@ export default function AdminOrdersPage() {
   const [allOrders, setAllOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
-  const pathname = usePathname();
   const searchParams = useSearchParams(); 
   const initialStatusFilter = searchParams.get('status') as StatusFilterValue | null;
-  const initialPeriodFilter = searchParams.get('period') as string | null;
+  // const initialPeriodFilter = searchParams.get('period') as string | null; // Keep for potential future use if period links are re-enabled
 
   const [statusFilter, setStatusFilter] = useState<StatusFilterValue>(initialStatusFilter || 'all');
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
@@ -63,15 +62,19 @@ export default function AdminOrdersPage() {
       }
     };
     fetchOrders();
-  }, [toast]); // Removed pathname from here as it's handled by searchParams effect
+  }, [toast]);
 
   useEffect(() => {
     const statusFromUrl = searchParams.get('status') as StatusFilterValue | null;
     if (statusFromUrl && availableStatuses.includes(statusFromUrl)) {
       setStatusFilter(statusFromUrl);
-    } else if (!statusFromUrl) {
-      // If no status in URL, default to 'all' to clear previous filter if user navigated directly
+    } else if (!statusFromUrl && initialStatusFilter) {
+      // If status was initially set from URL and then removed, reset to 'all'
+      // This handles navigating back or clearing URL params
       // setStatusFilter('all'); 
+    } else if (!statusFromUrl && !initialStatusFilter) {
+      // Default to 'all' if no URL param and no initial filter
+      // setStatusFilter('all');
     }
     
     const periodFromUrl = searchParams.get('period');
@@ -85,12 +88,12 @@ export default function AdminOrdersPage() {
         setStartDate(startOfDay(sevenDaysAgo));
         setEndDate(endOfDay(today));
       }
-    } else {
-      // If no period in URL, don't automatically clear dates.
-      // User can clear them manually if needed.
-    }
-    setCurrentPage(1); // Reset page when searchParams change
-  }, [searchParams]);
+    } 
+    // If no period in URL, existing dates are kept unless explicitly cleared by user.
+    // This prevents clearing dates if only status filter changes.
+
+    setCurrentPage(1); // Reset page when searchParams (filters) change
+  }, [searchParams, initialStatusFilter]);
 
 
   const handleUpdateStatus = async (orderId: string, newStatus: Order['status']) => {
@@ -145,7 +148,6 @@ export default function AdminOrdersPage() {
   const handleClearDates = () => {
     setStartDate(undefined);
     setEndDate(undefined);
-    // Also remove 'period' from URL if it exists? For now, no.
     setCurrentPage(1);
   };
 
@@ -166,10 +168,10 @@ export default function AdminOrdersPage() {
         <h1 className="text-3xl font-bold tracking-tight">ניהול הזמנות</h1>
       </div>
 
-      <div className="mb-4 p-2 border rounded-lg bg-muted/30 shadow-sm">
+      <div className="mb-4 p-3 border rounded-lg bg-muted/30 shadow-sm">
         <div className="flex flex-wrap items-center gap-2">
           <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value as StatusFilterValue); setCurrentPage(1); }}>
-            <SelectTrigger className="h-9 px-3 text-xs">
+            <SelectTrigger className="h-9 w-auto min-w-[130px] px-3 text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -187,7 +189,7 @@ export default function AdminOrdersPage() {
                   variant={"outline"}
                   size="sm" 
                   className={cn(
-                      "h-9 px-3 text-xs justify-start text-left font-normal",
+                      "h-9 w-[120px] px-2 text-xs justify-start text-left font-normal",
                       !startDate && "text-muted-foreground"
                   )}
                   >
@@ -212,7 +214,7 @@ export default function AdminOrdersPage() {
                   variant={"outline"}
                   size="sm" 
                   className={cn(
-                      "h-9 px-3 text-xs justify-start text-left font-normal",
+                      "h-9 w-[120px] px-2 text-xs justify-start text-left font-normal",
                       !endDate && "text-muted-foreground"
                   )}
                   >
