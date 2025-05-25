@@ -5,7 +5,7 @@ import Image from 'next/image';
 import type { Product } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ShoppingCartIcon, PlusCircle, MinusCircle, Info } from 'lucide-react';
+import { ShoppingCartIcon, PlusCircle, MinusCircle } from 'lucide-react';
 import { useCart } from '@/contexts/cart-context';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
@@ -17,7 +17,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
@@ -90,11 +89,13 @@ export function ProductCard({ product }: ProductCardProps) {
     return `₪${price.toFixed(2)}`;
   }
 
+  const openDialog = () => setIsDialogOpen(true);
+
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <Card className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg">
         
-          <CardHeader className="p-0 cursor-pointer" onClick={() => setIsDialogOpen(true)}>
+          <CardHeader className="p-0 cursor-pointer" onClick={openDialog}>
             <div className="aspect-square relative w-full">
               <Image
                 src={product.imageUrl || '/images/products/placeholder.jpg'}
@@ -111,7 +112,7 @@ export function ProductCard({ product }: ProductCardProps) {
               {product.category && (
                 <Badge
                   variant="secondary"
-                  className="absolute top-2 left-2 z-10 text-xs"
+                  className="absolute top-2 left-2 z-10 text-xs" 
                 >
                   {product.category}
                 </Badge>
@@ -120,7 +121,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </CardHeader>
         
        
-          <CardContent className="p-3 pb-1 flex-1 cursor-pointer" onClick={() => setIsDialogOpen(true)}>
+          <CardContent className="p-3 pb-1 flex-1 cursor-pointer" onClick={openDialog}>
             <CardTitle className="text-primary text-sm h-10 leading-tight overflow-hidden text-center line-clamp-2">
               {product.name}
             </CardTitle>
@@ -128,19 +129,14 @@ export function ProductCard({ product }: ProductCardProps) {
         
         <CardFooter 
           className={cn(
-            "p-3 flex items-center mt-auto",
+            "p-3 flex mt-auto",
             isAdminPreview ? "justify-center" : "flex-col sm:flex-row justify-between items-center gap-1"
           )}
           onClick={(e) => e.stopPropagation()} 
         >
-          <div className="flex items-center gap-1">
+          <div className={cn("flex items-center", isAdminPreview ? "justify-center w-full" : "")}>
             <p className="text-sm font-semibold text-foreground">{formatPrice(product.price)}</p>
-            <DialogTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary">
-                <Info className="h-4 w-4" />
-                <span className="sr-only">פרטים נוספים על {product.name}</span>
-              </Button>
-            </DialogTrigger>
+            {/* Info icon removed */}
           </div>
           
           {!isAdminPreview && (
