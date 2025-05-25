@@ -40,8 +40,8 @@ export function AdminHeader() {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('loggedInKviskalAdmin');
     }
-    console.log('Logout triggered');
-    router.push('/admin/login'); 
+    console.log('Logout triggered, redirecting to homepage');
+    router.push('/'); 
   };
 
   return (
