@@ -19,7 +19,7 @@ export default function CatalogPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const productListRef = useRef<HTMLDivElement>(null);
+  const scrollTargetRef = useRef<HTMLDivElement>(null); // Renamed and will be moved
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -69,13 +69,10 @@ export default function CatalogPage() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    if (productListRef.current) {
-      // Assuming header height is 4rem (h-16 from CustomerHeader)
-      // 1rem is typically 16px, so 4rem = 64px.
-      // Adding a small buffer, e.g., 8px, to ensure content is not touching the header.
-      const headerHeight = 64; // Adjust if header height changes
+    if (scrollTargetRef.current) {
+      const headerHeight = 64; // Assuming CustomerHeader height is h-16 (4rem = 64px)
       
-      const elementTopRelativeToDocument = productListRef.current.getBoundingClientRect().top + window.scrollY;
+      const elementTopRelativeToDocument = scrollTargetRef.current.getBoundingClientRect().top + window.scrollY;
       const scrollToPosition = elementTopRelativeToDocument - headerHeight;
 
       window.scrollTo({
@@ -108,28 +105,30 @@ export default function CatalogPage() {
         </p>
       </header>
       
-      <div className="mb-8 flex flex-col sm:flex-row gap-4 items-center">
-        <div className="relative flex-grow w-full sm:w-auto">
-          <Input 
-            type="search" 
-            placeholder="חפש מוצרים..." 
-            className="pl-10" 
-            value={searchTerm}
-            onChange={handleSearchChange}
-          />
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+      <div ref={scrollTargetRef} className="mb-8"> {/* Attach ref to the wrapper of search and filters */}
+        <div className="flex flex-col sm:flex-row gap-4 items-center mb-6"> {/* Added mb-6 for spacing */}
+          <div className="relative flex-grow w-full sm:w-auto">
+            <Input 
+              type="search" 
+              placeholder="חפש מוצרים..." 
+              className="pl-10" 
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          </div>
         </div>
+        
+        {categories.length > 0 && (
+          <CategoryFilter 
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onSelectCategory={handleSelectCategory}
+          />
+        )}
       </div>
-      
-      {categories.length > 0 && (
-        <CategoryFilter 
-          categories={categories}
-          selectedCategory={selectedCategory}
-          onSelectCategory={handleSelectCategory}
-        />
-      )}
 
-      <div ref={productListRef}> {/* Removed scroll-mt-20 */}
+      <div> {/* Product list container no longer needs a ref for this specific scroll */}
         {paginatedProducts.length > 0 ? (
            <>
               <ProductList products={paginatedProducts} />
