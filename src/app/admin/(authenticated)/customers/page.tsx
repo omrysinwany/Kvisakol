@@ -123,23 +123,23 @@ export default function AdminCustomersPage() {
       </div>
       
       <div className="mb-4 p-3 border rounded-lg bg-muted/30 shadow-sm">
-        <div className="flex flex-col sm:flex-row flex-wrap gap-3 items-end">
-          <div className="relative flex-grow w-full sm:w-auto">
-            <label htmlFor="customer-search" className="text-xs font-medium text-muted-foreground block mb-1.5">חיפוש לקוח</label>
+        <div className="flex flex-row flex-wrap items-end gap-3">
+          <div className="relative flex-1 min-w-[150px]"> {/* Allow search to grow and shrink */}
+            <label htmlFor="customer-search" className="text-xs font-medium text-muted-foreground block mb-1.5">חיפוש</label> {/* Shorter label */}
             <div className="relative">
               <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 id="customer-search"
                 type="search"
-                placeholder="חיפוש לפי שם או טלפון..."
+                placeholder="שם או טלפון..." 
                 className="pl-10 rtl:pr-10 w-full h-9 text-xs"
                 value={searchTerm}
                 onChange={handleSearchChange}
               />
             </div>
           </div>
-          <div className="w-full sm:w-auto sm:min-w-[200px]">
-            <label htmlFor="last-order-filter" className="text-xs font-medium text-muted-foreground block mb-1.5">סינון לפי הזמנה אחרונה</label>
+          <div className="min-w-[180px]"> {/* Select with a minimum width for usability */}
+            <label htmlFor="last-order-filter" className="text-xs font-medium text-muted-foreground block mb-1.5">הזמנה אחרונה</label> {/* Shorter label */}
             <Select value={lastOrderFilter} onValueChange={handleLastOrderFilterChange}>
               <SelectTrigger id="last-order-filter" className="h-9 w-full px-3 text-xs">
                 <SelectValue />
@@ -155,7 +155,6 @@ export default function AdminCustomersPage() {
           </div>
         </div>
       </div>
-
 
       <Card className="shadow-lg">
         <CardHeader className="flex flex-row items-center justify-between space-x-2 rtl:space-x-reverse">
