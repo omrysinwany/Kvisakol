@@ -3,19 +3,20 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { getOrdersByCustomerPhone, getCustomerSummaryById, updateOrderStatusService } from '@/services/order-service';
+import { getOrdersByCustomerPhone, getCustomerSummaryById } from '@/services/order-service';
 import type { CustomerSummary, Order } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { CustomerDetailView } from '@/components/admin/customer-detail-view';
+import { updateOrderStatusService } from '@/services/order-service'; // Added for potential use
 
 export default function AdminCustomerDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  const customerId = params.customerId as string;
+  const customerId = params.customerId as string; // This is the customer's phone number
 
   const [customer, setCustomer] = useState<CustomerSummary | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -42,8 +43,8 @@ export default function AdminCustomerDetailPage() {
           } else {
             setError('הלקוח המבוקש לא נמצא במערכת הלקוחות.');
             console.warn(`AdminCustomerDetailPage: No customer document found for ID ${customerId} in 'customers' collection.`);
-            setCustomer(null);
-            setOrders([]);
+            setCustomer(null); // Explicitly set to null if not found
+            setOrders([]); // Clear orders if customer not found
           }
         } catch (err) {
           console.error("AdminCustomerDetailPage: Failed to fetch customer data:", err);
@@ -61,6 +62,8 @@ export default function AdminCustomerDetailPage() {
   }, [customerId]);
 
   const handleUpdateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
+    // This function might be needed if you want to update order status from this page
+    // For now, it's similar to the one in [orderId]/page.tsx
     const statusTranslationsToast: Record<Order['status'], string> = {
       new: 'חדשה',
       received: 'התקבלה',
@@ -79,7 +82,7 @@ export default function AdminCustomerDetailPage() {
         });
         // Refresh customer summary if an order impacting totalSpent is completed/cancelled
         if (newStatus === 'completed' || newStatus === 'cancelled') {
-            if (customer) {
+            if (customer) { // Check if customer exists before trying to refresh
                 const updatedCustomerSummary = await getCustomerSummaryById(customer.id);
                 if (updatedCustomerSummary) {
                     setCustomer(updatedCustomerSummary);
@@ -117,7 +120,7 @@ export default function AdminCustomerDetailPage() {
     );
   }
 
-  if (!customer) {
+  if (!customer) { // If customer summary wasn't found
     return (
         <div className="container mx-auto px-4 py-8">
             <p className="text-center text-lg">לא נמצא לקוח עם המזהה (טלפון) שהתקבל: {customerId}.</p>
@@ -136,6 +139,7 @@ export default function AdminCustomerDetailPage() {
     );
   }
   
+  // This log is important: it shows if orders were found even if customer summary was.
   if (customer && orders.length === 0) {
     console.log(`AdminCustomerDetailPage: Customer ${customer.name} found, but they have 0 orders fetched from 'orders' collection.`);
   }
