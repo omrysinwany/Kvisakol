@@ -77,9 +77,8 @@ export function AdminSidebarNav({
             (pathname.startsWith('/admin') && item.href === '/') ? '' : (pathname === item.href ? 'bg-accent text-primary font-semibold' : ''),
             isMobile ? 'text-base' : 'text-sm'
           )}
-          // Add target="_blank" if the catalog link should open in a new tab
-          // target={item.href === '/' ? '_blank' : undefined} 
-          // rel={item.href === '/' ? 'noopener noreferrer' : undefined}
+          target={item.href === '/' ? '_blank' : undefined} 
+          rel={item.href === '/' ? 'noopener noreferrer' : undefined}
         >
           <item.icon className="h-4 w-4" />
           {item.label}
