@@ -19,7 +19,7 @@ export default function CatalogPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const scrollTargetRef = useRef<HTMLDivElement>(null); // Renamed and will be moved
+  const scrollTargetRef = useRef<HTMLDivElement>(null); 
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -56,15 +56,34 @@ export default function CatalogPage() {
       );
     }
     setFilteredProducts(productsToFilter);
-    setCurrentPage(1);
-  }, [selectedCategory, searchTerm, allProducts]);
+    setCurrentPage(1); // Reset to first page on filter/search change
+
+    // Scroll to target when category or search term changes
+    // This check ensures we don't scroll on initial load if allProducts is still empty
+    // and it's not a direct category/search interaction yet.
+    // We only want to scroll if it's a user-driven filter/search change after initial load.
+    if (scrollTargetRef.current && !isLoading) { // Added !isLoading to prevent scroll on initial fetch
+      const headerHeight = 64; // Assuming CustomerHeader height is h-16 (4rem = 64px)
+      
+      const elementTopRelativeToDocument = scrollTargetRef.current.getBoundingClientRect().top + window.scrollY;
+      const scrollToPosition = elementTopRelativeToDocument - headerHeight;
+
+      window.scrollTo({
+        top: scrollToPosition,
+        behavior: 'smooth',
+      });
+    }
+
+  }, [selectedCategory, searchTerm, allProducts, isLoading]); // Added isLoading to dependency array
 
   const handleSelectCategory = (category: string | null) => {
     setSelectedCategory(category);
+    // Scrolling is now handled by the useEffect above
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
+     // Scrolling is now handled by the useEffect above
   };
 
   const handlePageChange = (page: number) => {
@@ -88,7 +107,7 @@ export default function CatalogPage() {
     currentPage * ITEMS_PER_PAGE
   );
   
-  if (isLoading) {
+  if (isLoading && allProducts.length === 0) { // Show loading only on initial full load
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <p className="text-lg text-muted-foreground">טוען מוצרים...</p>
@@ -105,8 +124,8 @@ export default function CatalogPage() {
         </p>
       </header>
       
-      <div ref={scrollTargetRef} className="mb-8"> {/* Attach ref to the wrapper of search and filters */}
-        <div className="flex flex-col sm:flex-row gap-4 items-center mb-6"> {/* Added mb-6 for spacing */}
+      <div ref={scrollTargetRef} className="mb-8"> 
+        <div className="flex flex-col sm:flex-row gap-4 items-center mb-6"> 
           <div className="relative flex-grow w-full sm:w-auto">
             <Input 
               type="search" 
@@ -128,7 +147,7 @@ export default function CatalogPage() {
         )}
       </div>
 
-      <div> {/* Product list container no longer needs a ref for this specific scroll */}
+      <div>
         {paginatedProducts.length > 0 ? (
            <>
               <ProductList products={paginatedProducts} />
