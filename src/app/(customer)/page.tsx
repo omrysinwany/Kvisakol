@@ -70,7 +70,7 @@ export default function CatalogPage() {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     if (typeof window !== 'undefined') {
-      window.scrollTo(0, 0);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
