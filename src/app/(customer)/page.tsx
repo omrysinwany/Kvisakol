@@ -6,7 +6,7 @@ import { getProductsForCatalog } from '@/services/product-service';
 import type { Product } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react'; // Added useRef
 import { CategoryFilter } from '@/components/customer/category-filter';
 import { PaginationControls } from '@/components/customer/pagination-controls';
 
@@ -19,6 +19,7 @@ export default function CatalogPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const productListRef = useRef<HTMLDivElement>(null); // Ref for the product list section
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -69,8 +70,9 @@ export default function CatalogPage() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    if (typeof window !== 'undefined') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (productListRef.current) {
+      // Scroll to the top of the product list section
+      productListRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
@@ -118,22 +120,24 @@ export default function CatalogPage() {
         />
       )}
 
-      {paginatedProducts.length > 0 ? (
-         <>
-            <ProductList products={paginatedProducts} />
-            {totalPages > 1 && (
-              <PaginationControls
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-              />
-            )}
-         </>
-      ): (
-        <p className="text-center text-muted-foreground py-8">
-          לא נמצאו מוצרים התואמים את בחירתך.
-        </p>
-      )}
+      <div ref={productListRef} className="scroll-mt-20"> {/* Added ref and scroll-mt for potential sticky header offset */}
+        {paginatedProducts.length > 0 ? (
+           <>
+              <ProductList products={paginatedProducts} />
+              {totalPages > 1 && (
+                <PaginationControls
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
+              )}
+           </>
+        ): (
+          <p className="text-center text-muted-foreground py-8">
+            לא נמצאו מוצרים התואמים את בחירתך.
+          </p>
+        )}
+      </div>
     </div>
   );
 }
