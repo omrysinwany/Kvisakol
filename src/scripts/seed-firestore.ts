@@ -25,20 +25,18 @@ async function seedCollection<T extends { id?: string }>(
   let count = 0;
 
   data.forEach((item) => {
-    // Firestore can auto-generate IDs if we don't provide one.
-    // However, our placeholder data has IDs, so we'll use them.
-    // If your placeholder IDs are not unique or you prefer Firestore IDs, adjust accordingly.
-    const docId = item.id || doc(collectionRef).id; // Use placeholder ID or generate if missing
+    const docId = item.id || doc(collectionRef).id; 
     const docRef = doc(db, collectionName, docId);
     
     const dataToSet = transform ? transform(item) : { ...item };
-    if (dataToSet.id) { // Remove id from the data being set if it was used for docId
+    if (item.id && dataToSet.id) { // Ensure id from item is used for docId, not as a field if it's the same
         delete dataToSet.id;
     }
 
+
     batch.set(docRef, dataToSet);
     count++;
-    if (count % 400 === 0) { // Firestore batch limit is 500 operations
+    if (count % 400 === 0) { 
       console.log(`Processed ${count} items for ${collectionName}...`);
     }
   });
@@ -53,36 +51,41 @@ async function seedCollection<T extends { id?: string }>(
 
 async function main() {
   console.log('Starting Firestore seeding process...');
+  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+  if (!projectId) {
+    console.error("Error: NEXT_PUBLIC_FIREBASE_PROJECT_ID is not set in your .env.local file.");
+    console.error("Please ensure your .env.local file is correctly configured with your Firebase project details.");
+    return;
+  }
+  console.log(`Seeding Firestore for project ID: ${projectId}`);
 
-  // Seed Admin Users
-  // Note: Passwords are in plaintext (passwordHash field). THIS IS NOT SECURE FOR PRODUCTION.
-  // Use Firebase Authentication for real user management.
+
   await seedCollection<AdminUser>('adminUsers', placeholderAdminUsers, user => {
-    const { id, ...userData } = user; // Ensure id is not part of the document data if used as docId
+    const { id, ...userData } = user; 
     return userData;
   });
 
-  // Seed Products
   await seedCollection<Product>('products', placeholderProducts, product => {
     const { id, ...productData } = product;
     return {
         ...productData,
-        price: Number(productData.price) // Ensure price is a number
+        price: Number(productData.price) 
     };
   });
 
-  // Seed Orders
-  // Convert orderTimestamp to Firestore Timestamp
   await seedCollection<Order>('orders', placeholderOrders, order => {
     const { id, orderTimestamp, ...orderData } = order;
     return {
       ...orderData,
-      orderTimestamp: orderTimestamp instanceof Date ? Timestamp.fromDate(orderTimestamp) : Timestamp.now(), // Convert JS Date to Firestore Timestamp
-      totalAmount: Number(orderData.totalAmount) // Ensure totalAmount is a number
+      orderTimestamp: orderTimestamp instanceof Date ? Timestamp.fromDate(orderTimestamp) : Timestamp.now(), 
+      totalAmount: Number(orderData.totalAmount) 
     };
   });
 
   console.log('Firestore seeding process completed.');
 }
 
-main().catch(console.error);
+main().catch((error) => {
+    console.error("Seeding script failed:", error);
+    process.exit(1); // Exit with error code if main function fails
+});
