@@ -10,13 +10,13 @@ import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { CustomerDetailView } from '@/components/admin/customer-detail-view';
-import { updateOrderStatusService } from '@/services/order-service'; // Added for potential use
+import { updateOrderStatusService } from '@/services/order-service'; 
 
 export default function AdminCustomerDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  const customerId = params.customerId as string; // This is the customer's phone number
+  const customerId = params.customerId as string; 
 
   const [customer, setCustomer] = useState<CustomerSummary | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -36,15 +36,25 @@ export default function AdminCustomerDetailPage() {
 
           if (customerSummaryData) {
             setCustomer(customerSummaryData);
-            console.log(`AdminCustomerDetailPage: Attempting to fetch orders for customer phone: ${customerSummaryData.phone}`);
-            const customerOrders = await getOrdersByCustomerPhone(customerSummaryData.phone);
-            console.log(`AdminCustomerDetailPage: Fetched ${customerOrders.length} orders for customer phone ${customerSummaryData.phone}:`, customerOrders.map(o => o.id));
-            setOrders(customerOrders.sort((a, b) => new Date(b.orderTimestamp).getTime() - new Date(a.orderTimestamp).getTime()));
+            
+            const phoneToQuery = customerSummaryData.phone;
+            console.log(`AdminCustomerDetailPage: Phone number from customer summary to query orders: ${phoneToQuery}`);
+
+            if (!phoneToQuery) {
+                console.error("AdminCustomerDetailPage: Customer summary found, but phone number is missing. Cannot fetch orders.");
+                setError("שגיאה: מספר טלפון חסר בפרטי הלקוח ולא ניתן לשלוף הזמנות.");
+                setOrders([]);
+            } else {
+                console.log(`AdminCustomerDetailPage: Attempting to fetch orders for customer phone: ${phoneToQuery}`);
+                const customerOrders = await getOrdersByCustomerPhone(phoneToQuery);
+                console.log(`AdminCustomerDetailPage: Fetched ${customerOrders.length} orders for customer phone ${phoneToQuery}:`, customerOrders.map(o => o.id));
+                setOrders(customerOrders.sort((a, b) => new Date(b.orderTimestamp).getTime() - new Date(a.orderTimestamp).getTime()));
+            }
           } else {
             setError('הלקוח המבוקש לא נמצא במערכת הלקוחות.');
             console.warn(`AdminCustomerDetailPage: No customer document found for ID ${customerId} in 'customers' collection.`);
-            setCustomer(null); // Explicitly set to null if not found
-            setOrders([]); // Clear orders if customer not found
+            setCustomer(null); 
+            setOrders([]); 
           }
         } catch (err) {
           console.error("AdminCustomerDetailPage: Failed to fetch customer data:", err);
@@ -62,8 +72,6 @@ export default function AdminCustomerDetailPage() {
   }, [customerId]);
 
   const handleUpdateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
-    // This function might be needed if you want to update order status from this page
-    // For now, it's similar to the one in [orderId]/page.tsx
     const statusTranslationsToast: Record<Order['status'], string> = {
       new: 'חדשה',
       received: 'התקבלה',
@@ -80,9 +88,9 @@ export default function AdminCustomerDetailPage() {
           title: "סטטוס הזמנה עודכן",
           description: `הסטטוס של הזמנה ${orderId.substring(orderId.length - 6)} שונה ל: ${statusTranslationsToast[newStatus]}.`,
         });
-        // Refresh customer summary if an order impacting totalSpent is completed/cancelled
+        
         if (newStatus === 'completed' || newStatus === 'cancelled') {
-            if (customer) { // Check if customer exists before trying to refresh
+            if (customer) { 
                 const updatedCustomerSummary = await getCustomerSummaryById(customer.id);
                 if (updatedCustomerSummary) {
                     setCustomer(updatedCustomerSummary);
@@ -98,7 +106,6 @@ export default function AdminCustomerDetailPage() {
       toast({ variant: "destructive", title: "שגיאה", description: "אירעה תקלה בעדכון סטטוס ההזמנה." });
     }
   };
-
 
   if (isLoading) {
     return <div className="container mx-auto px-4 py-8"><p>טוען פרטי לקוח והזמנות...</p></div>;
@@ -120,7 +127,7 @@ export default function AdminCustomerDetailPage() {
     );
   }
 
-  if (!customer) { // If customer summary wasn't found
+  if (!customer) { 
     return (
         <div className="container mx-auto px-4 py-8">
             <p className="text-center text-lg">לא נמצא לקוח עם המזהה (טלפון) שהתקבל: {customerId}.</p>
@@ -139,9 +146,8 @@ export default function AdminCustomerDetailPage() {
     );
   }
   
-  // This log is important: it shows if orders were found even if customer summary was.
-  if (customer && orders.length === 0) {
-    console.log(`AdminCustomerDetailPage: Customer ${customer.name} found, but they have 0 orders fetched from 'orders' collection.`);
+  if (customer && orders.length === 0 && !isLoading && !error) {
+    console.log(`AdminCustomerDetailPage: Customer ${customer.name} (phone: ${customer.phone}) summary found, but they have 0 orders fetched from 'orders' collection for this phone number.`);
   }
 
 
