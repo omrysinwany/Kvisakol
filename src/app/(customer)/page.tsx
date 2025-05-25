@@ -11,9 +11,13 @@ import { CategoryFilter } from '@/components/customer/category-filter';
 import { PaginationControls } from '@/components/customer/pagination-controls';
 
 const ITEMS_PER_PAGE = 10;
-const PRODUCT_ID_TO_MOVE_SECOND_LAST = 'kbio1'; // ID for "כביסכל Bio אלגנס – 2 ליטר"
-const PRODUCT_ID_TO_MOVE_VERY_LAST = 'kbio11';  // ID for "כביסכל Bio רד רוז – 2 ליטר"
-const TARGET_CATEGORY_FOR_RESORT = 'נוזלי כביסה';
+const PRODUCT_ID_TO_MOVE_SECOND_LAST_NK = 'kbio1'; // ID for "כביסכל Bio אלגנס – 2 ליטר"
+const PRODUCT_ID_TO_MOVE_VERY_LAST_NK = 'kbio11';  // ID for "כביסכל Bio רד רוז – 2 ליטר"
+const TARGET_CATEGORY_FOR_RESORT_NK = 'נוזלי כביסה';
+
+const PRODUCT_ID_TO_MOVE_LAST_PFF = 'kpff1'; // ID for "מבשם רצפות פרוביוטי מאסק פלאוורס"
+const TARGET_CATEGORY_FOR_RESORT_PFF = 'פרפלור מבשמי רצפות';
+
 
 export default function CatalogPage() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -61,16 +65,16 @@ export default function CatalogPage() {
     }
 
     // Custom sort: if the target category is selected, move specific products to the end
-    if (selectedCategory === TARGET_CATEGORY_FOR_RESORT) {
+    if (selectedCategory === TARGET_CATEGORY_FOR_RESORT_NK) {
       let productSecondLast: Product | null = null;
       let productVeryLast: Product | null = null;
       
       const remainingProducts = productsToFilter.filter(p => {
-        if (p.id === PRODUCT_ID_TO_MOVE_SECOND_LAST) {
+        if (p.id === PRODUCT_ID_TO_MOVE_SECOND_LAST_NK) {
           productSecondLast = p;
           return false;
         }
-        if (p.id === PRODUCT_ID_TO_MOVE_VERY_LAST) {
+        if (p.id === PRODUCT_ID_TO_MOVE_VERY_LAST_NK) {
           productVeryLast = p;
           return false;
         }
@@ -83,6 +87,19 @@ export default function CatalogPage() {
       }
       if (productVeryLast) {
         productsToFilter.push(productVeryLast);
+      }
+    } else if (selectedCategory === TARGET_CATEGORY_FOR_RESORT_PFF) {
+      let productToMoveLast: Product | null = null;
+      const remainingProducts = productsToFilter.filter(p => {
+        if (p.id === PRODUCT_ID_TO_MOVE_LAST_PFF) {
+          productToMoveLast = p;
+          return false;
+        }
+        return true;
+      });
+      productsToFilter = [...remainingProducts];
+      if (productToMoveLast) {
+        productsToFilter.push(productToMoveLast);
       }
     }
     
