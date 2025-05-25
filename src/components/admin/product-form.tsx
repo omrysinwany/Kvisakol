@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import Image from 'next/image';
-import { UploadCloud } from 'lucide-react'; // Keep for placeholder if no image
+import { UploadCloud } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -24,7 +24,7 @@ const productFormSchema = z.object({
   name: z.string().min(3, { message: 'שם מוצר חייב להכיל לפחות 3 תווים.' }),
   description: z.string().min(10, { message: 'תיאור חייב להכיל לפחות 10 תווים.' }),
   price: z.coerce.number().positive({ message: 'מחיר חייב להיות מספר חיובי.' }),
-  imageUrl: z.string().url({ message: 'כתובת תמונה לא תקינה.' }).optional().or(z.literal('')), // Keep for data model
+  imageUrl: z.string().url({ message: 'כתובת תמונה לא תקינה.' }).optional().or(z.literal('')),
   category: z.string().optional().default(NO_CATEGORY_VALUE),
   isActive: z.boolean().default(true),
 });
@@ -79,14 +79,13 @@ export function ProductForm({ initialData, onSubmitSuccess, availableCategories 
 
     const finalCategory = data.category === NO_CATEGORY_VALUE ? '' : data.category;
 
-    // The imageUrl will be taken from initialData if editing, or default if new and not changed by an upload mechanism (which is now removed)
-    const finalImageUrl = initialData?.imageUrl || 'https://placehold.co/600x400.png'; 
+    const finalImageUrl = initialData?.imageUrl || '/images/products/placeholder.jpg'; 
 
     const newOrUpdatedProduct: Product = {
       id: initialData?.id || `prod-${Date.now()}`, 
       ...data,
       price: Number(data.price), 
-      imageUrl: finalImageUrl, // Use the existing or default image URL
+      imageUrl: finalImageUrl,
       dataAiHint: initialData?.dataAiHint || 'custom product',
       category: finalCategory,
     };
@@ -94,7 +93,6 @@ export function ProductForm({ initialData, onSubmitSuccess, availableCategories 
     if (onSubmitSuccess) {
       onSubmitSuccess(newOrUpdatedProduct);
     } else {
-      // This path is less likely now as onSubmitSuccess is usually provided
       toast({
         title: initialData ? 'מוצר עודכן!' : 'מוצר נוצר!',
         description: `המוצר "${data.name}" ${initialData ? 'עודכן' : 'נוצר'} בהצלחה.`,
@@ -103,23 +101,6 @@ export function ProductForm({ initialData, onSubmitSuccess, availableCategories 
     }
   };
   
-  // handleImageInputChange is no longer needed as file input is removed.
-  // const handleImageInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = event.target.files?.[0];
-  //   if (file) {
-  //     const reader = new FileReader();
-  //     reader.onloadend = () => {
-  //       setImagePreview(reader.result as string);
-  //       form.setValue('imageUrl', reader.result as string); // Update form value if image changes
-  //     };
-  //     reader.readAsDataURL(file);
-  //   } else {
-  //     setImagePreview(initialData?.imageUrl || null);
-  //     form.setValue('imageUrl', initialData?.imageUrl || '');
-  //   }
-  // };
-
-
   return (
     <Card>
       <CardHeader>
@@ -134,19 +115,19 @@ export function ProductForm({ initialData, onSubmitSuccess, availableCategories 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="md:col-span-1 space-y-2">
                 <FormLabel>תמונת מוצר</FormLabel>
-                  <div className="aspect-square w-full relative border border-dashed rounded-lg flex flex-col justify-center items-center overflow-hidden">
+                  <div className="aspect-square w-full relative border rounded-lg flex flex-col justify-center items-center overflow-hidden">
                     {imagePreview ? (
                       <Image 
                         src={imagePreview} 
                         alt="תצוגת מוצר" 
-                        layout="fill" 
-                        objectFit="cover" 
-                        className="rounded-lg" 
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover rounded-lg" 
+                        data-ai-hint={initialData?.dataAiHint || 'product image'}
                         onError={(e) => {
-                            // Fallback to a placeholder if the image fails to load
-                            e.currentTarget.srcset = 'https://placehold.co/300x300.png';
-                            e.currentTarget.src = 'https://placehold.co/300x300.png';
-                            setImagePreview('https://placehold.co/300x300.png');
+                            e.currentTarget.srcset = '/images/products/placeholder.jpg';
+                            e.currentTarget.src = '/images/products/placeholder.jpg';
+                            setImagePreview('/images/products/placeholder.jpg');
                         }}
                       />
                     ) : (
@@ -155,10 +136,7 @@ export function ProductForm({ initialData, onSubmitSuccess, availableCategories 
                         <p className="mt-2 text-sm">אין תמונה זמינה</p>
                       </div>
                     )}
-                     {/* File input removed to make it display-only */}
                   </div>
-                  {/* Description about uploading or pasting URL removed */}
-                  {/* URL input field removed */}
               </div>
 
               <div className="md:col-span-2 space-y-6">
@@ -228,7 +206,6 @@ export function ProductForm({ initialData, onSubmitSuccess, availableCategories 
                                 ))}
                                 </SelectContent>
                             </Select>
-                            {/* Description for category select removed */}
                             <FormMessage />
                             </FormItem>
                         )}
