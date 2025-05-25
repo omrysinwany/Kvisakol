@@ -4,6 +4,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { OrderTable } from '@/components/admin/order-table';
+import { AdminPaginationControls } from '@/components/admin/admin-pagination-controls'; // Assuming this exists
 import { getOrdersForAdmin, updateOrderStatusService } from '@/services/order-service';
 import type { Order } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,8 @@ import { cn } from "@/lib/utils";
 import { usePathname } from 'next/navigation';
 
 type StatusFilterValue = Order['status'] | 'all';
+
+const ITEMS_PER_PAGE = 10; // Changed from 15 to 10
 
 const statusTranslationsForFilter: Record<StatusFilterValue, string> = {
   all: 'כל הסטטוסים',
@@ -36,6 +39,7 @@ export default function AdminOrdersPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilterValue>('all');
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [currentPage, setCurrentPage] = useState(1); // Added for pagination
   const { toast } = useToast();
   const pathname = usePathname();
 
@@ -62,7 +66,6 @@ export default function AdminOrdersPage() {
         setAllOrders(prevOrders =>
           prevOrders.map(o => (o.id === orderId ? { ...updatedOrder } : o))
         );
-        // Find the correct translation for toast based on new status
         const statusKeyForToast = newStatus as keyof typeof statusTranslationsForFilter;
         toast({
           title: "סטטוס הזמנה עודכן",
@@ -93,6 +96,16 @@ export default function AdminOrdersPage() {
 
     return ordersToFilter;
   }, [allOrders, statusFilter, startDate, endDate]);
+  
+  const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
+  const paginatedOrders = filteredOrders.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   const handleClearDates = () => {
     setStartDate(undefined);
@@ -119,7 +132,7 @@ export default function AdminOrdersPage() {
       <div className="mb-4 p-2 border rounded-lg bg-muted/30 shadow-sm">
         <div className="flex flex-wrap items-center gap-2">
           <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilterValue)}>
-            <SelectTrigger className="h-9 px-3 text-xs w-auto">
+            <SelectTrigger className="h-9 px-3 text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -137,7 +150,7 @@ export default function AdminOrdersPage() {
                   variant={"outline"}
                   size="sm" 
                   className={cn(
-                      "h-9 px-3 text-xs w-auto justify-start text-left font-normal",
+                      "h-9 px-3 text-xs justify-start text-left font-normal",
                       !startDate && "text-muted-foreground"
                   )}
                   >
@@ -162,7 +175,7 @@ export default function AdminOrdersPage() {
                   variant={"outline"}
                   size="sm" 
                   className={cn(
-                      "h-9 px-3 text-xs w-auto justify-start text-left font-normal",
+                      "h-9 px-3 text-xs justify-start text-left font-normal",
                       !endDate && "text-muted-foreground"
                   )}
                   >
@@ -204,8 +217,17 @@ export default function AdminOrdersPage() {
           </Button>
         </CardHeader>
         <CardContent>
-          {filteredOrders.length > 0 ? (
-            <OrderTable orders={filteredOrders} onUpdateStatus={handleUpdateStatus} />
+          {paginatedOrders.length > 0 ? (
+             <>
+                <OrderTable orders={paginatedOrders} onUpdateStatus={handleUpdateStatus} />
+                {totalPages > 1 && (
+                    <AdminPaginationControls
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                    />
+                )}
+            </>
           ) : (
             <div className="text-center py-8">
               <p className="text-muted-foreground">
@@ -218,4 +240,3 @@ export default function AdminOrdersPage() {
     </>
   );
 }
-
