@@ -6,7 +6,7 @@ import { getProductsForCatalog } from '@/services/product-service';
 import type { Product } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
-import { useEffect, useState, useMemo, useRef } from 'react'; // Added useRef
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { CategoryFilter } from '@/components/customer/category-filter';
 import { PaginationControls } from '@/components/customer/pagination-controls';
 
@@ -19,7 +19,7 @@ export default function CatalogPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const productListRef = useRef<HTMLDivElement>(null); // Ref for the product list section
+  const productListRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -27,10 +27,9 @@ export default function CatalogPage() {
       try {
         const products = await getProductsForCatalog();
         setAllProducts(products);
-        setFilteredProducts(products); // Initially, all products are shown
+        setFilteredProducts(products);
       } catch (error) {
         console.error("Failed to fetch products:", error);
-        // Handle error appropriately, e.g., show a message to the user
       } finally {
         setIsLoading(false);
       }
@@ -57,7 +56,7 @@ export default function CatalogPage() {
       );
     }
     setFilteredProducts(productsToFilter);
-    setCurrentPage(1); // Reset to first page on filter change
+    setCurrentPage(1);
   }, [selectedCategory, searchTerm, allProducts]);
 
   const handleSelectCategory = (category: string | null) => {
@@ -71,8 +70,18 @@ export default function CatalogPage() {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     if (productListRef.current) {
-      // Scroll to the top of the product list section
-      productListRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Assuming header height is 4rem (h-16 from CustomerHeader)
+      // 1rem is typically 16px, so 4rem = 64px.
+      // Adding a small buffer, e.g., 8px, to ensure content is not touching the header.
+      const headerHeight = 64; // Adjust if header height changes
+      
+      const elementTopRelativeToDocument = productListRef.current.getBoundingClientRect().top + window.scrollY;
+      const scrollToPosition = elementTopRelativeToDocument - headerHeight;
+
+      window.scrollTo({
+        top: scrollToPosition,
+        behavior: 'smooth',
+      });
     }
   };
 
@@ -120,7 +129,7 @@ export default function CatalogPage() {
         />
       )}
 
-      <div ref={productListRef} className="scroll-mt-20"> {/* Added ref and scroll-mt for potential sticky header offset */}
+      <div ref={productListRef}> {/* Removed scroll-mt-20 */}
         {paginatedProducts.length > 0 ? (
            <>
               <ProductList products={paginatedProducts} />
