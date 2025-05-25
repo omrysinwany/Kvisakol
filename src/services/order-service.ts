@@ -13,7 +13,7 @@ const orderFromDoc = (docSnap: any): Order => {
     customerName: data.customerName || '',
     customerPhone: data.customerPhone || '',
     customerAddress: data.customerAddress || '',
-    customerNotes: data.customerNotes || undefined,
+    customerNotes: data.customerNotes || '', // Ensure it's an empty string if undefined
     items: data.items || [],
     totalAmount: data.totalAmount !== undefined ? Number(data.totalAmount) : 0,
     orderTimestamp: data.orderTimestamp instanceof Timestamp ? data.orderTimestamp.toDate() : new Date(0),
@@ -67,8 +67,8 @@ export async function createOrderService(orderDetails: {
   console.log('Creating order in Firestore:', orderDetails);
   try {
     const ordersCollectionRef = collection(db, 'orders');
-    const q = query(ordersCollectionRef, orderBy('orderTimestamp', 'desc')); // Query to get existing orders to determine next ID
-    const existingOrdersSnapshot = await getDocs(q);
+    // To generate o1, o2 style IDs:
+    const existingOrdersSnapshot = await getDocs(query(ordersCollectionRef, orderBy('orderTimestamp', 'desc')));
     let highestNumericId = 0;
     existingOrdersSnapshot.forEach(docSnap => {
       const docId = docSnap.id;
@@ -84,11 +84,11 @@ export async function createOrderService(orderDetails: {
 
     const newOrderData = {
       ...orderDetails,
-      customerNotes: orderDetails.customerNotes || '',
+      customerNotes: orderDetails.customerNotes || '', // Ensure customerNotes is an empty string if undefined
+      agentNotes: '', // Initialize agentNotes as an empty string
       orderTimestamp: Timestamp.fromDate(new Date()),
       status: 'new' as Order['status'],
       isViewedByAgent: false,
-      agentNotes: '', 
     };
 
     const orderDocRef = doc(db, 'orders', newOrderId);
@@ -118,7 +118,7 @@ export async function updateOrderStatusService(orderId: string, newStatus: Order
       updateData.isViewedByAgent = true;
     }
 
-    await updateDoc(orderDocRef, updateData as any);
+    await updateDoc(orderDocRef, updateData as any); // Type assertion needed for partial update
     const updatedDocSnap = await getDoc(orderDocRef);
      if (updatedDocSnap.exists()) {
       return orderFromDoc(updatedDocSnap);
@@ -131,13 +131,13 @@ export async function updateOrderStatusService(orderId: string, newStatus: Order
 }
 
 export async function markOrderAsViewedService(orderId: string): Promise<Order | null> {
-  console.log(`Marking order as viewed for ID: ${orderId} in Firestore.`);
+  console.log(`Marking order for ID: ${orderId} in Firestore. If new, will change status to 'received'.`);
   try {
     const orderDocRef = doc(db, 'orders', orderId);
     const docSnap = await getDoc(orderDocRef);
 
     if (!docSnap.exists()) {
-      console.log("Order not found to mark as viewed.");
+      console.log("Order not found to mark as viewed/received.");
       return null;
     }
 
@@ -146,13 +146,17 @@ export async function markOrderAsViewedService(orderId: string): Promise<Order |
 
     if (!orderData.isViewedByAgent) {
         updates.isViewedByAgent = true;
-        if (orderData.status === 'new') {
-            updates.status = 'received';
+    }
+    // Always change status to 'received' if it was 'new' and is being viewed for the first time.
+    if (orderData.status === 'new') {
+        updates.status = 'received';
+        if (!updates.isViewedByAgent) { // Ensure isViewedByAgent is also set if status changes due to viewing
+            updates.isViewedByAgent = true;
         }
     }
     
     if (Object.keys(updates).length > 0) {
-        await updateDoc(orderDocRef, updates as any);
+        await updateDoc(orderDocRef, updates as any); // Type assertion
     }
 
     const updatedDocSnap = await getDoc(orderDocRef); 
@@ -162,7 +166,7 @@ export async function markOrderAsViewedService(orderId: string): Promise<Order |
     return null;
 
   } catch (error) {
-    console.error("Error marking order as viewed in Firestore:", error);
+    console.error("Error marking order as viewed/received in Firestore:", error);
     return null;
   }
 }
@@ -177,8 +181,8 @@ export async function updateOrderAgentNotes(orderId: string, notes: string): Pro
       return orderFromDoc(updatedDocSnap);
     }
     return null;
-  } catch (error) {
-    console.error("Error updating agent notes in Firestore:", error);
+  } catch (err) {
+    console.error("Error updating agent notes in Firestore:", err);
     return null;
   }
 }
@@ -210,7 +214,7 @@ export async function getUniqueCustomersFromOrders(): Promise<CustomerSummary[]>
       if (order.orderTimestamp > summary.lastOrderDate) {
         summary.lastOrderDate = order.orderTimestamp;
         summary.latestAddress = order.customerAddress;
-        summary.name = order.customerName; // Update name to the latest one
+        summary.name = order.customerName; 
       }
     }
 
@@ -245,29 +249,7 @@ export async function getOrdersByCustomerPhone(phone: string): Promise<Order[]> 
   }
 }
 
-export async function getCustomerSummaryByPhone(phone: string): Promise<CustomerSummary | null> {
-  console.log(`Fetching customer summary for phone: ${phone}.`);
-  try {
-    const customerOrders = await getOrdersByCustomerPhone(phone);
-    if (customerOrders.length === 0) {
-      return null;
-    }
+// This function is no longer needed as its logic is now in AdminCustomerDetailPage
+// export async function getCustomerSummaryByPhone(phone: string): Promise<CustomerSummary | null> { ... }
 
-    // The first order is the latest due to sorting in getOrdersByCustomerPhone
-    const latestOrder = customerOrders[0];
-    const totalSpent = customerOrders.reduce((sum, order) => sum + order.totalAmount, 0);
-
-    return {
-      id: phone,
-      phone: phone,
-      name: latestOrder.customerName,
-      lastOrderDate: latestOrder.orderTimestamp,
-      totalOrders: customerOrders.length,
-      totalSpent: totalSpent,
-      latestAddress: latestOrder.customerAddress,
-    };
-  } catch (error) {
-    console.error(`Error fetching customer summary for phone ${phone}:`, error);
-    return null;
-  }
-}
+    

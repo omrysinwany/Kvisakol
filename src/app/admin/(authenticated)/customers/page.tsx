@@ -123,8 +123,8 @@ export default function AdminCustomersPage() {
       </div>
       
       <div className="mb-4 p-3 border rounded-lg bg-muted/30 shadow-sm">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row gap-3 items-center sm:items-end">
+          <div className="relative w-full sm:w-auto sm:flex-grow">
             <label htmlFor="customer-search" className="text-xs font-medium text-muted-foreground db-block mb-1.5">חיפוש לקוח</label>
             <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 translate-y-[calc(50%-2px)] text-muted-foreground" />
             <Input
@@ -136,7 +136,7 @@ export default function AdminCustomersPage() {
               onChange={handleSearchChange}
             />
           </div>
-          <div>
+          <div className="w-full sm:w-auto sm:min-w-[200px]">
             <label htmlFor="last-order-filter" className="text-xs font-medium text-muted-foreground db-block mb-1.5">סינון לפי הזמנה אחרונה</label>
             <Select value={lastOrderFilter} onValueChange={handleLastOrderFilterChange}>
               <SelectTrigger id="last-order-filter" className="h-9 w-full px-3 text-xs">
@@ -192,3 +192,4 @@ export default function AdminCustomersPage() {
     </>
   );
 }
+    
