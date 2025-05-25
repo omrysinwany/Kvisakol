@@ -1,7 +1,7 @@
 
 // Import the functions you need from the SDKs you need
-import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
-import { getFirestore, initializeFirestore, connectFirestoreEmulator, Firestore } from "firebase/firestore";
+import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
+import { getFirestore, initializeFirestore, connectFirestoreEmulator, type Firestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -26,24 +26,36 @@ if (!getApps().length) {
 let db: Firestore;
 
 try {
+  // Attempt to get the existing Firestore instance first
   db = getFirestore(app);
+  console.log("Firestore instance obtained via getFirestore(app).");
+
+  // Try to initialize with options only if it hasn't been initialized with these options before.
+  // This is a bit tricky to detect perfectly, so we rely on Firestore's own error handling.
   try {
     initializeFirestore(app, {
       ignoreUndefinedProperties: true,
     });
+    // If initializeFirestore didn't throw, we re-assign db to ensure we have the instance with these options.
     db = getFirestore(app); 
-    console.log("Firestore instance obtained/initialized with ignoreUndefinedProperties:true.");
+    console.log("Firestore re-initialized/confirmed with ignoreUndefinedProperties:true.");
   } catch (e: any) {
     if (e.code === 'failed-precondition' && e.message.includes('already been called')) {
       console.warn("Firestore was already initialized. Proceeding with existing instance. Ensure options are compatible if set elsewhere.");
     } else {
+      // If it's a different error, re-throw it.
       throw e;
     }
   }
 
-  if (process.env.NODE_ENV === 'development' && process.env.USE_FIRESTORE_EMULATOR === 'true') {
+  // Emulator connection (only in development and if flag is set)
+  // Check if this code is running in a Node.js environment (like the seed script) or browser
+  const isNodeEnvironment = typeof window === 'undefined';
+  if (isNodeEnvironment && process.env.NODE_ENV === 'development' && process.env.USE_FIRESTORE_EMULATOR === 'true') {
     console.log("Attempting to connect to Firestore Emulator (config.ts)...");
     try {
+      // For scripts, it's generally safer to connect every time.
+      // For client-side, this might cause issues if already connected.
       connectFirestoreEmulator(db, 'localhost', 8080); 
       console.log("Firestore Emulator connected (config.ts).");
     } catch (e: any) {
@@ -56,11 +68,13 @@ try {
   }
 } catch (e: any) {
   console.error("Critical error during Firestore initialization in config.ts:", e);
-  if (!db!) { 
+  // Fallback if any error occurs during the more complex initialization
+  if (!db!) { // db might still be undefined if initializeApp itself failed, though less likely here
       console.warn("Falling back to basic getFirestore() due to initialization error.");
       db = getFirestore(app);
   }
 }
+
 
 // For debugging in client/dev environments
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
