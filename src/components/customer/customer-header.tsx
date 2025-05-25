@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -8,7 +9,7 @@ import { useCart } from '@/contexts/cart-context';
 import { Badge } from '@/components/ui/badge';
 
 export function CustomerHeader() {
-  const { totalItems } = useCart();
+  const { uniqueProductCount } = useCart(); // Changed from totalItems to uniqueProductCount
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -18,12 +19,12 @@ export function CustomerHeader() {
           <Button variant="ghost" size="icon" asChild className="relative">
             <Link href="/cart">
               <ShoppingCart className="h-5 w-5" />
-              {totalItems > 0 && (
+              {uniqueProductCount > 0 && ( // Changed from totalItems
                 <Badge 
                   variant="destructive" 
                   className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs rounded-full"
                 >
-                  {totalItems}
+                  {uniqueProductCount} 
                 </Badge>
               )}
               <span className="sr-only">עגלת קניות</span>

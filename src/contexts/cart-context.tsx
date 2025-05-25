@@ -1,3 +1,4 @@
+
 // src/contexts/cart-context.tsx
 "use client";
 
@@ -14,6 +15,7 @@ interface CartContextType {
   getItemQuantity: (productId:string) => number;
   totalItems: number;
   totalPrice: number;
+  uniqueProductCount: number; // Added new property
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -81,6 +83,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const uniqueProductCount = cartItems.length; // Calculate unique product count
 
   if (!isInitialized) {
      // You could return a loading spinner or null here
@@ -98,6 +101,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         getItemQuantity,
         totalItems,
         totalPrice,
+        uniqueProductCount, // Provide new value
       }}
     >
       {children}
