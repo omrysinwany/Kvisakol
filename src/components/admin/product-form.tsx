@@ -18,12 +18,14 @@ import { UploadCloud } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+const NO_CATEGORY_VALUE = "--NO_CATEGORY--"; // Special value for "no category" option
+
 const productFormSchema = z.object({
   name: z.string().min(3, { message: 'שם מוצר חייב להכיל לפחות 3 תווים.' }),
   description: z.string().min(10, { message: 'תיאור חייב להכיל לפחות 10 תווים.' }),
   price: z.coerce.number().positive({ message: 'מחיר חייב להיות מספר חיובי.' }),
   imageUrl: z.string().url({ message: 'כתובת תמונה לא תקינה.' }).optional().or(z.literal('')),
-  category: z.string().optional().default(''), // Allow empty string for "no category"
+  category: z.string().optional().default(NO_CATEGORY_VALUE), // Default to special value
   isActive: z.boolean().default(true),
 });
 
@@ -46,14 +48,14 @@ export function ProductForm({ initialData, onSubmitSuccess, availableCategories 
       ? {
           ...initialData,
           price: Number(initialData.price),
-          category: initialData.category || '', // Ensure category is string or empty
+          category: initialData.category || NO_CATEGORY_VALUE, // Map empty/undefined to NO_CATEGORY_VALUE
         }
       : {
           name: '',
           description: '',
           price: 0,
           imageUrl: '',
-          category: '',
+          category: NO_CATEGORY_VALUE, // Default for new product
           isActive: true,
         },
   });
@@ -63,7 +65,7 @@ export function ProductForm({ initialData, onSubmitSuccess, availableCategories 
       form.reset({
         ...initialData,
         price: Number(initialData.price),
-        category: initialData.category || '',
+        category: initialData.category || NO_CATEGORY_VALUE,
       });
       setImagePreview(initialData.imageUrl);
     }
@@ -73,13 +75,15 @@ export function ProductForm({ initialData, onSubmitSuccess, availableCategories 
   const onSubmit = async (data: ProductFormValues) => {
     console.log('Product form submitted:', data);
 
+    const finalCategory = data.category === NO_CATEGORY_VALUE ? '' : data.category;
+
     const newOrUpdatedProduct: Product = {
       id: initialData?.id || `prod-${Date.now()}`, 
       ...data,
       price: Number(data.price), 
       imageUrl: imagePreview || 'https://placehold.co/600x400.png',
       dataAiHint: initialData?.dataAiHint || 'custom product',
-      category: data.category === "" ? undefined : data.category, // Store undefined if no category selected
+      category: finalCategory,
     };
 
     if (onSubmitSuccess) {
@@ -221,14 +225,19 @@ export function ProductForm({ initialData, onSubmitSuccess, availableCategories 
                         render={({ field }) => (
                             <FormItem>
                             <FormLabel>קטגוריה</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value || ''} defaultValue={field.value || ''}>
+                            <Select
+                              onValueChange={field.onChange}
+                              value={field.value} // Use field.value directly
+                            >
                                 <FormControl>
                                 <SelectTrigger>
                                     <SelectValue placeholder="בחר קטגוריה..." />
                                 </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                <SelectItem value=""><em>ללא קטגוריה</em></SelectItem>
+                                <SelectItem value={NO_CATEGORY_VALUE}> 
+                                    <em>ללא קטגוריה</em>
+                                </SelectItem>
                                 {availableCategories.map((cat) => (
                                     <SelectItem key={cat} value={cat}>
                                     {cat}
@@ -236,7 +245,7 @@ export function ProductForm({ initialData, onSubmitSuccess, availableCategories 
                                 ))}
                                 </SelectContent>
                             </Select>
-                            <FormDescription>בחר קטגוריה קיימת או השאר ריק.</FormDescription>
+                            <FormDescription>בחר קטגוריה קיימת או "ללא קטגוריה".</FormDescription>
                             <FormMessage />
                             </FormItem>
                         )}
@@ -278,4 +287,3 @@ export function ProductForm({ initialData, onSubmitSuccess, availableCategories 
     </Card>
   );
 }
-
