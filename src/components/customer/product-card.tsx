@@ -115,7 +115,7 @@ export function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
       </CardHeader>
-      <CardContent className="p-3 pb-1 flex-1"> {/* Changed padding-bottom */}
+      <CardContent className="p-3 pb-1 flex-1">
         <CardTitle className="text-primary text-sm h-10 leading-tight overflow-hidden text-center line-clamp-2">
           {product.name}
         </CardTitle>
@@ -125,7 +125,7 @@ export function ProductCard({ product }: ProductCardProps) {
         isAdminPreview ? "justify-start" : "flex-col sm:flex-row justify-between gap-1"
       )}>
         <div className="flex items-center gap-1">
-          <p className="text-sm text-foreground">{formatPrice(product.price)}</p>
+          <p className="text-sm font-semibold text-foreground">{formatPrice(product.price)}</p>
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary">
