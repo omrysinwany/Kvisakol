@@ -11,7 +11,8 @@ import { CategoryFilter } from '@/components/customer/category-filter';
 import { PaginationControls } from '@/components/customer/pagination-controls';
 
 const ITEMS_PER_PAGE = 10;
-const PRODUCT_ID_TO_MOVE_LAST = 'kbio1'; // ID for "כביסכל Bio אלגנס – 2 ליטר"
+const PRODUCT_ID_TO_MOVE_SECOND_LAST = 'kbio1'; // ID for "כביסכל Bio אלגנס – 2 ליטר"
+const PRODUCT_ID_TO_MOVE_VERY_LAST = 'kbio11';  // ID for "כביסכל Bio רד רוז – 2 ליטר"
 const TARGET_CATEGORY_FOR_RESORT = 'נוזלי כביסה';
 
 export default function CatalogPage() {
@@ -59,12 +60,29 @@ export default function CatalogPage() {
       );
     }
 
-    // Custom sort: if the target category is selected, move the specific product to the end
+    // Custom sort: if the target category is selected, move specific products to the end
     if (selectedCategory === TARGET_CATEGORY_FOR_RESORT) {
-      const targetProductIndex = productsToFilter.findIndex(p => p.id === PRODUCT_ID_TO_MOVE_LAST);
-      if (targetProductIndex > -1) {
-        const [targetProduct] = productsToFilter.splice(targetProductIndex, 1);
-        productsToFilter.push(targetProduct);
+      let productSecondLast: Product | null = null;
+      let productVeryLast: Product | null = null;
+      
+      const remainingProducts = productsToFilter.filter(p => {
+        if (p.id === PRODUCT_ID_TO_MOVE_SECOND_LAST) {
+          productSecondLast = p;
+          return false;
+        }
+        if (p.id === PRODUCT_ID_TO_MOVE_VERY_LAST) {
+          productVeryLast = p;
+          return false;
+        }
+        return true;
+      });
+      
+      productsToFilter = [...remainingProducts];
+      if (productSecondLast) {
+        productsToFilter.push(productSecondLast);
+      }
+      if (productVeryLast) {
+        productsToFilter.push(productVeryLast);
       }
     }
     
