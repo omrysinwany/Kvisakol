@@ -3,10 +3,10 @@
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' }); // Load environment variables from .env.local FIRST
 
-import { db, app as firebaseApp } from '@/lib/firebase/config'; // db is imported, also import app
+import { db, app as firebaseApp } from '@/lib/firebase/config';
 import { placeholderProducts, placeholderOrders, placeholderAdminUsers } from '@/lib/placeholder-data';
 import type { Product, Order, AdminUser } from '@/lib/types';
-import { collection, writeBatch, doc, Timestamp, getDocs, query } from 'firebase/firestore';
+import { collection, writeBatch, doc, Timestamp, getDocs, query, limit as firestoreLimit } from 'firebase/firestore';
 
 async function seedCollection<T extends { id?: string }>(
   collectionName: string,
@@ -15,7 +15,8 @@ async function seedCollection<T extends { id?: string }>(
 ) {
   console.log(`Checking existing data in ${collectionName}...`);
   const collectionRef = collection(db, collectionName);
-  const q = query(collectionRef);
+  
+  const q = query(collectionRef, firestoreLimit(1));
   const existingDocsSnapshot = await getDocs(q);
 
   if (!existingDocsSnapshot.empty) {
@@ -23,24 +24,21 @@ async function seedCollection<T extends { id?: string }>(
     return;
   }
   
-  console.log(`Seeding ${collectionName} collection...`);
+  console.log(`${collectionName} collection is empty. Seeding ${data.length} items...`);
   const batch = writeBatch(db);
   let count = 0;
 
   data.forEach((item) => {
-    const docId = item.id || doc(collectionRef).id; 
-    const docRef = doc(db, collectionName, docId);
+    // Use the item's id for the document ID if it exists, otherwise Firestore generates one.
+    const docRef = item.id ? doc(db, collectionName, item.id) : doc(collectionRef);
     
     let dataToSet: any;
     if (transform) {
       dataToSet = transform(item);
     } else {
-      if (item.id) {
-        const { id, ...restOfItem } = item;
-        dataToSet = restOfItem;
-      } else {
-        dataToSet = { ...item }; 
-      }
+      // If item.id was used for docRef, we don't need to store it as a field.
+      const { id, ...restOfItem } = item; 
+      dataToSet = restOfItem;
     }
     batch.set(docRef, dataToSet);
     count++;
@@ -69,8 +67,8 @@ async function main() {
   const envProjectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
   const sdkProjectId = firebaseApp.options.projectId;
 
-  console.log(`Project ID from .env.local: ${envProjectId}`);
-  console.log(`Project ID from Firebase SDK: ${sdkProjectId}`);
+  console.log(`Project ID from .env.local (NEXT_PUBLIC_FIREBASE_PROJECT_ID): ${envProjectId}`);
+  console.log(`Project ID from Firebase SDK (firebaseApp.options.projectId): ${sdkProjectId}`);
 
   if (!envProjectId) {
     console.error("Error: NEXT_PUBLIC_FIREBASE_PROJECT_ID is not set in your .env.local file.");
@@ -79,13 +77,12 @@ async function main() {
   }
 
   if (envProjectId !== sdkProjectId) {
-    console.error(`CRITICAL ERROR: Project ID mismatch!`);
-    console.error(`.env.local NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${envProjectId}`);
-    console.error(`Firebase SDK app.options.projectId: ${sdkProjectId}`);
-    console.error("Ensure these values match EXACTLY with your Firebase project ID in the Firebase Console.");
-    process.exit(1);
+    console.warn(
+      `Warning: Project ID mismatch detected. The script will use the SDK-initialized project ID: ${sdkProjectId} for Firestore operations. 
+      Ensure this is the intended project. .env.local NEXT_PUBLIC_FIREBASE_PROJECT_ID is ${envProjectId}.`
+    );
   }
-  console.log(`Confirmed project ID for seeding: ${sdkProjectId}`);
+  console.log(`Attempting to seed Firestore for project ID associated with the initialized Firebase app: ${sdkProjectId}`);
 
 
   await seedCollection<AdminUser>('adminUsers', placeholderAdminUsers, user => {
@@ -110,8 +107,8 @@ async function main() {
       ...orderData,
       orderTimestamp: order.orderTimestamp instanceof Date ? Timestamp.fromDate(order.orderTimestamp) : Timestamp.now(), 
       totalAmount: Number(order.totalAmount),
-      customerNotes: orderData.customerNotes || undefined, // Will be ignored if ignoreUndefinedProperties is true
-      agentNotes: orderData.agentNotes || undefined, // Will be ignored
+      customerNotes: orderData.customerNotes || undefined, 
+      agentNotes: orderData.agentNotes || undefined, 
       isViewedByAgent: orderData.isViewedByAgent !== undefined ? orderData.isViewedByAgent : false,
     };
   });
@@ -120,6 +117,6 @@ async function main() {
 }
 
 main().catch((error) => {
-    console.error("Seeding script failed:", error);
+    console.error("Seeding script failed with an unhandled error:", error);
     process.exit(1); 
 });
