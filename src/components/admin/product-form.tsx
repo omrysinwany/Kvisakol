@@ -14,18 +14,18 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import Image from 'next/image';
-import { UploadCloud } from 'lucide-react';
+import { UploadCloud } from 'lucide-react'; // Keep for placeholder if no image
 import { useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-const NO_CATEGORY_VALUE = "--NO_CATEGORY--"; // Special value for "no category" option
+const NO_CATEGORY_VALUE = "--NO_CATEGORY--";
 
 const productFormSchema = z.object({
   name: z.string().min(3, { message: 'שם מוצר חייב להכיל לפחות 3 תווים.' }),
   description: z.string().min(10, { message: 'תיאור חייב להכיל לפחות 10 תווים.' }),
   price: z.coerce.number().positive({ message: 'מחיר חייב להיות מספר חיובי.' }),
-  imageUrl: z.string().url({ message: 'כתובת תמונה לא תקינה.' }).optional().or(z.literal('')),
-  category: z.string().optional().default(NO_CATEGORY_VALUE), // Default to special value
+  imageUrl: z.string().url({ message: 'כתובת תמונה לא תקינה.' }).optional().or(z.literal('')), // Keep for data model
+  category: z.string().optional().default(NO_CATEGORY_VALUE),
   isActive: z.boolean().default(true),
 });
 
@@ -48,14 +48,15 @@ export function ProductForm({ initialData, onSubmitSuccess, availableCategories 
       ? {
           ...initialData,
           price: Number(initialData.price),
-          category: initialData.category || NO_CATEGORY_VALUE, // Map empty/undefined to NO_CATEGORY_VALUE
+          category: initialData.category || NO_CATEGORY_VALUE,
+          imageUrl: initialData.imageUrl || '',
         }
       : {
           name: '',
           description: '',
           price: 0,
           imageUrl: '',
-          category: NO_CATEGORY_VALUE, // Default for new product
+          category: NO_CATEGORY_VALUE,
           isActive: true,
         },
   });
@@ -66,6 +67,7 @@ export function ProductForm({ initialData, onSubmitSuccess, availableCategories 
         ...initialData,
         price: Number(initialData.price),
         category: initialData.category || NO_CATEGORY_VALUE,
+        imageUrl: initialData.imageUrl || '',
       });
       setImagePreview(initialData.imageUrl);
     }
@@ -77,11 +79,14 @@ export function ProductForm({ initialData, onSubmitSuccess, availableCategories 
 
     const finalCategory = data.category === NO_CATEGORY_VALUE ? '' : data.category;
 
+    // The imageUrl will be taken from initialData if editing, or default if new and not changed by an upload mechanism (which is now removed)
+    const finalImageUrl = initialData?.imageUrl || 'https://placehold.co/600x400.png'; 
+
     const newOrUpdatedProduct: Product = {
       id: initialData?.id || `prod-${Date.now()}`, 
       ...data,
       price: Number(data.price), 
-      imageUrl: imagePreview || 'https://placehold.co/600x400.png',
+      imageUrl: finalImageUrl, // Use the existing or default image URL
       dataAiHint: initialData?.dataAiHint || 'custom product',
       category: finalCategory,
     };
@@ -89,6 +94,7 @@ export function ProductForm({ initialData, onSubmitSuccess, availableCategories 
     if (onSubmitSuccess) {
       onSubmitSuccess(newOrUpdatedProduct);
     } else {
+      // This path is less likely now as onSubmitSuccess is usually provided
       toast({
         title: initialData ? 'מוצר עודכן!' : 'מוצר נוצר!',
         description: `המוצר "${data.name}" ${initialData ? 'עודכן' : 'נוצר'} בהצלחה.`,
@@ -97,18 +103,21 @@ export function ProductForm({ initialData, onSubmitSuccess, availableCategories 
     }
   };
   
-  const handleImageInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setImagePreview(initialData?.imageUrl || null);
-    }
-  };
+  // handleImageInputChange is no longer needed as file input is removed.
+  // const handleImageInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = event.target.files?.[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setImagePreview(reader.result as string);
+  //       form.setValue('imageUrl', reader.result as string); // Update form value if image changes
+  //     };
+  //     reader.readAsDataURL(file);
+  //   } else {
+  //     setImagePreview(initialData?.imageUrl || null);
+  //     form.setValue('imageUrl', initialData?.imageUrl || '');
+  //   }
+  // };
 
 
   return (
@@ -125,57 +134,31 @@ export function ProductForm({ initialData, onSubmitSuccess, availableCategories 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="md:col-span-1 space-y-2">
                 <FormLabel>תמונת מוצר</FormLabel>
-                  <div className="aspect-square w-full relative border border-dashed rounded-lg flex flex-col justify-center items-center">
+                  <div className="aspect-square w-full relative border border-dashed rounded-lg flex flex-col justify-center items-center overflow-hidden">
                     {imagePreview ? (
                       <Image 
                         src={imagePreview} 
-                        alt="תצוגה מקדימה של התמונה" 
+                        alt="תצוגת מוצר" 
                         layout="fill" 
                         objectFit="cover" 
                         className="rounded-lg" 
                         onError={(e) => {
+                            // Fallback to a placeholder if the image fails to load
                             e.currentTarget.srcset = 'https://placehold.co/300x300.png';
                             e.currentTarget.src = 'https://placehold.co/300x300.png';
                             setImagePreview('https://placehold.co/300x300.png');
                         }}
                       />
                     ) : (
-                      <div className="text-center p-4">
-                        <UploadCloud className="h-12 w-12 text-muted-foreground mx-auto" />
-                        <p className="mt-2 text-sm text-muted-foreground">גרור לכאן תמונה או לחץ לבחירה</p>
+                      <div className="text-center p-4 text-muted-foreground">
+                        <UploadCloud className="h-12 w-12 mx-auto" />
+                        <p className="mt-2 text-sm">אין תמונה זמינה</p>
                       </div>
                     )}
-                     <Input 
-                        id="picture" 
-                        type="file" 
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-                        accept="image/*"
-                        onChange={handleImageInputChange}
-                      />
+                     {/* File input removed to make it display-only */}
                   </div>
-                  <FormDescription>
-                    ניתן להעלות תמונה או להזין URL ישירות בשדה למטה.
-                  </FormDescription>
-                   <FormField
-                    control={form.control}
-                    name="imageUrl"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="sr-only">URL של תמונה</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="או הדבק URL של תמונה כאן" 
-                            {...field} 
-                            onChange={(e) => {
-                              field.onChange(e);
-                              setImagePreview(e.target.value);
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {/* Description about uploading or pasting URL removed */}
+                  {/* URL input field removed */}
               </div>
 
               <div className="md:col-span-2 space-y-6">
@@ -227,7 +210,7 @@ export function ProductForm({ initialData, onSubmitSuccess, availableCategories 
                             <FormLabel>קטגוריה</FormLabel>
                             <Select
                               onValueChange={field.onChange}
-                              value={field.value} // Use field.value directly
+                              value={field.value || NO_CATEGORY_VALUE}
                             >
                                 <FormControl>
                                 <SelectTrigger>
@@ -245,7 +228,7 @@ export function ProductForm({ initialData, onSubmitSuccess, availableCategories 
                                 ))}
                                 </SelectContent>
                             </Select>
-                            <FormDescription>בחר קטגוריה קיימת או "ללא קטגוריה".</FormDescription>
+                            {/* Description for category select removed */}
                             <FormMessage />
                             </FormItem>
                         )}
