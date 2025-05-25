@@ -1,9 +1,9 @@
 
 // src/scripts/seed-firestore.ts
 import dotenv from 'dotenv';
-dotenv.config({ path: '.env.local' }); // Load environment variables from .env.local
+dotenv.config({ path: '.env.local' }); // Load environment variables from .env.local FIRST
 
-import { db } from '@/lib/firebase/config';
+import { db, app as firebaseApp } from '@/lib/firebase/config'; // db is imported, also import app
 import { placeholderProducts, placeholderOrders, placeholderAdminUsers } from '@/lib/placeholder-data';
 import type { Product, Order, AdminUser } from '@/lib/types';
 import { collection, writeBatch, doc, Timestamp, getDocs, query } from 'firebase/firestore';
@@ -28,16 +28,14 @@ async function seedCollection<T extends { id?: string }>(
   let count = 0;
 
   data.forEach((item) => {
-    const docId = item.id || doc(collectionRef).id; // If item.id is undefined, a new ID is generated
+    const docId = item.id || doc(collectionRef).id; 
     const docRef = doc(db, collectionName, docId);
     
     let dataToSet: any;
     if (transform) {
-      dataToSet = transform(item); // The transform function is responsible for ensuring 'id' is handled correctly
+      dataToSet = transform(item);
     } else {
-      // If no transform, and item.id was used for docId, remove it from the data to be set.
       if (item.id) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { id, ...restOfItem } = item;
         dataToSet = restOfItem;
       } else {
@@ -61,37 +59,60 @@ async function seedCollection<T extends { id?: string }>(
 
 async function main() {
   console.log('Starting Firestore seeding process...');
-  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-  if (!projectId) {
+
+  if (!db) {
+    console.error("Firestore database instance (db) is not available. Exiting seed script.");
+    console.error("This might be due to an issue in Firebase config or initialization.");
+    process.exit(1);
+  }
+  
+  const envProjectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+  const sdkProjectId = firebaseApp.options.projectId;
+
+  console.log(`Project ID from .env.local: ${envProjectId}`);
+  console.log(`Project ID from Firebase SDK: ${sdkProjectId}`);
+
+  if (!envProjectId) {
     console.error("Error: NEXT_PUBLIC_FIREBASE_PROJECT_ID is not set in your .env.local file.");
     console.error("Please ensure your .env.local file is correctly configured with your Firebase project details.");
-    return;
+    process.exit(1);
   }
-  console.log(`Seeding Firestore for project ID: ${projectId}`);
+
+  if (envProjectId !== sdkProjectId) {
+    console.error(`CRITICAL ERROR: Project ID mismatch!`);
+    console.error(`.env.local NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${envProjectId}`);
+    console.error(`Firebase SDK app.options.projectId: ${sdkProjectId}`);
+    console.error("Ensure these values match EXACTLY with your Firebase project ID in the Firebase Console.");
+    process.exit(1);
+  }
+  console.log(`Confirmed project ID for seeding: ${sdkProjectId}`);
 
 
   await seedCollection<AdminUser>('adminUsers', placeholderAdminUsers, user => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id, ...userData } = user; 
     return userData;
   });
 
   await seedCollection<Product>('products', placeholderProducts, product => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id, ...productData } = product;
     return {
         ...productData,
-        price: Number(productData.price) 
+        price: Number(productData.price),
+        category: productData.category || '',
+        dataAiHint: productData.dataAiHint || '',
+        isActive: productData.isActive !== undefined ? productData.isActive : true,
     };
   });
 
   await seedCollection<Order>('orders', placeholderOrders, order => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id, ...orderData } = order; // Destructure id so it's not in orderData
+    const { id, ...orderData } = order;
     return {
       ...orderData,
       orderTimestamp: order.orderTimestamp instanceof Date ? Timestamp.fromDate(order.orderTimestamp) : Timestamp.now(), 
-      totalAmount: Number(order.totalAmount) 
+      totalAmount: Number(order.totalAmount),
+      customerNotes: orderData.customerNotes || undefined, // Will be ignored if ignoreUndefinedProperties is true
+      agentNotes: orderData.agentNotes || undefined, // Will be ignored
+      isViewedByAgent: orderData.isViewedByAgent !== undefined ? orderData.isViewedByAgent : false,
     };
   });
 
@@ -100,5 +121,5 @@ async function main() {
 
 main().catch((error) => {
     console.error("Seeding script failed:", error);
-    process.exit(1); // Exit with error code if main function fails
+    process.exit(1); 
 });
