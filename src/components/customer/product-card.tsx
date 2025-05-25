@@ -33,6 +33,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const { toast } = useToast();
   const quantityInCart = getItemQuantity(product.id);
   const [inputValue, setInputValue] = useState(quantityInCart.toString());
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const pathname = usePathname();
   const isAdminPreview = pathname === '/admin/catalog-preview';
@@ -90,120 +91,127 @@ export function ProductCard({ product }: ProductCardProps) {
   }
 
   return (
-    <Card className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg">
-      <CardHeader className="p-0">
-        <div className="aspect-square relative w-full">
-          <Image
-            src={product.imageUrl || '/images/products/placeholder.jpg'}
-            alt={product.name}
-            fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover"
-            data-ai-hint={product.dataAiHint as string || 'product image'}
-            onError={(e) => {
-              e.currentTarget.srcset = '/images/products/placeholder.jpg';
-              e.currentTarget.src = '/images/products/placeholder.jpg';
-            }}
-          />
-          {product.category && (
-            <Badge
-              variant="secondary"
-              className="absolute top-2 left-2 z-10 text-xs"
-            >
-              {product.category}
-            </Badge>
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Card className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg">
+        <DialogTrigger asChild>
+          <CardHeader className="p-0 cursor-pointer" onClick={() => setIsDialogOpen(true)}>
+            <div className="aspect-square relative w-full">
+              <Image
+                src={product.imageUrl || '/images/products/placeholder.jpg'}
+                alt={product.name}
+                fill
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                className="object-cover"
+                data-ai-hint={product.dataAiHint as string || 'product image'}
+                onError={(e) => {
+                  e.currentTarget.srcset = '/images/products/placeholder.jpg';
+                  e.currentTarget.src = '/images/products/placeholder.jpg';
+                }}
+              />
+              {product.category && (
+                <Badge
+                  variant="secondary"
+                  className="absolute top-2 left-2 z-10 text-xs"
+                >
+                  {product.category}
+                </Badge>
+              )}
+            </div>
+          </CardHeader>
+        </DialogTrigger>
+        <DialogTrigger asChild>
+          <CardContent className="p-3 pb-1 flex-1 cursor-pointer" onClick={() => setIsDialogOpen(true)}>
+            <CardTitle className="text-primary text-sm h-10 leading-tight overflow-hidden text-center line-clamp-2">
+              {product.name}
+            </CardTitle>
+          </CardContent>
+        </DialogTrigger>
+        <CardFooter 
+          className={cn(
+            "p-3 flex items-center mt-auto",
+            isAdminPreview ? "justify-start" : "flex-col sm:flex-row justify-between gap-1"
           )}
-        </div>
-      </CardHeader>
-      <CardContent className="p-3 pb-1 flex-1">
-        <CardTitle className="text-primary text-sm h-10 leading-tight overflow-hidden text-center line-clamp-2">
-          {product.name}
-        </CardTitle>
-      </CardContent>
-      <CardFooter className={cn(
-        "p-3 flex items-center mt-auto",
-        isAdminPreview ? "justify-start" : "flex-col sm:flex-row justify-between gap-1"
-      )}>
-        <div className="flex items-center gap-1">
-          <p className="text-sm font-semibold text-foreground">{formatPrice(product.price)}</p>
-          <Dialog>
+          onClick={(e) => e.stopPropagation()} // Prevent footer click from opening dialog
+        >
+          <div className="flex items-center gap-1">
+            <p className="text-sm font-semibold text-foreground">{formatPrice(product.price)}</p>
             <DialogTrigger asChild>
               <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary">
                 <Info className="h-4 w-4" />
                 <span className="sr-only">פרטים נוספים על {product.name}</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[525px]">
-              <DialogHeader>
-                <DialogTitle className="text-2xl">{product.name}</DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="relative aspect-square w-full max-w-xs mx-auto">
-                  <Image
-                    src={product.imageUrl || '/images/products/placeholder.jpg'}
-                    alt={product.name}
-                    fill
-                    sizes="(max-width: 640px) 80vw, 320px"
-                    className="object-cover rounded-md"
-                    data-ai-hint={product.dataAiHint as string || 'product image'}
-                     onError={(e) => {
-                        e.currentTarget.srcset = '/images/products/placeholder.jpg';
-                        e.currentTarget.src = '/images/products/placeholder.jpg';
-                    }}
-                  />
-                   {product.category && (
-                    <Badge
-                      variant="secondary"
-                      className="absolute top-2 left-2 z-10 text-xs" 
-                    >
-                      {product.category}
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-xl font-semibold">{formatPrice(product.price)}</p>
-                <DialogDescription className="text-sm text-muted-foreground whitespace-pre-wrap max-h-[200px] overflow-y-auto">
-                  {product.description}
-                </DialogDescription>
-              </div>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button type="button" variant="outline">
-                    סגור
+          </div>
+          
+          {!isAdminPreview && (
+            <>
+              {quantityInCart === 0 ? (
+                <Button onClick={handleAddToCart} className="w-full sm:w-auto" size="sm">
+                  <ShoppingCartIcon className="ml-1.5 h-4 w-4" />
+                  הוספה
+                </Button>
+              ) : (
+                <div className="flex items-center gap-1">
+                  <Button variant="outline" size="icon" onClick={handleDecreaseQuantity} className="h-7 w-7 rounded-full">
+                    <MinusCircle className="h-4 w-4" />
                   </Button>
-                </DialogClose>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-        
-        {!isAdminPreview && (
-          <>
-            {quantityInCart === 0 ? (
-              <Button onClick={handleAddToCart} className="w-full sm:w-auto" size="sm">
-                <ShoppingCartIcon className="ml-1.5 h-4 w-4" />
-                הוספה
-              </Button>
-            ) : (
-              <div className="flex items-center gap-1">
-                <Button variant="outline" size="icon" onClick={handleDecreaseQuantity} className="h-7 w-7 rounded-full">
-                  <MinusCircle className="h-4 w-4" />
-                </Button>
-                <Input
-                  type="number"
-                  value={inputValue}
-                  onChange={handleQuantityChangeViaInput}
-                  onBlur={handleBlurInput}
-                  className="h-7 w-10 text-center px-1 text-sm border-border focus:ring-primary focus:border-primary"
-                  min="0" 
-                />
-                <Button variant="outline" size="icon" onClick={handleIncreaseQuantity} className="h-7 w-7 rounded-full">
-                  <PlusCircle className="h-4 w-4" />
-                </Button>
-              </div>
+                  <Input
+                    type="number"
+                    value={inputValue}
+                    onChange={handleQuantityChangeViaInput}
+                    onBlur={handleBlurInput}
+                    className="h-7 w-10 text-center px-1 text-sm border-border focus:ring-primary focus:border-primary"
+                    min="0" 
+                  />
+                  <Button variant="outline" size="icon" onClick={handleIncreaseQuantity} className="h-7 w-7 rounded-full">
+                    <PlusCircle className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </CardFooter>
+      </Card>
+      <DialogContent className="sm:max-w-[525px]">
+        <DialogHeader>
+          <DialogTitle className="text-2xl">{product.name}</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="relative aspect-square w-full max-w-xs mx-auto">
+            <Image
+              src={product.imageUrl || '/images/products/placeholder.jpg'}
+              alt={product.name}
+              fill
+              sizes="(max-width: 640px) 80vw, 320px"
+              className="object-cover rounded-md"
+              data-ai-hint={product.dataAiHint as string || 'product image'}
+               onError={(e) => {
+                  e.currentTarget.srcset = '/images/products/placeholder.jpg';
+                  e.currentTarget.src = '/images/products/placeholder.jpg';
+              }}
+            />
+             {product.category && (
+              <Badge
+                variant="secondary"
+                className="absolute top-2 left-2 z-10 text-xs" 
+              >
+                {product.category}
+              </Badge>
             )}
-          </>
-        )}
-      </CardFooter>
-    </Card>
+          </div>
+          <p className="text-xl font-semibold">{formatPrice(product.price)}</p>
+          <DialogDescription className="text-sm text-muted-foreground whitespace-pre-wrap max-h-[200px] overflow-y-auto">
+            {product.description}
+          </DialogDescription>
+        </div>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button type="button" variant="outline">
+              סגור
+            </Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
