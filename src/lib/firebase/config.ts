@@ -1,12 +1,7 @@
 
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+import { getFirestore, initializeFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -22,13 +17,30 @@ const firebaseConfig = {
 let app;
 if (!getApps().length) {
   app = initializeApp(firebaseConfig);
-  console.log("Firebase initialized");
+  if (typeof window !== 'undefined') {
+    // For client-side Firestore, ensure it's initialized after the app.
+    // For server-side (e.g. Genkit, not used here for Firestore access directly), initialization might differ.
+    initializeFirestore(app, {
+      ignoreUndefinedProperties: true, // Recommended for Firestore
+    });
+  }
+  console.log("Firebase initialized with Firestore");
 } else {
   app = getApp();
+  // Ensure Firestore is initialized if app already exists (e.g., HMR)
+  // This check might be redundant if getFirestore(app) handles it, but safe to include.
+  try {
+    getFirestore(app);
+  } catch (e) {
+    if (typeof window !== 'undefined') {
+        initializeFirestore(app, {ignoreUndefinedProperties: true});
+        console.log("Firestore initialized on existing app instance.");
+    }
+  }
   console.log("Firebase app already exists");
 }
 
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   console.log("Firebase Config Loaded in Client:", {
     apiKey: !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -36,8 +48,7 @@ if (typeof window !== 'undefined') {
   });
 }
 
-
 const db = getFirestore(app);
-console.log("Firestore instance created");
+console.log("Firestore instance created/retrieved");
 
 export { app, db };
