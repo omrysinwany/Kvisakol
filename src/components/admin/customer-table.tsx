@@ -29,6 +29,7 @@ export function CustomerTable({ customers }: CustomerTableProps) {
       <TableHeader>
         <TableRow>
           <TableHead className="text-right">שם לקוח</TableHead>
+          <TableHead className="text-right">סטטוס</TableHead>
           <TableHead className="text-right">טלפון</TableHead>
           <TableHead className="hidden md:table-cell text-right">כתובת אחרונה</TableHead>
           <TableHead className="hidden lg:table-cell text-right">הזמנה אחרונה</TableHead>
@@ -48,8 +49,10 @@ export function CustomerTable({ customers }: CustomerTableProps) {
               className="cursor-pointer hover:bg-muted/50 transition-colors"
             >
               <TableCell className="font-medium">
-                <div className="flex items-center gap-2">
-                  <span>{customer.name}</span>
+                {customer.name}
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center gap-1">
                   {isNewCustomer && (
                     <Badge variant="outline" className="border-green-500 text-green-600 text-[10px] px-1.5 py-0.5">
                       <UserCheck className="h-3 w-3 ml-0.5" />
@@ -61,6 +64,9 @@ export function CustomerTable({ customers }: CustomerTableProps) {
                        <UserX className="h-3 w-3 ml-0.5" />
                       לא פעיל
                     </Badge>
+                  )}
+                  {!isNewCustomer && !isInactiveCustomer && (
+                    <span className="text-muted-foreground">-</span> 
                   )}
                 </div>
               </TableCell>
@@ -77,3 +83,4 @@ export function CustomerTable({ customers }: CustomerTableProps) {
     </Table>
   );
 }
+
