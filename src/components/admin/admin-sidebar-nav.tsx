@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, Package, ShoppingBasket, Users, Settings } from 'lucide-react'; // Changed UsersGroup to Users
+import { LayoutDashboard, Package, ShoppingBasket, Users, Settings, LayoutList } from 'lucide-react'; // Changed UsersGroup to Users, Added LayoutList
 import type { LucideIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -17,9 +17,9 @@ interface NavItem {
 
 const baseNavItems: NavItem[] = [
   { href: '/admin/dashboard', label: 'לוח בקרה', icon: LayoutDashboard },
+  { href: '/', label: 'קטלוג', icon: LayoutList },
   { href: '/admin/products', label: 'ניהול מוצרים', icon: Package },
   { href: '/admin/orders', label: 'ניהול הזמנות', icon: ShoppingBasket },
-  // { href: '/admin/agents', label: 'ניהול סוכנים', icon: Users, isSuperAdminOnly: true }, // Removed as per request for single admin
   // { href: '/admin/settings', label: 'הגדרות', icon: Settings }, // Example for future extension
 ];
 
@@ -53,7 +53,7 @@ export function AdminSidebarNav({
   if (isLoading) {
     return (
       <nav className={cn("flex flex-col gap-1 p-4", isMobile ? "" : "lg:gap-2 lg:p-4")}>
-        {[...Array(3)].map((_, i) => (
+        {[...Array(4)].map((_, i) => ( // Increased skeleton items due to new link
           <div key={i} className="h-8 bg-muted rounded-md animate-pulse"></div>
         ))}
       </nav>
@@ -71,9 +71,15 @@ export function AdminSidebarNav({
           onClick={isMobile ? onMobileLinkClick : undefined}
           className={cn(
             'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:bg-accent',
-            pathname === item.href && 'bg-accent text-primary font-semibold',
+            // Special handling for root path to avoid highlighting it for all admin sub-paths
+            (pathname === item.href && item.href !== '/') || (pathname === '/' && item.href === '/') ? 'bg-accent text-primary font-semibold' : '',
+            // If current path is an admin path and item.href is '/', don't highlight it unless explicitly on '/'
+            (pathname.startsWith('/admin') && item.href === '/') ? '' : (pathname === item.href ? 'bg-accent text-primary font-semibold' : ''),
             isMobile ? 'text-base' : 'text-sm'
           )}
+          // Add target="_blank" if the catalog link should open in a new tab
+          // target={item.href === '/' ? '_blank' : undefined} 
+          // rel={item.href === '/' ? 'noopener noreferrer' : undefined}
         >
           <item.icon className="h-4 w-4" />
           {item.label}
