@@ -24,34 +24,34 @@ export default function AdminCustomerDetailPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('AdminCustomerDetailPage: useEffect triggered. Customer ID from params:', customerId);
+    console.log('AdminCustomerDetailPage: useEffect triggered. Customer ID from URL params:', customerId);
     if (customerId) {
       const fetchCustomerData = async () => {
         setIsLoading(true);
         setError(null);
         try {
-          console.log(`AdminCustomerDetailPage: Attempting to fetch summary for customer ID: ${customerId}`);
+          console.log(`AdminCustomerDetailPage: Attempting to fetch customer summary for ID (phone): ${customerId} from 'customers' collection.`);
           const customerSummaryData = await getCustomerSummaryById(customerId);
-          console.log('AdminCustomerDetailPage: Fetched customer summary:', customerSummaryData);
+          console.log('AdminCustomerDetailPage: Fetched customer summary from "customers" collection:', customerSummaryData);
 
           if (customerSummaryData) {
             setCustomer(customerSummaryData);
             
-            const phoneToQuery = customerSummaryData.phone;
-            console.log(`AdminCustomerDetailPage: Phone number from customer summary to query orders: ${phoneToQuery}`);
+            const phoneToQueryOrders = customerSummaryData.phone;
+            console.log(`AdminCustomerDetailPage: Phone number from customer summary to query orders: >>${phoneToQueryOrders}<< (Type: ${typeof phoneToQueryOrders})`);
 
-            if (!phoneToQuery) {
-                console.error("AdminCustomerDetailPage: Customer summary found, but phone number is missing. Cannot fetch orders.");
-                setError("שגיאה: מספר טלפון חסר בפרטי הלקוח ולא ניתן לשלוף הזמנות.");
+            if (!phoneToQueryOrders) {
+                console.error("AdminCustomerDetailPage: Customer summary found, but 'phone' field is missing or empty in the summary. Cannot fetch orders.");
+                setError("שגיאה: מספר טלפון חסר בפרטי הלקוח (בסיכום הלקוח) ולא ניתן לשלוף הזמנות.");
                 setOrders([]);
             } else {
-                console.log(`AdminCustomerDetailPage: Attempting to fetch orders for customer phone: ${phoneToQuery}`);
-                const customerOrders = await getOrdersByCustomerPhone(phoneToQuery);
-                console.log(`AdminCustomerDetailPage: Fetched ${customerOrders.length} orders for customer phone ${phoneToQuery}:`, customerOrders.map(o => o.id));
+                console.log(`AdminCustomerDetailPage: Attempting to fetch orders for customer phone: >>${phoneToQueryOrders}<< from 'orders' collection.`);
+                const customerOrders = await getOrdersByCustomerPhone(phoneToQueryOrders);
+                console.log(`AdminCustomerDetailPage: Fetched ${customerOrders.length} orders for customer phone ${phoneToQueryOrders}. Order IDs: [${customerOrders.map(o => o.id).join(', ')}]`);
                 setOrders(customerOrders.sort((a, b) => new Date(b.orderTimestamp).getTime() - new Date(a.orderTimestamp).getTime()));
             }
           } else {
-            setError('הלקוח המבוקש לא נמצא במערכת הלקוחות.');
+            setError(`הלקוח המבוקש עם מזהה (טלפון) ${customerId} לא נמצא במערכת הלקוחות (בקולקציית 'customers').`);
             console.warn(`AdminCustomerDetailPage: No customer document found for ID ${customerId} in 'customers' collection.`);
             setCustomer(null); 
             setOrders([]); 
@@ -89,11 +89,14 @@ export default function AdminCustomerDetailPage() {
           description: `הסטטוס של הזמנה ${orderId.substring(orderId.length - 6)} שונה ל: ${statusTranslationsToast[newStatus]}.`,
         });
         
+        // If status changed to completed or cancelled, refresh customer summary for totalSpent etc.
         if (newStatus === 'completed' || newStatus === 'cancelled') {
             if (customer) { 
+                console.log(`AdminCustomerDetailPage: Order ${orderId} status changed to ${newStatus}. Refreshing customer summary for customer ID ${customer.id}.`);
                 const updatedCustomerSummary = await getCustomerSummaryById(customer.id);
                 if (updatedCustomerSummary) {
                     setCustomer(updatedCustomerSummary);
+                    console.log('AdminCustomerDetailPage: Customer summary refreshed:', updatedCustomerSummary);
                 }
             }
         }
