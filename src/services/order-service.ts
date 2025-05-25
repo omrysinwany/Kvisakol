@@ -3,7 +3,7 @@
 
 import { db } from '@/lib/firebase/config';
 import type { Order, OrderItem, CustomerSummary } from '@/lib/types';
-import { collection, getDocs, doc, getDoc, setDoc, updateDoc, query, orderBy, Timestamp, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, setDoc, updateDoc, query, orderBy, Timestamp, where } from 'firebase/firestore';
 
 // Helper function to convert Firestore doc data to Order
 const orderFromDoc = (docSnap: any): Order => {
@@ -19,7 +19,7 @@ const orderFromDoc = (docSnap: any): Order => {
     orderTimestamp: data.orderTimestamp instanceof Timestamp ? data.orderTimestamp.toDate() : new Date(0),
     status: data.status || 'new',
     isViewedByAgent: data.isViewedByAgent !== undefined ? data.isViewedByAgent : false,
-    agentNotes: data.agentNotes || undefined,
+    agentNotes: data.agentNotes || '',
   };
 };
 
@@ -67,7 +67,8 @@ export async function createOrderService(orderDetails: {
   console.log('Creating order in Firestore:', orderDetails);
   try {
     const ordersCollectionRef = collection(db, 'orders');
-    const existingOrdersSnapshot = await getDocs(query(ordersCollectionRef, orderBy('orderTimestamp', 'desc')));
+    const q = query(ordersCollectionRef, orderBy('orderTimestamp', 'desc')); // Query to get existing orders to determine next ID
+    const existingOrdersSnapshot = await getDocs(q);
     let highestNumericId = 0;
     existingOrdersSnapshot.forEach(docSnap => {
       const docId = docSnap.id;
@@ -83,10 +84,11 @@ export async function createOrderService(orderDetails: {
 
     const newOrderData = {
       ...orderDetails,
+      customerNotes: orderDetails.customerNotes || '',
       orderTimestamp: Timestamp.fromDate(new Date()),
       status: 'new' as Order['status'],
       isViewedByAgent: false,
-      agentNotes: '',
+      agentNotes: '', 
     };
 
     const orderDocRef = doc(db, 'orders', newOrderId);
@@ -94,12 +96,10 @@ export async function createOrderService(orderDetails: {
     
     console.log("Order created with custom ID: ", newOrderId);
     
-    // Fetch the just created document to return it with the ID and converted timestamp
     const createdDocSnap = await getDoc(orderDocRef);
     if (createdDocSnap.exists()) {
       return orderFromDoc(createdDocSnap);
     } else {
-      // Fallback, should not happen if setDoc was successful
       throw new Error("Failed to retrieve created order.");
     }
   } catch (error) {
@@ -114,10 +114,7 @@ export async function updateOrderStatusService(orderId: string, newStatus: Order
     const orderDocRef = doc(db, 'orders', orderId);
     const updateData: Partial<Order> = { status: newStatus };
     
-    if (newStatus !== 'new') { 
-      updateData.isViewedByAgent = true;
-    }
-     if (newStatus === 'received') { 
+    if (newStatus === 'received' || newStatus === 'completed' || newStatus === 'cancelled') { 
       updateData.isViewedByAgent = true;
     }
 
@@ -144,7 +141,7 @@ export async function markOrderAsViewedService(orderId: string): Promise<Order |
       return null;
     }
 
-    const orderData = docSnap.data() as Order; // Cast to Order to access fields
+    const orderData = docSnap.data() as Partial<Order>; 
     const updates: Partial<Order> = {};
 
     if (!orderData.isViewedByAgent) {
@@ -189,16 +186,15 @@ export async function updateOrderAgentNotes(orderId: string, notes: string): Pro
 export async function getUniqueCustomersFromOrders(): Promise<CustomerSummary[]> {
   console.log("Fetching unique customers from Firestore orders.");
   try {
-    const orders = await getOrdersForAdmin(); // This already sorts orders by orderTimestamp desc
+    const orders = await getOrdersForAdmin(); 
 
     const customerMap = new Map<string, CustomerSummary>();
 
     for (const order of orders) {
       const phone = order.customerPhone;
       if (!customerMap.has(phone)) {
-        // This is the first time we see this customer (due to sorting, it's their latest order info)
         customerMap.set(phone, {
-          id: phone, // Using phone as a unique ID for the summary
+          id: phone, 
           phone: phone,
           name: order.customerName,
           lastOrderDate: order.orderTimestamp,
@@ -211,12 +207,14 @@ export async function getUniqueCustomersFromOrders(): Promise<CustomerSummary[]>
       const summary = customerMap.get(phone)!;
       summary.totalOrders += 1;
       summary.totalSpent += order.totalAmount;
-      // name, latestAddress, and lastOrderDate are already set from the most recent order
-      // because getOrdersForAdmin sorts by orderTimestamp descending.
+      if (order.orderTimestamp > summary.lastOrderDate) {
+        summary.lastOrderDate = order.orderTimestamp;
+        summary.latestAddress = order.customerAddress;
+        summary.name = order.customerName; // Update name to the latest one
+      }
     }
 
     const customerSummaries = Array.from(customerMap.values());
-    // Sort by customer name for display
     customerSummaries.sort((a, b) => a.name.localeCompare(b.name, 'he'));
 
     console.log(`Processed ${customerSummaries.length} unique customers.`);
@@ -224,5 +222,52 @@ export async function getUniqueCustomersFromOrders(): Promise<CustomerSummary[]>
   } catch (error) {
     console.error("Error fetching unique customers from orders:", error);
     return [];
+  }
+}
+
+
+export async function getOrdersByCustomerPhone(phone: string): Promise<Order[]> {
+  console.log(`Fetching orders for customer phone: ${phone} from Firestore.`);
+  try {
+    const ordersCollectionRef = collection(db, 'orders');
+    const q = query(
+      ordersCollectionRef,
+      where('customerPhone', '==', phone),
+      orderBy('orderTimestamp', 'desc')
+    );
+    const querySnapshot = await getDocs(q);
+    const orders = querySnapshot.docs.map(docSnap => orderFromDoc(docSnap));
+    console.log(`Fetched ${orders.length} orders for customer ${phone}.`);
+    return orders;
+  } catch (error) {
+    console.error(`Error fetching orders for customer ${phone}:`, error);
+    return [];
+  }
+}
+
+export async function getCustomerSummaryByPhone(phone: string): Promise<CustomerSummary | null> {
+  console.log(`Fetching customer summary for phone: ${phone}.`);
+  try {
+    const customerOrders = await getOrdersByCustomerPhone(phone);
+    if (customerOrders.length === 0) {
+      return null;
+    }
+
+    // The first order is the latest due to sorting in getOrdersByCustomerPhone
+    const latestOrder = customerOrders[0];
+    const totalSpent = customerOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+
+    return {
+      id: phone,
+      phone: phone,
+      name: latestOrder.customerName,
+      lastOrderDate: latestOrder.orderTimestamp,
+      totalOrders: customerOrders.length,
+      totalSpent: totalSpent,
+      latestAddress: latestOrder.customerAddress,
+    };
+  } catch (error) {
+    console.error(`Error fetching customer summary for phone ${phone}:`, error);
+    return null;
   }
 }

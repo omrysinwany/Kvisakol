@@ -6,8 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { format, isBefore, subDays, startOfDay } from 'date-fns';
 import { he } from 'date-fns/locale';
-import { Button } from '@/components/ui/button';
-import { Eye, UserCheck, UserX } from 'lucide-react';
+import { UserCheck, UserX } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface CustomerTableProps {
@@ -17,9 +16,13 @@ interface CustomerTableProps {
 export function CustomerTable({ customers }: CustomerTableProps) {
   const router = useRouter();
 
-  const handleViewCustomerOrders = (phone: string) => {
-    router.push(`/admin/orders?customerPhone=${encodeURIComponent(phone)}`);
+  const handleRowClick = (customerId: string) => {
+    router.push(`/admin/customers/${customerId}`);
   };
+
+  const formatPrice = (price: number) => {
+    return `₪${price.toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
 
   return (
     <Table className="text-xs">
@@ -30,7 +33,6 @@ export function CustomerTable({ customers }: CustomerTableProps) {
           <TableHead className="hidden md:table-cell text-right">כתובת אחרונה</TableHead>
           <TableHead className="hidden lg:table-cell text-right">הזמנה אחרונה</TableHead>
           <TableHead className="hidden sm:table-cell text-center">סה"כ הזמנות</TableHead>
-          <TableHead className="text-left">פעולות</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -40,7 +42,11 @@ export function CustomerTable({ customers }: CustomerTableProps) {
           const isInactiveCustomer = isBefore(new Date(customer.lastOrderDate), ninetyDaysAgo);
 
           return (
-            <TableRow key={customer.id}>
+            <TableRow 
+              key={customer.id} 
+              onClick={() => handleRowClick(customer.phone)}
+              className="cursor-pointer hover:bg-muted/50 transition-colors"
+            >
               <TableCell className="font-medium">
                 <div className="flex items-center gap-2">
                   <span>{customer.name}</span>
@@ -50,7 +56,7 @@ export function CustomerTable({ customers }: CustomerTableProps) {
                       חדש
                     </Badge>
                   )}
-                  {isInactiveCustomer && !isNewCustomer && ( // Show inactive only if not also new
+                  {isInactiveCustomer && !isNewCustomer && ( 
                     <Badge variant="outline" className="border-amber-500 text-amber-600 text-[10px] px-1.5 py-0.5">
                        <UserX className="h-3 w-3 ml-0.5" />
                       לא פעיל
@@ -64,17 +70,6 @@ export function CustomerTable({ customers }: CustomerTableProps) {
                 {format(new Date(customer.lastOrderDate), 'dd/MM/yyyy', { locale: he })}
               </TableCell>
               <TableCell className="hidden sm:table-cell text-center">{customer.totalOrders}</TableCell>
-              <TableCell className="text-left">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleViewCustomerOrders(customer.phone)}
-                  title="צפה בהזמנות הלקוח"
-                >
-                  <Eye className="h-4 w-4" />
-                  <span className="sr-only">צפה בהזמנות הלקוח</span>
-                </Button>
-              </TableCell>
             </TableRow>
           );
         })}
