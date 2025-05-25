@@ -7,7 +7,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { getAllProductsForAdmin } from "@/services/product-service";
 import { getOrdersForAdmin } from "@/services/order-service";
 import type { Product, Order } from "@/lib/types";
-import { Package, ShoppingCart, Activity, ClipboardCheck, Eye, Users, CalendarDays, CalendarCheck, CalendarIcon, X, Hourglass, ChevronDown } from "lucide-react";
+import { Package, Activity, ClipboardCheck, Eye, Users, CalendarDays, CalendarCheck, CalendarIcon, X, Hourglass, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -191,8 +191,9 @@ export default function AdminDashboardPage() {
           </Button>
         </div>
       </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-6"> {/* Main grid for summary cards */}
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Row 1: Summary Cards */}
         <Link href="/admin/orders?status=new" className="block hover:shadow-lg transition-shadow rounded-lg">
           <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -219,7 +220,7 @@ export default function AdminDashboardPage() {
           </Card>
         </Link>
 
-        <Link href="/admin/orders" className="block hover:shadow-lg transition-shadow rounded-lg">
+        <Link href="/admin/orders?period=today" className="block hover:shadow-lg transition-shadow rounded-lg">
           <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">הזמנות מהיום</CardTitle>
@@ -232,7 +233,7 @@ export default function AdminDashboardPage() {
           </Card>
         </Link>
 
-        <Link href="/admin/orders" className="block hover:shadow-lg transition-shadow rounded-lg">
+        <Link href="/admin/orders?period=thisWeek" className="block hover:shadow-lg transition-shadow rounded-lg">
           <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">הזמנות מהשבוע</CardTitle>
@@ -270,10 +271,9 @@ export default function AdminDashboardPage() {
             </CardContent>
           </Card>
         </Link>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="md:col-span-2"> {/* Recent Orders card spanning full width on md+ */}
+        {/* Row 2: Recent Orders - Full Width */}
+        <Card className="md:col-span-2"> 
           <CardHeader>
             <CardTitle>הזמנות אחרונות</CardTitle>
             <CardDescription>סקירה מהירה של {summary.latestOrders.length > 0 ? Math.min(summary.latestOrders.length, 5) : '0'} ההזמנות האחרונות.</CardDescription>
@@ -301,8 +301,9 @@ export default function AdminDashboardPage() {
             </Button>
           </CardContent>
         </Card>
-
-        <Card className="md:col-span-2"> {/* Revenue card spanning full width on md+ */}
+        
+        {/* Row 3: Revenue Card - Full Width */}
+        <Card className="md:col-span-2">
           <CardHeader className="pb-3">
             <div className="flex flex-row items-center justify-between gap-2">
               <CardTitle className="text-2xl font-semibold"> 

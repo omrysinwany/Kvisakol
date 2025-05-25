@@ -13,10 +13,10 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { format, startOfDay, endOfDay } from 'date-fns';
+import { format, startOfDay, endOfDay, subDays, isToday } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { cn } from "@/lib/utils";
-import { usePathname, useSearchParams } from 'next/navigation'; // Import useSearchParams
+import { usePathname, useSearchParams } from 'next/navigation'; 
 
 type StatusFilterValue = Order['status'] | 'all';
 
@@ -38,8 +38,9 @@ export default function AdminOrdersPage() {
   const [isLoading, setIsLoading] = useState(true);
   
   const pathname = usePathname();
-  const searchParams = useSearchParams(); // Get search params
+  const searchParams = useSearchParams(); 
   const initialStatusFilter = searchParams.get('status') as StatusFilterValue | null;
+  const initialPeriodFilter = searchParams.get('period') as string | null;
 
   const [statusFilter, setStatusFilter] = useState<StatusFilterValue>(initialStatusFilter || 'all');
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
@@ -62,19 +63,33 @@ export default function AdminOrdersPage() {
       }
     };
     fetchOrders();
-  }, [toast, pathname]);
+  }, [toast]); // Removed pathname from here as it's handled by searchParams effect
 
-  // Effect to set status filter from URL on initial load or if URL changes
   useEffect(() => {
     const statusFromUrl = searchParams.get('status') as StatusFilterValue | null;
     if (statusFromUrl && availableStatuses.includes(statusFromUrl)) {
       setStatusFilter(statusFromUrl);
     } else if (!statusFromUrl) {
-        // If no status in URL, could default to 'all' or keep current state
-        // For simplicity, if URL changes and has no status, we might not want to reset user's manual filter.
-        // But if we want URL to always dictate:
-        // setStatusFilter('all');
+      // If no status in URL, default to 'all' to clear previous filter if user navigated directly
+      // setStatusFilter('all'); 
     }
+    
+    const periodFromUrl = searchParams.get('period');
+    if (periodFromUrl) {
+      const today = new Date();
+      if (periodFromUrl === 'today') {
+        setStartDate(startOfDay(today));
+        setEndDate(endOfDay(today));
+      } else if (periodFromUrl === 'thisWeek') {
+        const sevenDaysAgo = subDays(today, 6);
+        setStartDate(startOfDay(sevenDaysAgo));
+        setEndDate(endOfDay(today));
+      }
+    } else {
+      // If no period in URL, don't automatically clear dates.
+      // User can clear them manually if needed.
+    }
+    setCurrentPage(1); // Reset page when searchParams change
   }, [searchParams]);
 
 
@@ -124,14 +139,14 @@ export default function AdminOrdersPage() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-     // Scroll to top of table or a relevant section might be good here
-    // For now, let's scroll to the top of the window
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleClearDates = () => {
     setStartDate(undefined);
     setEndDate(undefined);
+    // Also remove 'period' from URL if it exists? For now, no.
+    setCurrentPage(1);
   };
 
   const handleExportOrders = () => {
