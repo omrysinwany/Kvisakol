@@ -3,7 +3,7 @@
 
 import { db } from '@/lib/firebase/config';
 import type { Order, OrderItem } from '@/lib/types';
-import { collection, getDocs, doc, getDoc, addDoc, updateDoc, query, orderBy, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, setDoc, updateDoc, query, orderBy, Timestamp } from 'firebase/firestore';
 
 // Helper function to convert Firestore doc data to Order
 const orderFromDoc = (docSnap: any): Order => {
@@ -13,14 +13,13 @@ const orderFromDoc = (docSnap: any): Order => {
     customerName: data.customerName || '',
     customerPhone: data.customerPhone || '',
     customerAddress: data.customerAddress || '',
-    customerNotes: data.customerNotes || undefined, // Ensure it can be undefined
+    customerNotes: data.customerNotes || undefined,
     items: data.items || [],
     totalAmount: data.totalAmount !== undefined ? Number(data.totalAmount) : 0,
-    // Firestore Timestamps need to be converted to JS Date objects
-    orderTimestamp: data.orderTimestamp instanceof Timestamp ? data.orderTimestamp.toDate() : new Date(0), // Default to epoch if invalid
+    orderTimestamp: data.orderTimestamp instanceof Timestamp ? data.orderTimestamp.toDate() : new Date(0),
     status: data.status || 'new',
     isViewedByAgent: data.isViewedByAgent !== undefined ? data.isViewedByAgent : false,
-    agentNotes: data.agentNotes || undefined, // Ensure it can be undefined
+    agentNotes: data.agentNotes || undefined,
   };
 };
 
@@ -28,8 +27,8 @@ const orderFromDoc = (docSnap: any): Order => {
 export async function getOrdersForAdmin(): Promise<Order[]> {
   console.log("Fetching orders from Firestore for admin.");
   try {
-    const ordersCollection = collection(db, 'orders');
-    const q = query(ordersCollection, orderBy('orderTimestamp', 'desc'));
+    const ordersCollectionRef = collection(db, 'orders');
+    const q = query(ordersCollectionRef, orderBy('orderTimestamp', 'desc'));
     const querySnapshot = await getDocs(q);
     const orders = querySnapshot.docs.map(docSnap => orderFromDoc(docSnap));
     console.log(`Fetched ${orders.length} orders from Firestore.`);
@@ -67,32 +66,51 @@ export async function createOrderService(orderDetails: {
 }): Promise<Order> {
   console.log('Creating order in Firestore:', orderDetails);
   try {
+    // Determine the next sequential ID in 'oX' format
+    const ordersCollectionRef = collection(db, 'orders');
+    const existingOrdersSnapshot = await getDocs(ordersCollectionRef);
+    let highestNumericId = 0;
+    existingOrdersSnapshot.forEach(docSnap => {
+      const docId = docSnap.id;
+      if (docId.startsWith('o')) {
+        const numericPart = parseInt(docId.substring(1), 10);
+        if (!isNaN(numericPart) && numericPart > highestNumericId) {
+          highestNumericId = numericPart;
+        }
+      }
+    });
+    const newNumericId = highestNumericId + 1;
+    const newOrderId = `o${newNumericId}`;
+
     const newOrderData = {
       ...orderDetails,
       orderTimestamp: Timestamp.fromDate(new Date()), // Use Firestore Timestamp
       status: 'new' as Order['status'],
       isViewedByAgent: false,
-      agentNotes: orderDetails.customerNotes || '', // Initialize with customer notes or empty
+      agentNotes: orderDetails.customerNotes || '', 
     };
-    const docRef = await addDoc(collection(db, 'orders'), newOrderData);
-    console.log("Order created with ID: ", docRef.id);
-    // Return an Order object consistent with the application type
+
+    const orderDocRef = doc(db, 'orders', newOrderId);
+    await setDoc(orderDocRef, newOrderData);
+    
+    console.log("Order created with custom ID: ", newOrderId);
+    
     return { 
-        id: docRef.id,
+        id: newOrderId, // Use the new custom ID
         customerName: newOrderData.customerName,
         customerPhone: newOrderData.customerPhone,
         customerAddress: newOrderData.customerAddress,
         customerNotes: newOrderData.customerNotes,
         items: newOrderData.items,
         totalAmount: newOrderData.totalAmount,
-        orderTimestamp: newOrderData.orderTimestamp.toDate(), // Convert to JS Date
+        orderTimestamp: newOrderData.orderTimestamp.toDate(),
         status: newOrderData.status,
         isViewedByAgent: newOrderData.isViewedByAgent,
         agentNotes: newOrderData.agentNotes,
     };
   } catch (error) {
     console.error("Error creating order in Firestore:", error);
-    throw error; // Re-throw to be caught by UI
+    throw error;
   }
 }
 
@@ -102,14 +120,14 @@ export async function updateOrderStatusService(orderId: string, newStatus: Order
     const orderDocRef = doc(db, 'orders', orderId);
     const updateData: Partial<Order> = { status: newStatus };
     
-    if (newStatus !== 'new') { // Any status other than 'new' implies it has been interacted with
+    if (newStatus !== 'new') { 
       updateData.isViewedByAgent = true;
     }
-     if (newStatus === 'received') { // Specifically mark as viewed if status becomes 'received'
+     if (newStatus === 'received') { 
       updateData.isViewedByAgent = true;
     }
 
-    await updateDoc(orderDocRef, updateData);
+    await updateDoc(orderDocRef, updateData as any); // Use 'as any' to bypass strict type check for Partial
     const updatedDocSnap = await getDoc(orderDocRef);
      if (updatedDocSnap.exists()) {
       return orderFromDoc(updatedDocSnap);
@@ -132,7 +150,7 @@ export async function markOrderAsViewedService(orderId: string): Promise<Order |
       return null;
     }
 
-    const orderData = docSnap.data() as Order; // Cast to Order to access fields
+    const orderData = docSnap.data();
     const updates: Partial<Order> = {};
 
     if (!orderData.isViewedByAgent) {
@@ -143,10 +161,10 @@ export async function markOrderAsViewedService(orderId: string): Promise<Order |
     }
     
     if (Object.keys(updates).length > 0) {
-        await updateDoc(orderDocRef, updates);
+        await updateDoc(orderDocRef, updates as any); // Use 'as any' for partial update
     }
 
-    const updatedDocSnap = await getDoc(orderDocRef); // Fetch again to get the latest state
+    const updatedDocSnap = await getDoc(orderDocRef); 
     if (updatedDocSnap.exists()) {
       return orderFromDoc(updatedDocSnap);
     }
