@@ -35,9 +35,11 @@ export default function AdminCustomerDetailPage() {
         setIsLoading(true);
         setError(null);
         try {
+          // First, fetch all orders for this customer
           const customerOrders = await getOrdersByCustomerPhone(customerId);
 
           if (customerOrders.length > 0) {
+            // If orders exist, derive customer summary from them
             const latestOrder = customerOrders[0]; // Orders are sorted desc by timestamp from service
             const totalSpent = customerOrders.reduce((sum, order) => sum + order.totalAmount, 0);
             
@@ -53,6 +55,7 @@ export default function AdminCustomerDetailPage() {
             setCustomer(customerSummaryData);
             setOrders(customerOrders);
           } else {
+            // No orders found for this customer
             setError('לא נמצאו הזמנות עבור לקוח זה, או שהלקוח אינו קיים במערכת ההזמנות.');
             toast({ variant: 'destructive', title: 'שגיאה', description: 'לא נמצאו הזמנות עבור לקוח זה או שהלקוח אינו קיים.' });
             setCustomer(null);
@@ -112,7 +115,8 @@ export default function AdminCustomerDetailPage() {
   }
 
   if (!customer) {
-    // This case should be handled by the error state, but as a fallback
+    // This case should be handled by the error state if no orders are found,
+    // or if there was an issue creating the summary.
     return (
         <div className="container mx-auto px-4 py-8">
             <p className="text-center text-lg">לא ניתן לטעון את פרטי הלקוח המבוקש.</p>

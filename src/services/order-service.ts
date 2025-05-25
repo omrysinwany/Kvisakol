@@ -67,15 +67,18 @@ export async function createOrderService(orderDetails: {
   console.log('Creating order in Firestore:', orderDetails);
   try {
     const ordersCollectionRef = collection(db, 'orders');
-    // To generate o1, o2 style IDs:
+    
     const existingOrdersSnapshot = await getDocs(query(ordersCollectionRef, orderBy('orderTimestamp', 'desc')));
     let highestNumericId = 0;
     existingOrdersSnapshot.forEach(docSnap => {
       const docId = docSnap.id;
-      if (docId.startsWith('o')) {
-        const numericPart = parseInt(docId.substring(1), 10);
-        if (!isNaN(numericPart) && numericPart > highestNumericId) {
-          highestNumericId = numericPart;
+      if (docId.startsWith('o') && docId.length > 1) {
+        const numericPartString = docId.substring(1);
+        if (/^\d+$/.test(numericPartString)) { // Check if the rest is a number
+          const numericPart = parseInt(numericPartString, 10);
+          if (numericPart > highestNumericId) {
+            highestNumericId = numericPart;
+          }
         }
       }
     });
@@ -84,8 +87,8 @@ export async function createOrderService(orderDetails: {
 
     const newOrderData = {
       ...orderDetails,
-      customerNotes: orderDetails.customerNotes || '', // Ensure customerNotes is an empty string if undefined
-      agentNotes: '', // Initialize agentNotes as an empty string
+      customerNotes: orderDetails.customerNotes || '', 
+      agentNotes: '', 
       orderTimestamp: Timestamp.fromDate(new Date()),
       status: 'new' as Order['status'],
       isViewedByAgent: false,
@@ -114,6 +117,8 @@ export async function updateOrderStatusService(orderId: string, newStatus: Order
     const orderDocRef = doc(db, 'orders', orderId);
     const updateData: Partial<Order> = { status: newStatus };
     
+    // If status is changing to 'received', 'completed', or 'cancelled', ensure isViewedByAgent is true.
+    // This also handles cases where an order might be directly set to 'completed' or 'cancelled' from 'new'.
     if (newStatus === 'received' || newStatus === 'completed' || newStatus === 'cancelled') { 
       updateData.isViewedByAgent = true;
     }
@@ -144,15 +149,12 @@ export async function markOrderAsViewedService(orderId: string): Promise<Order |
     const orderData = docSnap.data() as Partial<Order>; 
     const updates: Partial<Order> = {};
 
-    if (!orderData.isViewedByAgent) {
-        updates.isViewedByAgent = true;
-    }
-    // Always change status to 'received' if it was 'new' and is being viewed for the first time.
+    // If the order status is 'new', change it to 'received' and mark as viewed.
     if (orderData.status === 'new') {
         updates.status = 'received';
-        if (!updates.isViewedByAgent) { // Ensure isViewedByAgent is also set if status changes due to viewing
-            updates.isViewedByAgent = true;
-        }
+        updates.isViewedByAgent = true; // Always mark as viewed if status changes from new
+    } else if (!orderData.isViewedByAgent) { // If not new, but still not viewed (e.g., directly set to completed but not opened)
+        updates.isViewedByAgent = true;
     }
     
     if (Object.keys(updates).length > 0) {
