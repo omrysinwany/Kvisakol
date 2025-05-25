@@ -147,9 +147,6 @@ export default function AdminDashboardPage() {
             } else if (customRevenueEndDate) {
                  relevantOrders = relevantOrders.filter(o => new Date(o.orderTimestamp) <= endOfDay(customRevenueEndDate));
             } else {
-                 // If only one date is selected for custom, or no dates, show 0 revenue or all revenue based on desired logic.
-                 // For now, if not both dates are set, show all relevant (completed) orders.
-                 // Or, if you want to show 0 unless both are set:
                  relevantOrders = []; 
             }
             break;
@@ -192,7 +189,7 @@ export default function AdminDashboardPage() {
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-2 gap-6">
         {/* Row 1: Summary Cards */}
         <Link href="/admin/orders?status=new" className="block hover:shadow-lg transition-shadow rounded-lg">
           <Card className="h-full">
@@ -273,7 +270,7 @@ export default function AdminDashboardPage() {
         </Link>
 
         {/* Row 2: Recent Orders - Full Width */}
-        <Card className="md:col-span-2"> 
+        <Card className="col-span-2"> 
           <CardHeader>
             <CardTitle>הזמנות אחרונות</CardTitle>
             <CardDescription>סקירה מהירה של {summary.latestOrders.length > 0 ? Math.min(summary.latestOrders.length, 5) : '0'} ההזמנות האחרונות.</CardDescription>
@@ -303,7 +300,7 @@ export default function AdminDashboardPage() {
         </Card>
         
         {/* Row 3: Revenue Card - Full Width */}
-        <Card className="md:col-span-2">
+        <Card className="col-span-2">
           <CardHeader className="pb-3">
             <div className="flex flex-row items-center justify-between gap-2">
               <CardTitle className="text-2xl font-semibold"> 
