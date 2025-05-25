@@ -83,4 +83,3 @@ export function CustomerTable({ customers }: CustomerTableProps) {
     </Table>
   );
 }
-
