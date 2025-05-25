@@ -6,7 +6,7 @@ import type { Order } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 // Button component is no longer needed directly here if we remove the actions dropdown trigger button
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, XCircle, Hourglass, ClipboardCheck, Eye } from 'lucide-react'; 
+import { CheckCircle, XCircle, Hourglass, ClipboardCheck } from 'lucide-react'; 
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -60,12 +60,11 @@ export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
     <Table className="text-xs">
       <TableHeader>
         <TableRow>
-          <TableHead>מספר הזמנה</TableHead>
-          <TableHead>לקוח</TableHead>
-          <TableHead className="hidden md:table-cell">תאריך</TableHead>
-          <TableHead className="hidden sm:table-cell">סכום</TableHead>
+          <TableHead className="text-right">מספר הזמנה</TableHead>
+          <TableHead className="text-right">לקוח</TableHead>
+          <TableHead className="hidden md:table-cell text-right">תאריך</TableHead>
+          <TableHead className="hidden sm:table-cell text-right">סכום</TableHead>
           <TableHead className="text-right">סטטוס</TableHead>
-          {/* Actions column removed */}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -115,7 +114,6 @@ export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
                 </DropdownMenuContent>
               </DropdownMenu>
             </TableCell>
-            {/* Actions Td removed */}
           </TableRow>
         )})}
       </TableBody>
