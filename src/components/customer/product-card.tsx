@@ -21,6 +21,8 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 interface ProductCardProps {
   product: Product;
@@ -31,6 +33,9 @@ export function ProductCard({ product }: ProductCardProps) {
   const { toast } = useToast();
   const quantityInCart = getItemQuantity(product.id);
   const [inputValue, setInputValue] = useState(quantityInCart.toString());
+
+  const pathname = usePathname();
+  const isAdminPreview = pathname === '/admin/catalog-preview';
 
   useEffect(() => {
     setInputValue(quantityInCart.toString());
@@ -103,13 +108,16 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
       </CardHeader>
       <CardContent className="p-3 flex-1">
-        <CardTitle className="text-sm font-semibold mb-1 h-10 leading-tight overflow-hidden text-primary">
+        <CardTitle className="text-primary text-sm font-semibold mb-1 h-10 leading-tight overflow-hidden">
           {product.name}
         </CardTitle>
         {product.category && <Badge variant="secondary" className="mb-1 text-xs">{product.category}</Badge>}
       </CardContent>
-      <CardFooter className="p-2 flex flex-col sm:flex-row justify-between items-center gap-1 mt-auto">
-        <div className="flex items-center gap-1"> {/* Adjusted gap for tighter spacing */}
+      <CardFooter className={cn(
+        "p-3 flex items-center mt-auto",
+        isAdminPreview ? "justify-start" : "flex-col sm:flex-row justify-between gap-1"
+      )}>
+        <div className="flex items-center gap-1">
           <p className="text-sm font-bold text-foreground">{formatPrice(product.price)}</p>
           <Dialog>
             <DialogTrigger asChild>
@@ -131,6 +139,10 @@ export function ProductCard({ product }: ProductCardProps) {
                     sizes="(max-width: 640px) 80vw, 320px"
                     className="object-cover rounded-md"
                     data-ai-hint={product.dataAiHint as string || 'product image'}
+                     onError={(e) => {
+                        e.currentTarget.srcset = 'https://placehold.co/300x300.png';
+                        e.currentTarget.src = 'https://placehold.co/300x300.png';
+                    }}
                   />
                 </div>
                 {product.category && <Badge variant="secondary" className="w-fit">{product.category}</Badge>}
@@ -150,28 +162,32 @@ export function ProductCard({ product }: ProductCardProps) {
           </Dialog>
         </div>
         
-        {quantityInCart === 0 ? (
-          <Button onClick={handleAddToCart} className="w-full sm:w-auto" size="sm">
-            <ShoppingCartIcon className="ml-1.5 h-4 w-4" />
-            הוספה
-          </Button>
-        ) : (
-          <div className="flex items-center gap-1">
-            <Button variant="outline" size="icon" onClick={handleDecreaseQuantity} className="h-7 w-7 rounded-full">
-              <MinusCircle className="h-4 w-4" />
-            </Button>
-            <Input
-              type="number"
-              value={inputValue}
-              onChange={handleQuantityChangeViaInput}
-              onBlur={handleBlurInput}
-              className="h-7 w-10 text-center px-1 text-sm border-border focus:ring-primary focus:border-primary"
-              min="0" 
-            />
-            <Button variant="outline" size="icon" onClick={handleIncreaseQuantity} className="h-7 w-7 rounded-full">
-              <PlusCircle className="h-4 w-4" />
-            </Button>
-          </div>
+        {!isAdminPreview && (
+          <>
+            {quantityInCart === 0 ? (
+              <Button onClick={handleAddToCart} className="w-full sm:w-auto" size="sm">
+                <ShoppingCartIcon className="ml-1.5 h-4 w-4" />
+                הוספה
+              </Button>
+            ) : (
+              <div className="flex items-center gap-1">
+                <Button variant="outline" size="icon" onClick={handleDecreaseQuantity} className="h-7 w-7 rounded-full">
+                  <MinusCircle className="h-4 w-4" />
+                </Button>
+                <Input
+                  type="number"
+                  value={inputValue}
+                  onChange={handleQuantityChangeViaInput}
+                  onBlur={handleBlurInput}
+                  className="h-7 w-10 text-center px-1 text-sm border-border focus:ring-primary focus:border-primary"
+                  min="0" 
+                />
+                <Button variant="outline" size="icon" onClick={handleIncreaseQuantity} className="h-7 w-7 rounded-full">
+                  <PlusCircle className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </CardFooter>
     </Card>
