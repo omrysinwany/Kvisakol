@@ -1,4 +1,4 @@
-# **App Name**: K'Viskal Orders
+# **App Name**: Kvisakol Orders
 
 ## Core Features:
 

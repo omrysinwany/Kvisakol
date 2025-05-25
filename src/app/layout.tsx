@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "K'Viskal Orders",
-  description: 'Digital product catalog and ordering for K\'Viskal sales agents.',
+  title: "Kvisakol Orders",
+  description: 'Digital product catalog and ordering for Kvisakol sales agents.',
 };
 
 export default function RootLayout({
