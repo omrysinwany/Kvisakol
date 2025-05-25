@@ -8,21 +8,21 @@ import { AdminPaginationControls } from '@/components/admin/admin-pagination-con
 import { getOrdersForAdmin, updateOrderStatusService } from '@/services/order-service';
 import type { Order } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Download, CalendarIcon, X } from 'lucide-react'; // Removed Filter icon as it's not used
+import { Download, CalendarIcon, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { format, startOfDay, endOfDay, subDays } from 'date-fns'; // Removed isToday as it's not directly used here
+import { format, startOfDay, endOfDay, subDays } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { cn } from "@/lib/utils";
-import { useSearchParams } from 'next/navigation'; // Removed usePathname as it's not strictly needed for this logic
+import { useSearchParams } from 'next/navigation';
 
 type StatusFilterValue = Order['status'] | 'all';
 
 const ITEMS_PER_PAGE = 10; 
 
-const statusTranslationsForFilter: Record<StatusFilterValue, string> = {
+const statusTranslationsForFilter: Record<StatusFilterValue | 'received', string> = {
   all: 'כל הסטטוסים',
   new: 'חדשה',
   received: 'התקבלה',
@@ -39,7 +39,6 @@ export default function AdminOrdersPage() {
   
   const searchParams = useSearchParams(); 
   const initialStatusFilter = searchParams.get('status') as StatusFilterValue | null;
-  // const initialPeriodFilter = searchParams.get('period') as string | null; // Keep for potential future use if period links are re-enabled
 
   const [statusFilter, setStatusFilter] = useState<StatusFilterValue>(initialStatusFilter || 'all');
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
@@ -89,10 +88,7 @@ export default function AdminOrdersPage() {
         setEndDate(endOfDay(today));
       }
     } 
-    // If no period in URL, existing dates are kept unless explicitly cleared by user.
-    // This prevents clearing dates if only status filter changes.
-
-    setCurrentPage(1); // Reset page when searchParams (filters) change
+    setCurrentPage(1);
   }, [searchParams, initialStatusFilter]);
 
 
@@ -171,13 +167,13 @@ export default function AdminOrdersPage() {
       <div className="mb-4 p-3 border rounded-lg bg-muted/30 shadow-sm">
         <div className="flex flex-wrap items-center gap-2">
           <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value as StatusFilterValue); setCurrentPage(1); }}>
-            <SelectTrigger className="h-9 w-auto min-w-[130px] px-3 text-xs">
+            <SelectTrigger className="h-9 w-auto px-3 text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {availableStatuses.map((statusKey) => (
                 <SelectItem key={statusKey} value={statusKey} className="text-xs">
-                  {statusTranslationsForFilter[statusKey]}
+                  {statusTranslationsForFilter[statusKey as StatusFilterValue | 'received']}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -189,7 +185,7 @@ export default function AdminOrdersPage() {
                   variant={"outline"}
                   size="sm" 
                   className={cn(
-                      "h-9 w-[120px] px-2 text-xs justify-start text-left font-normal",
+                      "h-9 w-auto px-2 text-xs justify-start text-left font-normal",
                       !startDate && "text-muted-foreground"
                   )}
                   >
@@ -214,7 +210,7 @@ export default function AdminOrdersPage() {
                   variant={"outline"}
                   size="sm" 
                   className={cn(
-                      "h-9 w-[120px] px-2 text-xs justify-start text-left font-normal",
+                      "h-9 w-auto px-2 text-xs justify-start text-left font-normal",
                       !endDate && "text-muted-foreground"
                   )}
                   >
@@ -279,3 +275,4 @@ export default function AdminOrdersPage() {
     </>
   );
 }
+
