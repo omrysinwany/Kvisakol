@@ -1,7 +1,7 @@
 
 'use client';
 
-import Link from 'next/link';
+import { useRouter } from 'next/navigation'; // Import useRouter
 import type { Order } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -62,9 +62,15 @@ const getDisplayStatus = (order: Order): { text: string; colorClass: string; ico
 
 
 export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
+  const router = useRouter(); // Initialize router
+
   const formatPrice = (price: number) => {
     return `₪${price.toFixed(2)}`;
   }
+
+  const handleRowClick = (orderId: string) => {
+    router.push(`/admin/orders/${orderId}`);
+  };
 
   return (
     <Table className="text-xs">
@@ -84,11 +90,13 @@ export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
           const DisplayStatusIcon = displayStatus.icon;
           
           return (
-          <TableRow key={order.id} className={order.status === 'new' && !order.isViewedByAgent ? 'bg-primary/5' : ''}>
+          <TableRow 
+            key={order.id} 
+            onClick={() => handleRowClick(order.id)}
+            className={`cursor-pointer ${order.status === 'new' && !order.isViewedByAgent ? 'bg-primary/5' : ''}`}
+          >
             <TableCell className="font-medium">
-              <Link href={`/admin/orders/${order.id}`} className="hover:underline text-primary">
-                #{order.id.substring(order.id.length - 6)}
-              </Link>
+              #{order.id.substring(order.id.length - 6)}
             </TableCell>
             <TableCell>{order.customerName}</TableCell>
             <TableCell className="hidden md:table-cell">
@@ -104,18 +112,22 @@ export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
             <TableCell className="text-left">
               <DropdownMenu dir="rtl">
                 <DropdownMenuTrigger asChild>
-                  <Button aria-haspopup="true" size="icon" variant="ghost">
+                  <Button 
+                    aria-haspopup="true" 
+                    size="icon" 
+                    variant="ghost"
+                    onClick={(e) => e.stopPropagation()} // Prevent row click when actions button is clicked
+                  >
                     <MoreHorizontal className="h-4 w-4" />
                     <span className="sr-only">פתח תפריט פעולות</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}> {/* Prevent row click for content too */}
                   <DropdownMenuLabel>פעולות עבור הזמנה</DropdownMenuLabel>
-                  <DropdownMenuItem asChild>
-                    <Link href={`/admin/orders/${order.id}`} className="flex items-center gap-2 cursor-pointer">
-                      <Eye className="h-4 w-4" />
-                      צפה בפרטי הזמנה
-                    </Link>
+                  {/* Direct navigation to order details is now handled by row click, so this item can be removed or kept for explicitness */}
+                  <DropdownMenuItem onClick={() => router.push(`/admin/orders/${order.id}`)} className="flex items-center gap-2 cursor-pointer">
+                    <Eye className="h-4 w-4" />
+                    צפה בפרטי הזמנה
                   </DropdownMenuItem>
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger className="flex items-center gap-2 cursor-pointer">
