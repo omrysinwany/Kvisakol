@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CustomerTable } from '@/components/admin/customer-table';
 import { AdminPaginationControls } from '@/components/admin/admin-pagination-controls';
@@ -10,14 +10,26 @@ import type { CustomerSummary } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Download } from 'lucide-react';
+import { Search, Download, CalendarDays, UserCheck, UserX } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { subDays, isWithinInterval, startOfDay, endOfDay, isBefore } from 'date-fns';
 
 const ITEMS_PER_PAGE = 15;
+
+type LastOrderDateFilter = 'all' | 'last7days' | 'last30days' | 'over90days';
+
+const lastOrderDateFilterTranslations: Record<LastOrderDateFilter, string> = {
+  all: 'כל התקופות',
+  last7days: 'הזמינו ב-7 ימים אחרונים',
+  last30days: 'הזמינו ב-30 ימים אחרונים',
+  over90days: 'לא הזמינו מעל 90 יום',
+};
 
 export default function AdminCustomersPage() {
   const [allCustomers, setAllCustomers] = useState<CustomerSummary[]>([]);
   const [filteredCustomers, setFilteredCustomers] = useState<CustomerSummary[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [lastOrderFilter, setLastOrderFilter] = useState<LastOrderDateFilter>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
@@ -41,6 +53,8 @@ export default function AdminCustomersPage() {
 
   useEffect(() => {
     let customersToFilter = [...allCustomers];
+    const now = endOfDay(new Date());
+
     if (searchTerm) {
       const lowerSearchTerm = searchTerm.toLowerCase();
       customersToFilter = customersToFilter.filter(customer =>
@@ -48,12 +62,36 @@ export default function AdminCustomersPage() {
         customer.phone.includes(lowerSearchTerm)
       );
     }
+
+    if (lastOrderFilter !== 'all') {
+      customersToFilter = customersToFilter.filter(customer => {
+        const customerLastOrderDate = new Date(customer.lastOrderDate);
+        if (lastOrderFilter === 'last7days') {
+          const sevenDaysAgo = startOfDay(subDays(now, 6));
+          return isWithinInterval(customerLastOrderDate, { start: sevenDaysAgo, end: now });
+        }
+        if (lastOrderFilter === 'last30days') {
+          const thirtyDaysAgo = startOfDay(subDays(now, 29));
+          return isWithinInterval(customerLastOrderDate, { start: thirtyDaysAgo, end: now });
+        }
+        if (lastOrderFilter === 'over90days') {
+          const ninetyDaysAgo = subDays(now, 90);
+          return isBefore(customerLastOrderDate, ninetyDaysAgo);
+        }
+        return true;
+      });
+    }
+
     setFilteredCustomers(customersToFilter);
     setCurrentPage(1);
-  }, [searchTerm, allCustomers]);
+  }, [searchTerm, lastOrderFilter, allCustomers]);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
+  };
+
+  const handleLastOrderFilterChange = (value: LastOrderDateFilter) => {
+    setLastOrderFilter(value);
   };
 
   const totalPages = Math.ceil(filteredCustomers.length / ITEMS_PER_PAGE);
@@ -82,23 +120,44 @@ export default function AdminCustomersPage() {
     <>
       <div className="mb-4 flex flex-col sm:flex-row justify-between items-center gap-4">
         <h1 className="text-3xl font-bold tracking-tight">ניהול לקוחות</h1>
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <div className="relative flex-grow sm:flex-grow-0">
-            <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+         <Button variant="outline" size="sm" onClick={handleExportCustomers} className="text-xs whitespace-nowrap">
+            <Download className="ml-1.5 h-3.5 w-3.5" />
+            ייצא CSV
+          </Button>
+      </div>
+      
+      <div className="mb-4 p-3 border rounded-lg bg-muted/30 shadow-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+          <div className="relative">
+            <label htmlFor="customer-search" className="text-xs font-medium text-muted-foreground db-block mb-1.5">חיפוש לקוח</label>
+            <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 translate-y-[calc(50%-2px)] text-muted-foreground" />
             <Input
+              id="customer-search"
               type="search"
               placeholder="חיפוש לפי שם או טלפון..."
-              className="pl-10 rtl:pr-10 w-full sm:max-w-xs"
+              className="pl-10 rtl:pr-10 w-full h-9 text-xs"
               value={searchTerm}
               onChange={handleSearchChange}
             />
           </div>
-          <Button variant="outline" size="sm" onClick={handleExportCustomers} className="text-xs">
-            <Download className="ml-1.5 h-3.5 w-3.5" />
-            ייצא CSV
-          </Button>
+          <div>
+            <label htmlFor="last-order-filter" className="text-xs font-medium text-muted-foreground db-block mb-1.5">סינון לפי הזמנה אחרונה</label>
+            <Select value={lastOrderFilter} onValueChange={handleLastOrderFilterChange}>
+              <SelectTrigger id="last-order-filter" className="h-9 w-full px-3 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(lastOrderDateFilterTranslations).map(([key, value]) => (
+                  <SelectItem key={key} value={key} className="text-xs">
+                    {value}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
+
 
       <Card className="shadow-lg">
         <CardHeader>
@@ -122,7 +181,7 @@ export default function AdminCustomersPage() {
           ) : (
             <div className="text-center py-8">
               <p className="text-muted-foreground">
-                {allCustomers.length === 0 ? 'לא קיימים לקוחות במערכת.' : 'לא נמצאו לקוחות התואמים את החיפוש.'}
+                {allCustomers.length === 0 ? 'לא קיימים לקוחות במערכת.' : 'לא נמצאו לקוחות התואמים את החיפוש או הסינון.'}
               </p>
             </div>
           )}
