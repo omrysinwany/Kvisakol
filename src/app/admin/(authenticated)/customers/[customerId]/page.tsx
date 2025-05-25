@@ -3,21 +3,19 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { getOrdersByCustomerPhone, getCustomerSummaryById } from '@/services/order-service'; 
+import { getOrdersByCustomerPhone, getCustomerSummaryById, updateOrderStatusService } from '@/services/order-service';
 import type { CustomerSummary, Order } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { CustomerDetailView } from '@/components/admin/customer-detail-view';
-import { updateOrderStatusService } from '@/services/order-service'; // For status update
-
 
 export default function AdminCustomerDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  const customerId = params.customerId as string; 
+  const customerId = params.customerId as string;
 
   const [customer, setCustomer] = useState<CustomerSummary | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -38,9 +36,9 @@ export default function AdminCustomerDetailPage() {
           if (customerSummaryData) {
             setCustomer(customerSummaryData);
             console.log(`AdminCustomerDetailPage: Attempting to fetch orders for customer phone: ${customerSummaryData.phone}`);
-            const customerOrders = await getOrdersByCustomerPhone(customerSummaryData.phone); 
+            const customerOrders = await getOrdersByCustomerPhone(customerSummaryData.phone);
             console.log(`AdminCustomerDetailPage: Fetched ${customerOrders.length} orders for customer phone ${customerSummaryData.phone}:`, customerOrders.map(o => o.id));
-            setOrders(customerOrders.sort((a, b) => new Date(b.orderTimestamp).getTime() - new Date(a.orderTimestamp).getTime())); 
+            setOrders(customerOrders.sort((a, b) => new Date(b.orderTimestamp).getTime() - new Date(a.orderTimestamp).getTime()));
           } else {
             setError('הלקוח המבוקש לא נמצא במערכת הלקוחות.');
             console.warn(`AdminCustomerDetailPage: No customer document found for ID ${customerId} in 'customers' collection.`);
@@ -75,6 +73,8 @@ export default function AdminCustomerDetailPage() {
         setOrders(prevOrders =>
           prevOrders.map(o => (o.id === orderId ? { ...updatedOrder } : o))
         );
+        // Also update customer summary if the order status change affects it (e.g. totalSpent on 'completed')
+        // For now, we rely on the summary in `customers` collection. A more robust solution might re-fetch or re-calculate.
         toast({
           title: "סטטוס הזמנה עודכן",
           description: `הסטטוס של הזמנה ${orderId.substring(orderId.length - 6)} שונה ל: ${statusTranslationsToast[newStatus]}.`,
@@ -110,9 +110,14 @@ export default function AdminCustomerDetailPage() {
   }
 
   if (!customer) {
+    // This case covers when getCustomerSummaryById returns null.
+    // It implies the customerId (phone) from URL wasn't found in 'customers' collection.
     return (
         <div className="container mx-auto px-4 py-8">
-            <p className="text-center text-lg">לא ניתן לטעון את פרטי הלקוח המבוקש.</p>
+            <p className="text-center text-lg">לא נמצא לקוח עם המזהה (טלפון) שהתקבל: {customerId}.</p>
+            <p className="text-center text-sm text-muted-foreground">
+                ייתכן שהלקוח עדיין לא ביצע הזמנות או שהמזהה אינו תקין.
+            </p>
             <div className="text-center mt-4">
             <Button asChild variant="outline">
                 <Link href="/admin/customers">
@@ -123,6 +128,11 @@ export default function AdminCustomerDetailPage() {
             </div>
         </div>
     );
+  }
+  
+  // If customer summary is found, but orders might be empty
+  if (customer && orders.length === 0) {
+    console.log(`AdminCustomerDetailPage: Customer ${customer.name} found, but they have 0 orders fetched from 'orders' collection.`);
   }
 
 
@@ -136,9 +146,9 @@ export default function AdminCustomerDetailPage() {
           </Link>
         </Button>
       </div>
+      {/* CustomerDetailView will show customer.totalOrders which might be stale if orders were manually deleted. 
+          The order list itself will show orders.length which is the live count. */}
       <CustomerDetailView customer={customer} orders={orders} onUpdateOrderStatus={handleUpdateOrderStatus} />
     </>
   );
 }
-
-    
