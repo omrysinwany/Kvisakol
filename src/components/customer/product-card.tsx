@@ -116,7 +116,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
       </CardHeader>
       <CardContent className="p-3 flex-1">
-        <CardTitle className="text-primary text-sm font-semibold mb-1 h-10 leading-tight overflow-hidden text-center">
+        <CardTitle className="text-primary text-sm mb-1 h-10 leading-tight overflow-hidden text-center line-clamp-2">
           {product.name}
         </CardTitle>
       </CardContent>
@@ -125,7 +125,7 @@ export function ProductCard({ product }: ProductCardProps) {
         isAdminPreview ? "justify-start" : "flex-col sm:flex-row justify-between gap-1"
       )}>
         <div className="flex items-center gap-1">
-          <p className="text-sm font-bold text-foreground">{formatPrice(product.price)}</p>
+          <p className="text-sm text-foreground">{formatPrice(product.price)}</p>
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary">
@@ -151,7 +151,6 @@ export function ProductCard({ product }: ProductCardProps) {
                         e.currentTarget.src = '/images/products/placeholder.jpg';
                     }}
                   />
-                   {/* Display badge inside modal as well if needed, or remove if redundant */}
                    {product.category && (
                     <Badge
                       variant="secondary"
@@ -161,8 +160,6 @@ export function ProductCard({ product }: ProductCardProps) {
                     </Badge>
                   )}
                 </div>
-                {/* Badge display in modal main content - can be removed if overlay is preferred */}
-                {/* {product.category && <Badge variant="secondary" className="w-fit">{product.category}</Badge>} */}
                 <p className="text-xl font-semibold">{formatPrice(product.price)}</p>
                 <DialogDescription className="text-sm text-muted-foreground whitespace-pre-wrap max-h-[200px] overflow-y-auto">
                   {product.description}
@@ -210,4 +207,3 @@ export function ProductCard({ product }: ProductCardProps) {
     </Card>
   );
 }
-
