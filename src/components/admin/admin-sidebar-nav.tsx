@@ -13,11 +13,13 @@ interface NavItem {
   label: string;
   icon: LucideIcon;
   isSuperAdminOnly?: boolean;
+  target?: string; // Added target for new tab behavior
+  rel?: string;    // Added rel for new tab behavior
 }
 
 const baseNavItems: NavItem[] = [
   { href: '/admin/dashboard', label: 'לוח בקרה', icon: LayoutDashboard },
-  { href: '/', label: 'קטלוג', icon: LayoutList },
+  { href: '/admin/catalog-preview', label: 'קטלוג', icon: LayoutList }, // Changed href, removed target and rel
   { href: '/admin/products', label: 'ניהול מוצרים', icon: Package },
   { href: '/admin/orders', label: 'ניהול הזמנות', icon: ShoppingBasket },
   // { href: '/admin/settings', label: 'הגדרות', icon: Settings }, // Example for future extension
@@ -32,10 +34,9 @@ export function AdminSidebarNav({
 }) {
   const pathname = usePathname();
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // isLoading is true initially
+  const [isLoading, setIsLoading] = useState(true); 
 
   useEffect(() => {
-    // This effect runs on the client after hydration
     const storedUser = localStorage.getItem('loggedInKviskalAdmin');
     if (storedUser) {
       try {
@@ -45,15 +46,13 @@ export function AdminSidebarNav({
         console.error("Failed to parse user from localStorage for sidebar", error);
       }
     }
-    setIsLoading(false); // Set isLoading to false after checking localStorage
+    setIsLoading(false); 
   }, []);
 
-  // If still loading (e.g. initial render before useEffect runs), show skeleton.
-  // This will render on both server and client initially if isLoading is true.
   if (isLoading) {
     return (
       <nav className={cn("flex flex-col gap-1 p-4", isMobile ? "" : "lg:gap-2 lg:p-4")}>
-        {[...Array(4)].map((_, i) => ( // Increased skeleton items due to new link
+        {[...Array(baseNavItems.length)].map((_, i) => (
           <div key={i} className="h-8 bg-muted rounded-md animate-pulse"></div>
         ))}
       </nav>
@@ -71,14 +70,15 @@ export function AdminSidebarNav({
           onClick={isMobile ? onMobileLinkClick : undefined}
           className={cn(
             'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:bg-accent',
-            // Special handling for root path to avoid highlighting it for all admin sub-paths
-            (pathname === item.href && item.href !== '/') || (pathname === '/' && item.href === '/') ? 'bg-accent text-primary font-semibold' : '',
-            // If current path is an admin path and item.href is '/', don't highlight it unless explicitly on '/'
+            (pathname === item.href && item.href !== '/') || 
+            (pathname === '/' && item.href === '/') || 
+            (pathname === '/admin/catalog-preview' && item.href === '/admin/catalog-preview') 
+            ? 'bg-accent text-primary font-semibold' : '',
             (pathname.startsWith('/admin') && item.href === '/') ? '' : (pathname === item.href ? 'bg-accent text-primary font-semibold' : ''),
             isMobile ? 'text-base' : 'text-sm'
           )}
-          target={item.href === '/' ? '_blank' : undefined} 
-          rel={item.href === '/' ? 'noopener noreferrer' : undefined}
+          target={item.target} 
+          rel={item.rel}
         >
           <item.icon className="h-4 w-4" />
           {item.label}
