@@ -45,7 +45,7 @@ interface DashboardSummary {
   totalOrders: number;
   newOrdersUnviewed: number;
   receivedOrders: number;
-  allTimeRevenue: number; 
+  // allTimeRevenue: number; // No longer directly used in summary state
   latestOrders: Order[];
   ordersToday: number;
   ordersThisWeek: number;
@@ -93,10 +93,6 @@ export default function AdminDashboardPage() {
             isWithinInterval(new Date(o.orderTimestamp), { start: startOfDay(sevenDaysAgo), end: endOfDay(today) })
         ).length;
         
-        const allTimeRevenue = orders
-          .filter(o => o.status === 'completed')
-          .reduce((sum, order) => sum + order.totalAmount, 0);
-
         const latestOrders = orders.slice(0, 5);
 
         setSummary({
@@ -104,7 +100,7 @@ export default function AdminDashboardPage() {
           totalOrders,
           newOrdersUnviewed: newOrdersUnviewedCount,
           receivedOrders: receivedOrdersCount,
-          allTimeRevenue,
+          // allTimeRevenue is calculated in a separate effect now
           latestOrders,
           ordersToday: ordersTodayCount,
           ordersThisWeek: ordersThisWeekCount,
@@ -120,7 +116,7 @@ export default function AdminDashboardPage() {
   }, [toast]);
 
   useEffect(() => {
-    if (!allOrders.length && summary?.allTimeRevenue === undefined) {
+    if (!allOrders.length) { // Check if allOrders is empty
         setFilteredRevenue(0);
         return;
     }
@@ -153,17 +149,18 @@ export default function AdminDashboardPage() {
             } else if (customRevenueEndDate) {
                  relevantOrders = relevantOrders.filter(o => new Date(o.orderTimestamp) <= endOfDay(customRevenueEndDate));
             } else {
-                 relevantOrders = []; 
+                 relevantOrders = []; // No dates selected for custom, so no revenue
             }
             break;
         case 'allTime':
         default:
+            // No filtering needed for allTime, uses all completed orders
             break;
     }
     const newFilteredRevenue = relevantOrders.reduce((sum, order) => sum + order.totalAmount, 0);
     setFilteredRevenue(newFilteredRevenue);
 
-}, [allOrders, selectedRevenuePeriod, customRevenueStartDate, customRevenueEndDate, summary]);
+}, [allOrders, selectedRevenuePeriod, customRevenueStartDate, customRevenueEndDate]);
 
 
   const formatPrice = (price: number) => {
@@ -295,101 +292,102 @@ export default function AdminDashboardPage() {
 
       <div className="mt-8">
         <Card className="col-span-2">
-            <CardHeader className="pb-3">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                  <div className="flex items-center">
-                      <DollarSign className="h-5 w-5 text-muted-foreground ml-2" />
-                      <CardTitle className="text-2xl font-bold">
-                          הכנסות בתקופה הנבחרת
-                      </CardTitle>
-                  </div>
-                  <DropdownMenu dir="rtl">
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="min-w-[130px] justify-between self-start sm:self-center">
-                        {revenuePeriodTranslations[selectedRevenuePeriod]}
-                        <ChevronDown className="h-4 w-4 opacity-50 mr-1" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>בחר תקופה</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuRadioGroup value={selectedRevenuePeriod} onValueChange={(value) => setSelectedRevenuePeriod(value as RevenuePeriod)}>
-                        <DropdownMenuRadioItem value="thisMonth">החודש</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="thisWeek">השבוע</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="today">היום</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="allTime">כל הזמן</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="custom">מותאם אישית</DropdownMenuRadioItem>
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+          <CardHeader className="pb-3">
+            <div className="flex flex-row items-center justify-between gap-2"> {/* Ensured flex-row and items-center for alignment */}
+              <div className="flex items-center">
+                <DollarSign className="h-5 w-5 text-muted-foreground ml-2" />
+                <CardTitle className="text-2xl font-bold">
+                  הכנסות בתקופה הנבחרת
+                </CardTitle>
               </div>
-            </CardHeader>
-            <CardContent>
-              {selectedRevenuePeriod === 'custom' && (
-                <div className="flex flex-col sm:flex-row gap-2 my-4 items-center p-3 border rounded-lg bg-muted/40 shadow-sm">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        size="sm"
-                        className={cn(
-                          "w-full sm:w-[160px] justify-start text-left font-normal text-xs",
-                          !customRevenueStartDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-1 h-3.5 w-3.5" />
-                        {customRevenueStartDate ? format(customRevenueStartDate, "PPP", { locale: he }) : <span>מתאריך</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={customRevenueStartDate}
-                        onSelect={setCustomRevenueStartDate}
-                        initialFocus
-                        disabled={(date) => customRevenueEndDate ? date > customRevenueEndDate : false}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        size="sm"
-                        className={cn(
-                          "w-full sm:w-[160px] justify-start text-left font-normal text-xs",
-                          !customRevenueEndDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-1 h-3.5 w-3.5" />
-                        {customRevenueEndDate ? format(customRevenueEndDate, "PPP", { locale: he }) : <span>עד תאריך</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={customRevenueEndDate}
-                        onSelect={setCustomRevenueEndDate}
-                        initialFocus
-                        disabled={(date) => customRevenueStartDate ? date < customRevenueStartDate : false}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  {(customRevenueStartDate || customRevenueEndDate) && (
-                      <Button variant="ghost" size="icon" onClick={handleClearCustomDates} className="h-9 w-9">
-                          <X className="h-4 w-4" />
-                          <span className="sr-only">נקה תאריכים</span>
-                      </Button>
-                  )}
-                </div>
-              )}
-              <div className="text-2xl font-bold mt-2">{formatPrice(filteredRevenue)}</div>
-              <p className="text-sm text-muted-foreground">
-                  סה"כ מהזמנות <span className="font-medium">שהושלמו</span> בתקופה שנבחרה.
-              </p>
-            </CardContent>
-          </Card>
+              <DropdownMenu dir="rtl">
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="justify-between"> {/* Removed min-w and self-start/center */}
+                    {revenuePeriodTranslations[selectedRevenuePeriod]}
+                    <ChevronDown className="h-4 w-4 opacity-50 mr-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>בחר תקופה</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuRadioGroup value={selectedRevenuePeriod} onValueChange={(value) => setSelectedRevenuePeriod(value as RevenuePeriod)}>
+                    <DropdownMenuRadioItem value="thisMonth">החודש</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="thisWeek">השבוע</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="today">היום</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="allTime">כל הזמן</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="custom">מותאם אישית</DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {selectedRevenuePeriod === 'custom' && (
+              <div className="flex flex-col sm:flex-row gap-2 my-4 items-center p-3 border rounded-lg bg-muted/40 shadow-sm">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      size="sm"
+                      className={cn(
+                        "w-full sm:w-[160px] justify-start text-left font-normal text-xs",
+                        !customRevenueStartDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-1 h-3.5 w-3.5" />
+                      {customRevenueStartDate ? format(customRevenueStartDate, "PPP", { locale: he }) : <span>מתאריך</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={customRevenueStartDate}
+                      onSelect={setCustomRevenueStartDate}
+                      initialFocus
+                      disabled={(date) => customRevenueEndDate ? date > customRevenueEndDate : false}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      size="sm"
+                      className={cn(
+                        "w-full sm:w-[160px] justify-start text-left font-normal text-xs",
+                        !customRevenueEndDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-1 h-3.5 w-3.5" />
+                      {customRevenueEndDate ? format(customRevenueEndDate, "PPP", { locale: he }) : <span>עד תאריך</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={customRevenueEndDate}
+                      onSelect={setCustomRevenueEndDate}
+                      initialFocus
+                      disabled={(date) => customRevenueStartDate ? date < customRevenueStartDate : false}
+                    />
+                  </PopoverContent>
+                </Popover>
+                {(customRevenueStartDate || customRevenueEndDate) && (
+                    <Button variant="ghost" size="icon" onClick={handleClearCustomDates} className="h-9 w-9">
+                        <X className="h-4 w-4" />
+                        <span className="sr-only">נקה תאריכים</span>
+                    </Button>
+                )}
+              </div>
+            )}
+            <div className="text-2xl font-bold mt-2">{formatPrice(filteredRevenue)}</div>
+            <p className="text-sm text-muted-foreground">
+                סה"כ מהזמנות <span className="font-medium">שהושלמו</span> בתקופה שנבחרה.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </>
   );
 }
+
