@@ -2,7 +2,6 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import type { Product } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -16,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-// useToast removed as it's handled by the parent page (AdminProductsPage)
+import { useRouter } from 'next/navigation';
 
 interface ProductTableProps {
   products: Product[];
@@ -25,10 +24,15 @@ interface ProductTableProps {
 }
 
 export function ProductTable({ products, onDeleteProduct, onToggleActive }: ProductTableProps) {
+  const router = useRouter();
 
   const formatPrice = (price: number) => {
     return `₪${price.toFixed(2)}`;
   }
+
+  const handleRowClick = (productId: string) => {
+    router.push(`/admin/products/edit/${productId}`);
+  };
 
   return (
     <Table className="text-xs">
@@ -44,16 +48,24 @@ export function ProductTable({ products, onDeleteProduct, onToggleActive }: Prod
       </TableHeader>
       <TableBody>
         {products.map((product) => (
-          <TableRow key={product.id}>
-            <TableCell className="hidden sm:table-cell">
+          <TableRow 
+            key={product.id} 
+            onClick={() => handleRowClick(product.id)}
+            className="cursor-pointer"
+          >
+            <TableCell className="hidden sm:table-cell" onClick={(e) => e.stopPropagation()}>
               <div className="relative h-12 w-12 overflow-hidden rounded-md">
                 <Image
-                  src={product.imageUrl}
+                  src={product.imageUrl || 'https://placehold.co/48x48.png'}
                   alt={product.name}
                   fill
                   sizes="48px"
                   className="object-cover"
                   data-ai-hint={product.dataAiHint as string}
+                  onError={(e) => {
+                    e.currentTarget.srcset = 'https://placehold.co/48x48.png';
+                    e.currentTarget.src = 'https://placehold.co/48x48.png';
+                  }}
                 />
               </div>
             </TableCell>
@@ -66,7 +78,7 @@ export function ProductTable({ products, onDeleteProduct, onToggleActive }: Prod
                 {product.isActive ? 'פעיל' : 'לא פעיל'}
               </Badge>
             </TableCell>
-            <TableCell className="text-left">
+            <TableCell className="text-left" onClick={(e) => e.stopPropagation()}>
               <DropdownMenu dir="rtl">
                 <DropdownMenuTrigger asChild>
                   <Button aria-haspopup="true" size="icon" variant="ghost">
@@ -76,11 +88,9 @@ export function ProductTable({ products, onDeleteProduct, onToggleActive }: Prod
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>פעולות</DropdownMenuLabel>
-                  <DropdownMenuItem asChild>
-                    <Link href={`/admin/products/edit/${product.id}`} className="flex items-center gap-2 cursor-pointer">
+                  <DropdownMenuItem onClick={() => handleRowClick(product.id)} className="flex items-center gap-2 cursor-pointer">
                       <Edit2 className="h-4 w-4" />
                       ערוך מוצר
-                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onToggleActive(product.id, product.name, product.isActive)} className="flex items-center gap-2 cursor-pointer">
                     {product.isActive ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -100,3 +110,4 @@ export function ProductTable({ products, onDeleteProduct, onToggleActive }: Prod
     </Table>
   );
 }
+

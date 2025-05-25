@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,24 +16,26 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import Image from 'next/image';
 import { UploadCloud } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const productFormSchema = z.object({
   name: z.string().min(3, { message: 'שם מוצר חייב להכיל לפחות 3 תווים.' }),
   description: z.string().min(10, { message: 'תיאור חייב להכיל לפחות 10 תווים.' }),
   price: z.coerce.number().positive({ message: 'מחיר חייב להיות מספר חיובי.' }),
-  imageUrl: z.string().url({ message: 'כתובת תמונה לא תקינה.' }).optional().or(z.literal('')), // Optional for now, can be expanded for actual upload
-  category: z.string().optional(),
+  imageUrl: z.string().url({ message: 'כתובת תמונה לא תקינה.' }).optional().or(z.literal('')),
+  category: z.string().optional().default(''), // Allow empty string for "no category"
   isActive: z.boolean().default(true),
 });
 
 type ProductFormValues = z.infer<typeof productFormSchema>;
 
 interface ProductFormProps {
-  initialData?: Product | null; // For editing
-  onSubmitSuccess?: (product: Product) => void; // Callback after successful submission
+  initialData?: Product | null;
+  onSubmitSuccess?: (product: Product) => void;
+  availableCategories: string[];
 }
 
-export function ProductForm({ initialData, onSubmitSuccess }: ProductFormProps) {
+export function ProductForm({ initialData, onSubmitSuccess, availableCategories }: ProductFormProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [imagePreview, setImagePreview] = useState<string | null>(initialData?.imageUrl || null);
@@ -42,7 +45,8 @@ export function ProductForm({ initialData, onSubmitSuccess }: ProductFormProps) 
     defaultValues: initialData
       ? {
           ...initialData,
-          price: Number(initialData.price) // ensure price is number
+          price: Number(initialData.price),
+          category: initialData.category || '', // Ensure category is string or empty
         }
       : {
           name: '',
@@ -58,7 +62,8 @@ export function ProductForm({ initialData, onSubmitSuccess }: ProductFormProps) 
     if (initialData) {
       form.reset({
         ...initialData,
-        price: Number(initialData.price)
+        price: Number(initialData.price),
+        category: initialData.category || '',
       });
       setImagePreview(initialData.imageUrl);
     }
@@ -66,22 +71,20 @@ export function ProductForm({ initialData, onSubmitSuccess }: ProductFormProps) 
   
 
   const onSubmit = async (data: ProductFormValues) => {
-    // In a real app, handle image upload if a file is selected,
-    // then save product data (including image URL) to Firebase.
     console.log('Product form submitted:', data);
 
     const newOrUpdatedProduct: Product = {
-      id: initialData?.id || `prod-${Date.now()}`, // Generate ID if new
+      id: initialData?.id || `prod-${Date.now()}`, 
       ...data,
-      price: Number(data.price), // Ensure price is number before "saving"
-      imageUrl: imagePreview || 'https://placehold.co/600x400.png', // Use preview or default
-      dataAiHint: 'custom product' // Generic hint for new/edited products
+      price: Number(data.price), 
+      imageUrl: imagePreview || 'https://placehold.co/600x400.png',
+      dataAiHint: initialData?.dataAiHint || 'custom product',
+      category: data.category === "" ? undefined : data.category, // Store undefined if no category selected
     };
 
     if (onSubmitSuccess) {
       onSubmitSuccess(newOrUpdatedProduct);
     } else {
-      // Default behavior if no callback (e.g. direct page navigation)
       toast({
         title: initialData ? 'מוצר עודכן!' : 'מוצר נוצר!',
         description: `המוצר "${data.name}" ${initialData ? 'עודכן' : 'נוצר'} בהצלחה.`,
@@ -96,15 +99,10 @@ export function ProductForm({ initialData, onSubmitSuccess }: ProductFormProps) 
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
-        // In a real scenario, you might upload the file here and get a URL
-        // For now, we just use the data URL for preview
-        // form.setValue('imageUrl', reader.result as string); // This would require schema to accept data URL or handle upload separately
       };
       reader.readAsDataURL(file);
     } else {
-      // If user clears file input, or no file, potentially revert to initial or clear
       setImagePreview(initialData?.imageUrl || null);
-      // form.setValue('imageUrl', initialData?.imageUrl || '');
     }
   };
 
@@ -125,7 +123,18 @@ export function ProductForm({ initialData, onSubmitSuccess }: ProductFormProps) 
                 <FormLabel>תמונת מוצר</FormLabel>
                   <div className="aspect-square w-full relative border border-dashed rounded-lg flex flex-col justify-center items-center">
                     {imagePreview ? (
-                      <Image src={imagePreview} alt="תצוגה מקדימה של התמונה" layout="fill" objectFit="cover" className="rounded-lg" />
+                      <Image 
+                        src={imagePreview} 
+                        alt="תצוגה מקדימה של התמונה" 
+                        layout="fill" 
+                        objectFit="cover" 
+                        className="rounded-lg" 
+                        onError={(e) => {
+                            e.currentTarget.srcset = 'https://placehold.co/300x300.png';
+                            e.currentTarget.src = 'https://placehold.co/300x300.png';
+                            setImagePreview('https://placehold.co/300x300.png');
+                        }}
+                      />
                     ) : (
                       <div className="text-center p-4">
                         <UploadCloud className="h-12 w-12 text-muted-foreground mx-auto" />
@@ -207,18 +216,31 @@ export function ProductForm({ initialData, onSubmitSuccess }: ProductFormProps) 
                       )}
                     />
                     <FormField
-                      control={form.control}
-                      name="category"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>קטגוריה (אופציונלי)</FormLabel>
-                          <FormControl>
-                            <Input placeholder="לדוגמה: אבקות כביסה" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                        control={form.control}
+                        name="category"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>קטגוריה</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value || ''} defaultValue={field.value || ''}>
+                                <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="בחר קטגוריה..." />
+                                </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                <SelectItem value=""><em>ללא קטגוריה</em></SelectItem>
+                                {availableCategories.map((cat) => (
+                                    <SelectItem key={cat} value={cat}>
+                                    {cat}
+                                    </SelectItem>
+                                ))}
+                                </SelectContent>
+                            </Select>
+                            <FormDescription>בחר קטגוריה קיימת או השאר ריק.</FormDescription>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
                   </div>
                 <FormField
                   control={form.control}
@@ -256,3 +278,4 @@ export function ProductForm({ initialData, onSubmitSuccess }: ProductFormProps) 
     </Card>
   );
 }
+
