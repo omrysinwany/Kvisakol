@@ -1,72 +1,92 @@
 
 'use server';
 
-import { placeholderProducts } from '@/lib/placeholder-data';
+import { placeholderProducts, setPlaceholderProducts, addPlaceholderProduct, updatePlaceholderProduct, deletePlaceholderProduct } from '@/lib/placeholder-data';
 import type { Product } from '@/lib/types';
+import { db } from '@/lib/firebase/config';
+import { collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc, query, where } from 'firebase/firestore';
 
-// Simulate API delay - useful for testing loading states
-// const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
+// Example of fetching products from Firestore for the catalog
 export async function getProductsForCatalog(): Promise<Product[]> {
-  // await delay(100); // Simulate network latency
-  // For customer catalog, usually only active products
-  return Promise.resolve(placeholderProducts.filter(p => p.isActive));
+  try {
+    const productsCollectionRef = collection(db, 'products');
+    const q = query(productsCollectionRef, where('isActive', '==', true));
+    const querySnapshot = await getDocs(q);
+    const products = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    } as Product));
+    return products;
+  } catch (error) {
+    console.error("Error fetching products from Firestore for catalog:", error);
+    // Fallback to placeholder data or return empty array in case of error
+    // For now, returning empty array to indicate failure to fetch from DB
+    return []; 
+  }
 }
 
+// --- Functions below still use placeholder data and need to be updated for Firestore ---
+
 export async function getAllProductsForAdmin(): Promise<Product[]> {
-  // await delay(100);
-  // For admin, show all products
+  // TODO: Update to fetch all products from Firestore
+  console.warn("getAllProductsForAdmin is using placeholder data. Update for Firestore.");
   return Promise.resolve([...placeholderProducts]);
 }
 
 export async function getProductById(productId: string): Promise<Product | null> {
-  // await delay(50);
+  // TODO: Update to fetch a single product by ID from Firestore
+  console.warn(`getProductById for ${productId} is using placeholder data. Update for Firestore.`);
   const product = placeholderProducts.find(p => p.id === productId) || null;
   return Promise.resolve(product);
 }
 
-// In a real DB scenario, these CUD operations would interact with the database.
-// For now, they will log and modify the in-memory array (which won't persist across reloads).
-
 export async function createProductService(productData: Omit<Product, 'id' | 'imageUrl' | 'dataAiHint'> & { imageUrl?: string }): Promise<Product> {
-  console.log('SERVICE: Simulating createProduct:', productData);
-  const newProduct: Product = {
-    id: `prod-${Date.now()}`,
+  // TODO: Update to create a product in Firestore
+  console.warn("createProductService is using placeholder data. Update for Firestore.");
+  const newProductData = {
     name: productData.name,
     description: productData.description,
     price: productData.price,
     category: productData.category,
     isActive: productData.isActive,
-    imageUrl: productData.imageUrl || 'https://placehold.co/600x400.png',
-    dataAiHint: 'custom product' // Or generate based on name/category
+    imageUrl: productData.imageUrl || '/images/products/placeholder.jpg', // Ensure a default image
+    dataAiHint: 'custom product'
   };
-  placeholderProducts.push(newProduct); // Modifies in-memory array
+  
+  // Simulate adding to Firestore and getting an ID, then add to placeholder for now
+  const docRef = await addDoc(collection(db, "products_placeholder_demo"), newProductData); // Example, not real "products" collection
+  
+  const newProduct: Product = {
+    id: docRef.id, // Use ID from Firestore for demo
+    ...newProductData
+  };
+  addPlaceholderProduct(newProduct); // Add to in-memory array for other functions to see it
   return Promise.resolve(newProduct);
 }
 
 export async function updateProductService(productId: string, productData: Partial<Omit<Product, 'id'>>): Promise<Product | null> {
-  console.log('SERVICE: Simulating updateProduct:', productId, productData);
+  // TODO: Update to update a product in Firestore
+  console.warn(`updateProductService for ${productId} is using placeholder data. Update for Firestore.`);
   const productIndex = placeholderProducts.findIndex(p => p.id === productId);
   if (productIndex === -1) {
     return Promise.resolve(null);
   }
   const updatedProductDetails = { ...placeholderProducts[productIndex], ...productData };
-  placeholderProducts[productIndex] = updatedProductDetails; // Modifies in-memory array
+  updatePlaceholderProduct(updatedProductDetails); // Modifies in-memory array
   return Promise.resolve(updatedProductDetails);
 }
 
 export async function deleteProductService(productId: string): Promise<boolean> {
-  console.log('SERVICE: Simulating deleteProduct:', productId);
+  // TODO: Update to delete a product from Firestore
+  console.warn(`deleteProductService for ${productId} is using placeholder data. Update for Firestore.`);
   const initialLength = placeholderProducts.length;
-  const index = placeholderProducts.findIndex(p => p.id === productId);
-  if (index > -1) {
-    placeholderProducts.splice(index, 1); // Modifies in-memory array
-  }
+  deletePlaceholderProduct(productId); // Modifies in-memory array
   return Promise.resolve(placeholderProducts.length < initialLength);
 }
 
 export async function toggleProductActiveStatusService(productId: string, isActive: boolean): Promise<Product | null> {
-  console.log('SERVICE: Simulating toggleProductActiveStatus:', productId, isActive);
+  // TODO: Update to toggle product active status in Firestore
+  console.warn(`toggleProductActiveStatusService for ${productId} is using placeholder data. Update for Firestore.`);
   const productIndex = placeholderProducts.findIndex(p => p.id === productId);
   if (productIndex === -1) {
     return Promise.resolve(null);
