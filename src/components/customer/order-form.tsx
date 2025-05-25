@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { createOrderService } from '@/services/order-service';
 import type { OrderItem } from '@/lib/types';
+import { useEffect } from 'react'; // Import useEffect
 
 const orderFormSchema = z.object({
   customerName: z.string().min(2, { message: 'שם חייב להכיל לפחות 2 תווים.' }),
@@ -38,6 +39,14 @@ export function OrderForm() {
       customerNotes: '',
     },
   });
+
+  useEffect(() => {
+    // Redirect to cart if cart is empty, runs only on client after mount
+    if (typeof window !== 'undefined' && cartItems.length === 0) {
+      router.push('/cart');
+    }
+  }, [cartItems, router]);
+
 
   const onSubmit = async (data: OrderFormValues) => {
     try {
@@ -77,10 +86,15 @@ export function OrderForm() {
     return `₪${price.toFixed(2)}`;
   }
 
-  if (cartItems.length === 0 && typeof window !== 'undefined') { // Ensure router.push only runs client-side
-    router.push('/cart'); 
-    return null;
+  // Return null or a loading state while redirecting or if cart is empty
+  if (cartItems.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <p className="text-lg text-muted-foreground">העגלה שלך ריקה, מעביר אותך לדף העגלה...</p>
+      </div>
+    ); 
   }
+
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
