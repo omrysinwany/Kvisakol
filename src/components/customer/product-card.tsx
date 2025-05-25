@@ -105,13 +105,20 @@ export function ProductCard({ product }: ProductCardProps) {
               e.currentTarget.src = '/images/products/placeholder.jpg';
             }}
           />
+          {product.category && (
+            <Badge
+              variant="secondary"
+              className="absolute top-2 left-2 z-10 text-xs"
+            >
+              {product.category}
+            </Badge>
+          )}
         </div>
       </CardHeader>
       <CardContent className="p-3 flex-1">
         <CardTitle className="text-primary text-sm font-semibold mb-1 h-10 leading-tight overflow-hidden text-center">
           {product.name}
         </CardTitle>
-        {product.category && <Badge variant="secondary" className="mb-1 text-xs">{product.category}</Badge>}
       </CardContent>
       <CardFooter className={cn(
         "p-3 flex items-center mt-auto",
@@ -144,8 +151,18 @@ export function ProductCard({ product }: ProductCardProps) {
                         e.currentTarget.src = '/images/products/placeholder.jpg';
                     }}
                   />
+                   {/* Display badge inside modal as well if needed, or remove if redundant */}
+                   {product.category && (
+                    <Badge
+                      variant="secondary"
+                      className="absolute top-2 left-2 z-10 text-xs" 
+                    >
+                      {product.category}
+                    </Badge>
+                  )}
                 </div>
-                {product.category && <Badge variant="secondary" className="w-fit">{product.category}</Badge>}
+                {/* Badge display in modal main content - can be removed if overlay is preferred */}
+                {/* {product.category && <Badge variant="secondary" className="w-fit">{product.category}</Badge>} */}
                 <p className="text-xl font-semibold">{formatPrice(product.price)}</p>
                 <DialogDescription className="text-sm text-muted-foreground whitespace-pre-wrap max-h-[200px] overflow-y-auto">
                   {product.description}
@@ -193,3 +210,4 @@ export function ProductCard({ product }: ProductCardProps) {
     </Card>
   );
 }
+
