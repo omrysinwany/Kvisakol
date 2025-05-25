@@ -18,6 +18,9 @@ const TARGET_CATEGORY_FOR_RESORT_NK = 'נוזלי כביסה';
 const PRODUCT_ID_TO_MOVE_LAST_PFF = 'kpff1'; // ID for "מבשם רצפות פרוביוטי מאסק פלאוורס"
 const TARGET_CATEGORY_FOR_RESORT_PFF = 'פרפלור מבשמי רצפות';
 
+const PRODUCT_ID_TO_MOVE_LAST_MNM = 'kprof7'; // ID for "מסיר כתמים לפני כביסה"
+const TARGET_CATEGORY_FOR_RESORT_MNM = 'מוצרי ניקוי מקצועיים';
+
 
 export default function CatalogPage() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -92,6 +95,19 @@ export default function CatalogPage() {
       let productToMoveLast: Product | null = null;
       const remainingProducts = productsToFilter.filter(p => {
         if (p.id === PRODUCT_ID_TO_MOVE_LAST_PFF) {
+          productToMoveLast = p;
+          return false;
+        }
+        return true;
+      });
+      productsToFilter = [...remainingProducts];
+      if (productToMoveLast) {
+        productsToFilter.push(productToMoveLast);
+      }
+    } else if (selectedCategory === TARGET_CATEGORY_FOR_RESORT_MNM) {
+      let productToMoveLast: Product | null = null;
+      const remainingProducts = productsToFilter.filter(p => {
+        if (p.id === PRODUCT_ID_TO_MOVE_LAST_MNM) {
           productToMoveLast = p;
           return false;
         }
