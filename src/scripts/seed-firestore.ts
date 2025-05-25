@@ -22,8 +22,13 @@ const firebaseConfig = {
 
 let app: FirebaseApp;
 if (!getApps().length) {
-  app = initializeApp(firebaseConfig);
-  console.log("Firebase app initialized for seeding.");
+  try {
+    app = initializeApp(firebaseConfig);
+    console.log("Firebase app initialized for seeding.");
+  } catch (e) {
+    console.error("Error initializing Firebase app for seeding:", e);
+    process.exit(1); // Exit if Firebase app cannot be initialized
+  }
 } else {
   app = getApp();
   console.log("Firebase app already exists for seeding, getting instance.");
@@ -31,20 +36,22 @@ if (!getApps().length) {
 
 let db: Firestore;
 try {
+  // Attempt to initialize Firestore with specific settings if not already initialized with these or similar settings.
   db = initializeFirestore(app, {
     ignoreUndefinedProperties: true,
   });
-  console.log("Firestore initialized for seeding with ignoreUndefinedProperties:true using initializeFirestore(app, {options}).");
+  console.log("Firestore initialized for seeding with ignoreUndefinedProperties:true.");
 } catch (e: any) {
   if (e.code === 'failed-precondition') {
     console.warn("initializeFirestore() for seeding failed, likely already called. Attempting to get existing instance via getFirestore(app).");
-    db = getFirestore(app);
+    db = getFirestore(app); // Fallback to getting the possibly already initialized instance.
   } else {
     console.error("Unexpected error during Firestore initialization for seeding with options:", e);
     console.warn("Falling back to basic getFirestore(app) for seeding.");
-    db = getFirestore(app);
+    db = getFirestore(app); // Safest fallback
   }
 }
+
 
 const isEmulatorEnabled = process.env.USE_FIRESTORE_EMULATOR === 'true';
 const isDevelopment = process.env.NODE_ENV === 'development';
@@ -86,7 +93,7 @@ async function seedCollection<T extends { id?: string }>(
   let count = 0;
 
   data.forEach((item) => {
-    const docId = idField ? String(item[idField]) : item.id; // Use item.id if idField is not provided
+    const docId = idField ? String(item[idField]) : item.id;
     
     if (!docId) {
         console.warn(`Item in ${collectionName} is missing an ID (original ID field: ${String(idField)}). Skipping.`);
@@ -98,15 +105,14 @@ async function seedCollection<T extends { id?: string }>(
     if (transform) {
       dataToSet = transform(item);
     } else {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { id, ...restOfItem } = item; 
       dataToSet = restOfItem;
     }
     
-    // Ensure the explicit 'id' field is not written into the document if it matches the document's ID
     if (dataToSet.hasOwnProperty('id') && dataToSet.id === docId) {
         delete dataToSet.id;
     }
-
 
     batch.set(docRef, dataToSet);
     count++;
@@ -138,7 +144,6 @@ async function seedCustomersCollection() {
 
     const customerDataMap = new Map<string, CustomerSummary>();
 
-    // Sort orders by timestamp to correctly determine first/last order dates & addresses
     const sortedOrders = [...placeholderOrders].sort((a, b) => 
         new Date(a.orderTimestamp).getTime() - new Date(b.orderTimestamp).getTime()
     );
@@ -154,38 +159,35 @@ async function seedCustomersCollection() {
 
         if (!customerDataMap.has(phone)) {
             customerDataMap.set(phone, {
-                id: phone, // This will be the document ID
-                phone: phone, // Store phone as a field as well for consistency
-                name: order.customerName,
+                id: phone,
+                phone: phone,
+                name: order.customerName, // Name from the first order (due to sorting)
                 firstOrderDate: orderTimestamp.toDate(),
                 lastOrderDate: orderTimestamp.toDate(),
-                totalOrders: 0, // Will be incremented
-                totalSpent: 0,  // Will be incremented
+                totalOrders: 0,
+                totalSpent: 0,
                 latestAddress: order.customerAddress,
             });
         }
         const summary = customerDataMap.get(phone)!;
         summary.totalOrders += 1;
         summary.totalSpent += order.totalAmount;
-        // Since orders are sorted, the current order is always the latest for this iteration step
         summary.lastOrderDate = orderTimestamp.toDate();
         summary.latestAddress = order.customerAddress;
-        summary.name = order.customerName; // Update name to the one from the latest order
-        // firstOrderDate is already set correctly due to sorted orders and initial map entry.
+        // Do not update summary.name here, keep the name from the first order.
     }
     
     const batch = writeBatch(db);
     let count = 0;
     customerDataMap.forEach((customerSummary) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { id, ...customerDataFields } = customerSummary; 
         const dataToSet = {
             ...customerDataFields,
-            // Ensure Date objects are converted to Timestamps for Firestore
             firstOrderDate: customerSummary.firstOrderDate ? Timestamp.fromDate(new Date(customerSummary.firstOrderDate)) : null,
             lastOrderDate: Timestamp.fromDate(new Date(customerSummary.lastOrderDate)),
         };
-        console.log(`Seeding customer ${id} with data:`, dataToSet);
-        const customerDocRef = doc(db, 'customers', id); // id is the phone number
+        const customerDocRef = doc(db, 'customers', customerSummary.id); // id is the phone number
         batch.set(customerDocRef, dataToSet);
         count++;
     });
@@ -220,11 +222,13 @@ async function main() {
   console.log(`Seeding Firestore for project ID: ${sdkProjectId}`);
 
   await seedCollection<AdminUser>('adminUsers', placeholderAdminUsers, user => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id, ...userData } = user; 
     return userData;
   }, 'id');
 
   await seedCollection<Product>('products', placeholderProducts, product => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id, ...productData } = product;
     return {
         ...productData,
@@ -236,10 +240,11 @@ async function main() {
   }, 'id');
 
   await seedCollection<Order>('orders', placeholderOrders, order => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id, ...orderData } = order;
     return {
       ...orderData,
-      customerPhone: orderData.customerPhone || '', // Ensure customerPhone is always a string
+      customerPhone: orderData.customerPhone || '', 
       orderTimestamp: order.orderTimestamp instanceof Date ? Timestamp.fromDate(order.orderTimestamp) : Timestamp.fromDate(new Date(order.orderTimestamp)), 
       totalAmount: Number(order.totalAmount),
       customerNotes: orderData.customerNotes || '', 
@@ -257,5 +262,3 @@ main().catch((error) => {
     console.error("Seeding script failed with an unhandled error:", error);
     process.exit(1); 
 });
-
-    
