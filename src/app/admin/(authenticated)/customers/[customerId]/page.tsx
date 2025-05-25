@@ -3,7 +3,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { getOrdersByCustomerPhone, getCustomerSummaryById, updateOrderStatusService } from '@/services/order-service'; // Added getCustomerSummaryById
+import { getOrdersByCustomerPhone, getCustomerSummaryById } from '@/services/order-service'; // Re-added getCustomerSummaryById
 import type { CustomerSummary, Order } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
@@ -37,8 +37,8 @@ export default function AdminCustomerDetailPage() {
           if (customerSummaryData) {
             setCustomer(customerSummaryData);
             // Fetch all orders for this customer phone number
-            const customerOrders = await getOrdersByCustomerPhone(customerId);
-            console.log(`AdminCustomerDetailPage: Fetched ${customerOrders.length} orders for customerId ${customerId}`);
+            const customerOrders = await getOrdersByCustomerPhone(customerSummaryData.phone); // Use phone from summary for consistency
+            console.log(`AdminCustomerDetailPage: Fetched ${customerOrders.length} orders for customer phone ${customerSummaryData.phone}`);
             setOrders(customerOrders); // Already sorted by service
           } else {
             setError('הלקוח המבוקש לא נמצא במערכת הלקוחות.');
