@@ -21,6 +21,17 @@ const TARGET_CATEGORY_FOR_RESORT_PFF = 'פרפלור מבשמי רצפות';
 const PRODUCT_ID_TO_MOVE_LAST_MNM = 'kprof7'; // ID for "מסיר כתמים לפני כביסה"
 const TARGET_CATEGORY_FOR_RESORT_MNM = 'מוצרי ניקוי מקצועיים';
 
+const TARGET_CATEGORY_MBSMM = 'מבשמים';
+const ORDERED_PRODUCT_IDS_MBSMM = [
+  'kmb7',  // בייבי 750 מ"ל ביו
+  'kmb14', // מאסק פלאוורס 750 מ"ל
+  'kmb1',  // מבשם אלגנס 750 מ"ל
+  'kmb2',  // סופט קייר 750 מ"ל ביו
+  'kmb6',  // ספא 750 מ"ל
+  'kmb3',  // פרידום 750 מ"ל
+  'kmb11', // רוז 750 מ"ל
+];
+
 
 export default function CatalogPage() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -35,12 +46,15 @@ export default function CatalogPage() {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
-        const products = await getProductsForCatalog();
+        // const products = await getProductsForCatalog(); // Original line using Firestore
+        // For now, using placeholderProducts directly for local testing if getProductsForCatalog is slow or problematic
+        // This should be switched back to getProductsForCatalog() once Firestore is stable and populated.
+        const products = await getProductsForCatalog(); 
         setAllProducts(products);
-        setFilteredProducts(products); // Initialize with all products
+        // Ensure products are sorted alphabetically by default if no other sort is applied
+        setFilteredProducts(products.sort((a, b) => a.name.localeCompare(b.name, 'he'))); 
       } catch (error) {
         console.error("Failed to fetch products:", error);
-        // Optionally, set an error state here to display to the user
       } finally {
         setIsLoading(false);
       }
@@ -54,7 +68,8 @@ export default function CatalogPage() {
   }, [allProducts]);
 
   useEffect(() => {
-    let productsToFilter = [...allProducts]; // Start with a copy of all products
+    // Start with a fresh sort of allProducts alphabetically for baseline
+    let productsToFilter = [...allProducts].sort((a,b) => a.name.localeCompare(b.name, 'he'));
 
     if (selectedCategory) {
       productsToFilter = productsToFilter.filter(p => p.category === selectedCategory);
@@ -66,8 +81,7 @@ export default function CatalogPage() {
         (p.description && p.description.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
-
-    // Custom sort: if the target category is selected, move specific products to the end
+    
     if (selectedCategory === TARGET_CATEGORY_FOR_RESORT_NK) {
       let productSecondLast: Product | null = null;
       let productVeryLast: Product | null = null;
@@ -104,6 +118,23 @@ export default function CatalogPage() {
       if (productToMoveLast) {
         productsToFilter.push(productToMoveLast);
       }
+    } else if (selectedCategory === TARGET_CATEGORY_MBSMM) {
+      productsToFilter.sort((a, b) => {
+        const indexA = ORDERED_PRODUCT_IDS_MBSMM.indexOf(a.id);
+        const indexB = ORDERED_PRODUCT_IDS_MBSMM.indexOf(b.id);
+
+        if (indexA !== -1 && indexB !== -1) { // Both are in the custom order list
+          return indexA - indexB;
+        }
+        if (indexA !== -1) { // Only A is in the custom list, A comes first
+          return -1;
+        }
+        if (indexB !== -1) { // Only B is in the custom list, B comes first
+          return 1;
+        }
+        // Neither is in the custom list, sort alphabetically (already done as baseline)
+        return a.name.localeCompare(b.name, 'he');
+      });
     } else if (selectedCategory === TARGET_CATEGORY_FOR_RESORT_MNM) {
       let productToMoveLast: Product | null = null;
       const remainingProducts = productsToFilter.filter(p => {
@@ -120,7 +151,7 @@ export default function CatalogPage() {
     }
     
     setFilteredProducts(productsToFilter);
-    setCurrentPage(1); // Reset to first page on filter/search change
+    setCurrentPage(1); 
 
     if (scrollTargetRef.current && !isLoading && (selectedCategory !== null || searchTerm !== '')) {
       const headerHeight = 64; 
@@ -222,3 +253,4 @@ export default function CatalogPage() {
     </div>
   );
 }
+
