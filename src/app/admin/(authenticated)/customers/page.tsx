@@ -10,7 +10,7 @@ import type { CustomerSummary } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Download, CalendarDays, UserCheck, UserX } from 'lucide-react';
+import { Search, Download } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { subDays, isWithinInterval, startOfDay, endOfDay, isBefore } from 'date-fns';
 
@@ -118,12 +118,8 @@ export default function AdminCustomersPage() {
 
   return (
     <>
-      <div className="mb-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div className="mb-4">
         <h1 className="text-3xl font-bold tracking-tight">ניהול לקוחות</h1>
-         <Button variant="outline" size="sm" onClick={handleExportCustomers} className="text-xs whitespace-nowrap">
-            <Download className="ml-1.5 h-3.5 w-3.5" />
-            ייצא CSV
-          </Button>
       </div>
       
       <div className="mb-4 p-3 border rounded-lg bg-muted/30 shadow-sm">
@@ -160,11 +156,17 @@ export default function AdminCustomersPage() {
 
 
       <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-xl">רשימת לקוחות ({filteredCustomers.length})</CardTitle>
-          <CardDescription>
-            סקירה של כל הלקוחות שביצעו הזמנות במערכת.
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between space-x-2 rtl:space-x-reverse">
+          <div>
+            <CardTitle className="text-xl">רשימת לקוחות ({filteredCustomers.length})</CardTitle>
+            <CardDescription>
+              סקירה של כל הלקוחות שביצעו הזמנות במערכת.
+            </CardDescription>
+          </div>
+          <Button variant="ghost" size="sm" onClick={handleExportCustomers} className="text-xs text-muted-foreground hover:text-foreground whitespace-nowrap">
+            <Download className="ml-1.5 h-3.5 w-3.5" />
+            ייצא CSV
+          </Button>
         </CardHeader>
         <CardContent>
           {paginatedCustomers.length > 0 ? (
