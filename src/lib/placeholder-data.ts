@@ -123,16 +123,7 @@ export let placeholderProducts: Product[] = [
     category: 'נוזלי כביסה',
     isActive: true,
   },
-  {
-    id: 'kcat7',
-    name: 'נוזל כביסה קלאסי "כביסכל"',
-    description: 'נוזל כביסה לשימוש יומיומי, יעיל וחסכוני לכל סוגי הבדים.',
-    price: 35.00,
-    imageUrl: '/images/products/kcat7.jpg',
-    dataAiHint: 'classic laundry',
-    category: 'נוזלי כביסה',
-    isActive: true,
-  },
+
 
   // חבילות
   {
@@ -250,7 +241,7 @@ export let placeholderProducts: Product[] = [
     name: 'מארז PerfumeClean X2',
     description: 'מארז משתלם של PerfumeClean. המחיר עשוי להשתנות לפי אפשרויות.',
     price: 110.00,
-    imageUrl: '/images/products/pkg12.jpg',
+    imageUrl: '/images/products/pkg12.png',
     dataAiHint: 'perfume clean bundle',
     category: 'חבילות',
     isActive: true,
@@ -404,7 +395,7 @@ export let placeholderProducts: Product[] = [
     name: 'דפיוזר מקלות שחורים – SILVER',
     description: 'דפיוזר עם מקלות שחורים בניחוח SILVER יוקרתי. 100 מ"ל.',
     price: 60.00,
-    imageUrl: '/images/products/kdf8.jpg',
+    imageUrl: '/images/products/kdf8.png',
     dataAiHint: 'silver sticks diffuser',
     category: 'מפיצי ריח',
     isActive: true,
@@ -414,7 +405,7 @@ export let placeholderProducts: Product[] = [
     name: 'דפיוזר מקלות שחורים – GOLD',
     description: 'דפיוזר עם מקלות שחורים בניחוח GOLD יוקרתי. 100 מ"ל.',
     price: 60.00,
-    imageUrl: '/images/products/kdf9.jpg',
+    imageUrl: '/images/products/kdf9.png',
     dataAiHint: 'gold sticks diffuser',
     category: 'מפיצי ריח',
     isActive: true,
@@ -424,7 +415,7 @@ export let placeholderProducts: Product[] = [
     name: 'דפיוזר מקלות שחורים – PLATINUM',
     description: 'דפיוזר עם מקלות שחורים בניחוח PLATINUM יוקרתי. 100 מ"ל.',
     price: 60.00,
-    imageUrl: '/images/products/kdf10.jpg',
+    imageUrl: '/images/products/kdf10.png',
     dataAiHint: 'platinum sticks diffuser',
     category: 'מפיצי ריח',
     isActive: true,
@@ -434,7 +425,7 @@ export let placeholderProducts: Product[] = [
     name: 'דפיוזר מקלות שחורים – BRONZE',
     description: 'דפיוזר עם מקלות שחורים בניחוח BRONZE יוקרתי. 100 מ"ל.',
     price: 60.00,
-    imageUrl: '/images/products/kdf11.jpg',
+    imageUrl: '/images/products/kdf11.png',
     dataAiHint: 'bronze sticks diffuser',
     category: 'מפיצי ריח',
     isActive: true,
@@ -977,16 +968,7 @@ export let placeholderProducts: Product[] = [
     category: 'נוזלי כלים',
     isActive: true,
   },
-  {
-    id: 'pold1',
-    name: 'אבקת כביסה "כביסכל קלאסי הישן"',
-    description: 'אבקת כביסה איכותית לכל סוגי הבדים, בניחוח מרענן. (מוצר ישן, לא פעיל)',
-    price: 39.90,
-    imageUrl: '/images/products/pold1.jpg',
-    dataAiHint: 'laundry powder',
-    category: 'אבקות כביסה',
-    isActive: false,
-  },
+
 ];
 
 export let placeholderOrders: Order[] = [

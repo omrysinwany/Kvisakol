@@ -69,6 +69,9 @@ export default function CatalogPage() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+    if (typeof window !== 'undefined') {
+      window.scrollTo(0, 0);
+    }
   };
 
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
