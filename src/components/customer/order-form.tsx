@@ -65,12 +65,12 @@ export function OrderForm() {
 
       toast({
         title: "הזמנה נשלחה בהצלחה!",
-        description: `תודה רבה, ${data.customerName}. הזמנתך התקבלה ומספרה ${createdOrder.id}. הסוכן ייצור עמך קשר בהקדם.`,
+        description: `תודה רבה, ${data.customerName}. הזמנתך התקבלה. הסוכן ייצור עמך קשר בהקדם.`, // Order ID removed from toast as confirmation page is skipped.
         duration: 5000,
       });
       
       clearCart();
-      router.push(`/order-confirmation/${createdOrder.id}`);
+      router.push('/'); // Redirect to homepage
 
     } catch (error) {
       console.error('Failed to submit order:', error);
