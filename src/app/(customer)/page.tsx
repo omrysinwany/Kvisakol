@@ -59,10 +59,9 @@ export default function CatalogPage() {
     setCurrentPage(1); // Reset to first page on filter/search change
 
     // Scroll to target when category or search term changes
-    // This check ensures we don't scroll on initial load if allProducts is still empty
-    // and it's not a direct category/search interaction yet.
-    // We only want to scroll if it's a user-driven filter/search change after initial load.
-    if (scrollTargetRef.current && !isLoading) { // Added !isLoading to prevent scroll on initial fetch
+    // Only scroll if a specific category is selected OR a search term is active.
+    // Do not scroll if "All" categories is selected and search term is empty.
+    if (scrollTargetRef.current && !isLoading && (selectedCategory !== null || searchTerm !== '')) {
       const headerHeight = 64; // Assuming CustomerHeader height is h-16 (4rem = 64px)
       
       const elementTopRelativeToDocument = scrollTargetRef.current.getBoundingClientRect().top + window.scrollY;
@@ -74,16 +73,14 @@ export default function CatalogPage() {
       });
     }
 
-  }, [selectedCategory, searchTerm, allProducts, isLoading]); // Added isLoading to dependency array
+  }, [selectedCategory, searchTerm, allProducts, isLoading]);
 
   const handleSelectCategory = (category: string | null) => {
     setSelectedCategory(category);
-    // Scrolling is now handled by the useEffect above
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
-     // Scrolling is now handled by the useEffect above
   };
 
   const handlePageChange = (page: number) => {
@@ -107,7 +104,7 @@ export default function CatalogPage() {
     currentPage * ITEMS_PER_PAGE
   );
   
-  if (isLoading && allProducts.length === 0) { // Show loading only on initial full load
+  if (isLoading && allProducts.length === 0) { 
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <p className="text-lg text-muted-foreground">טוען מוצרים...</p>
