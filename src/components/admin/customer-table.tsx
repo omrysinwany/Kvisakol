@@ -33,7 +33,7 @@ export function CustomerTable({ customers }: CustomerTableProps) {
           <TableHead className="hidden md:table-cell text-right">כתובת אחרונה</TableHead>
           <TableHead className="hidden lg:table-cell text-right">הזמנה אחרונה</TableHead>
           <TableHead className="hidden sm:table-cell text-right">סה"כ הזמנות</TableHead>
-          <TableHead className="text-right">סה"כ הוצאות</TableHead>
+          {/* Removed: <TableHead className="text-right">סה"כ הוצאות</TableHead> */}
           <TableHead className="text-left">פעולות</TableHead>
         </TableRow>
       </TableHeader>
@@ -47,7 +47,7 @@ export function CustomerTable({ customers }: CustomerTableProps) {
               {format(new Date(customer.lastOrderDate), 'dd/MM/yyyy', { locale: he })}
             </TableCell>
             <TableCell className="hidden sm:table-cell text-center">{customer.totalOrders}</TableCell>
-            <TableCell className="text-right">{formatPrice(customer.totalSpent)}</TableCell>
+            {/* Removed: <TableCell className="text-right">{formatPrice(customer.totalSpent)}</TableCell> */}
             <TableCell className="text-left">
               <Button
                 variant="ghost"
