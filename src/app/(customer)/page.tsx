@@ -10,7 +10,7 @@ import { useEffect, useState, useMemo, useRef } from 'react';
 import { CategoryFilter } from '@/components/customer/category-filter';
 import { PaginationControls } from '@/components/customer/pagination-controls';
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 12; // Changed from 10 to 12
 const PRODUCT_ID_TO_MOVE_SECOND_LAST_NK = 'kbio1'; // ID for "כביסכל Bio אלגנס – 2 ליטר"
 const PRODUCT_ID_TO_MOVE_VERY_LAST_NK = 'kbio11';  // ID for "כביסכל Bio רד רוז – 2 ליטר"
 const TARGET_CATEGORY_FOR_RESORT_NK = 'נוזלי כביסה';
@@ -46,12 +46,8 @@ export default function CatalogPage() {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
-        // const products = await getProductsForCatalog(); // Original line using Firestore
-        // For now, using placeholderProducts directly for local testing if getProductsForCatalog is slow or problematic
-        // This should be switched back to getProductsForCatalog() once Firestore is stable and populated.
         const products = await getProductsForCatalog(); 
         setAllProducts(products);
-        // Ensure products are sorted alphabetically by default if no other sort is applied
         setFilteredProducts(products.sort((a, b) => a.name.localeCompare(b.name, 'he'))); 
       } catch (error) {
         console.error("Failed to fetch products:", error);
@@ -68,7 +64,6 @@ export default function CatalogPage() {
   }, [allProducts]);
 
   useEffect(() => {
-    // Start with a fresh sort of allProducts alphabetically for baseline
     let productsToFilter = [...allProducts].sort((a,b) => a.name.localeCompare(b.name, 'he'));
 
     if (selectedCategory) {
@@ -123,16 +118,15 @@ export default function CatalogPage() {
         const indexA = ORDERED_PRODUCT_IDS_MBSMM.indexOf(a.id);
         const indexB = ORDERED_PRODUCT_IDS_MBSMM.indexOf(b.id);
 
-        if (indexA !== -1 && indexB !== -1) { // Both are in the custom order list
+        if (indexA !== -1 && indexB !== -1) { 
           return indexA - indexB;
         }
-        if (indexA !== -1) { // Only A is in the custom list, A comes first
+        if (indexA !== -1) { 
           return -1;
         }
-        if (indexB !== -1) { // Only B is in the custom list, B comes first
+        if (indexB !== -1) { 
           return 1;
         }
-        // Neither is in the custom list, sort alphabetically (already done as baseline)
         return a.name.localeCompare(b.name, 'he');
       });
     } else if (selectedCategory === TARGET_CATEGORY_FOR_RESORT_MNM) {
@@ -253,4 +247,3 @@ export default function CatalogPage() {
     </div>
   );
 }
-
