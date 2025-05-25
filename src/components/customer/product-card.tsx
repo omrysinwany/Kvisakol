@@ -94,21 +94,21 @@ export function ProductCard({ product }: ProductCardProps) {
       <CardHeader className="p-0">
         <div className="aspect-square relative w-full">
           <Image
-            src={product.imageUrl || 'https://placehold.co/300x300.png'}
+            src={product.imageUrl || '/images/products/placeholder.jpg'}
             alt={product.name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             className="object-cover"
             data-ai-hint={product.dataAiHint as string || 'product image'}
             onError={(e) => {
-              e.currentTarget.srcset = 'https://placehold.co/300x300.png';
-              e.currentTarget.src = 'https://placehold.co/300x300.png';
+              e.currentTarget.srcset = '/images/products/placeholder.jpg';
+              e.currentTarget.src = '/images/products/placeholder.jpg';
             }}
           />
         </div>
       </CardHeader>
       <CardContent className="p-3 flex-1">
-        <CardTitle className="text-primary text-sm font-semibold mb-1 h-10 leading-tight overflow-hidden">
+        <CardTitle className="text-primary text-sm font-semibold mb-1 h-10 leading-tight overflow-hidden text-center">
           {product.name}
         </CardTitle>
         {product.category && <Badge variant="secondary" className="mb-1 text-xs">{product.category}</Badge>}
@@ -133,15 +133,15 @@ export function ProductCard({ product }: ProductCardProps) {
               <div className="grid gap-4 py-4">
                 <div className="relative aspect-square w-full max-w-xs mx-auto">
                   <Image
-                    src={product.imageUrl || 'https://placehold.co/300x300.png'}
+                    src={product.imageUrl || '/images/products/placeholder.jpg'}
                     alt={product.name}
                     fill
                     sizes="(max-width: 640px) 80vw, 320px"
                     className="object-cover rounded-md"
                     data-ai-hint={product.dataAiHint as string || 'product image'}
                      onError={(e) => {
-                        e.currentTarget.srcset = 'https://placehold.co/300x300.png';
-                        e.currentTarget.src = 'https://placehold.co/300x300.png';
+                        e.currentTarget.srcset = '/images/products/placeholder.jpg';
+                        e.currentTarget.src = '/images/products/placeholder.jpg';
                     }}
                   />
                 </div>
