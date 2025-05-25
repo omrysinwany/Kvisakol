@@ -5,12 +5,22 @@ import Image from 'next/image';
 import type { Product } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ShoppingCartIcon, PlusCircle, MinusCircle } from 'lucide-react';
+import { ShoppingCartIcon, PlusCircle, MinusCircle, Info } from 'lucide-react';
 import { useCart } from '@/contexts/cart-context';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useState, useEffect } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 interface ProductCardProps {
   product: Product;
@@ -43,27 +53,19 @@ export function ProductCard({ product }: ProductCardProps) {
     if (!isNaN(newQuantity) && newQuantity > 0) {
       updateQuantity(product.id, newQuantity);
     } else if (value === '' || newQuantity === 0) {
-      // If input is cleared or set to 0, effectively remove from cart or set to 0.
-      // updateQuantity handles newQuantity <= 0 by removing the item or preventing update
       updateQuantity(product.id, 0); 
     }
   };
 
-  // This function ensures that if the user leaves the input field empty or with an invalid number,
-  // it resets to the current quantity in cart or 0 if not in cart.
   const handleBlurInput = () => {
     const currentCartQty = getItemQuantity(product.id);
     if (inputValue === '' || isNaN(parseInt(inputValue, 10)) || parseInt(inputValue, 10) <= 0) {
-      // If the item was in cart, reset input to its quantity, otherwise set to "0"
-      // This also handles the case where user types "0" and it was already in cart.
       if (currentCartQty > 0) {
         setInputValue(currentCartQty.toString());
       } else {
-        // If it wasn't in cart and input is invalid/empty/0, reflect "0"
         setInputValue("0"); 
       }
     }
-    // If a valid number was entered, it's already handled by handleQuantityChangeViaInput
   };
 
   const handleIncreaseQuantity = () => {
@@ -74,7 +76,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   const handleDecreaseQuantity = () => {
     const newQuantity = quantityInCart - 1;
-    updateQuantity(product.id, newQuantity); // updateQuantity will handle removal if newQuantity is 0 or less
+    updateQuantity(product.id, newQuantity);
     setInputValue(newQuantity > 0 ? newQuantity.toString() : "0");
   };
   
@@ -94,7 +96,6 @@ export function ProductCard({ product }: ProductCardProps) {
             className="object-cover"
             data-ai-hint={product.dataAiHint as string || 'product image'}
             onError={(e) => {
-              // Fallback for broken images
               e.currentTarget.srcset = 'https://placehold.co/300x300.png';
               e.currentTarget.src = 'https://placehold.co/300x300.png';
             }}
@@ -108,7 +109,47 @@ export function ProductCard({ product }: ProductCardProps) {
         {product.category && <Badge variant="secondary" className="mb-1 text-xs">{product.category}</Badge>}
       </CardContent>
       <CardFooter className="p-2 flex flex-col sm:flex-row justify-between items-center gap-1 mt-auto">
-        <p className="text-sm font-bold">{formatPrice(product.price)}</p> {/* Changed from text-base to text-sm */}
+        <div className="flex items-center gap-1"> {/* Adjusted gap for tighter spacing */}
+          <p className="text-sm font-bold text-foreground">{formatPrice(product.price)}</p>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary">
+                <Info className="h-4 w-4" />
+                <span className="sr-only">פרטים נוספים על {product.name}</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[525px]">
+              <DialogHeader>
+                <DialogTitle className="text-2xl">{product.name}</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="relative aspect-square w-full max-w-xs mx-auto">
+                  <Image
+                    src={product.imageUrl || 'https://placehold.co/300x300.png'}
+                    alt={product.name}
+                    fill
+                    sizes="(max-width: 640px) 80vw, 320px"
+                    className="object-cover rounded-md"
+                    data-ai-hint={product.dataAiHint as string || 'product image'}
+                  />
+                </div>
+                {product.category && <Badge variant="secondary" className="w-fit">{product.category}</Badge>}
+                <p className="text-xl font-semibold">{formatPrice(product.price)}</p>
+                <DialogDescription className="text-sm text-muted-foreground whitespace-pre-wrap max-h-[200px] overflow-y-auto">
+                  {product.description}
+                </DialogDescription>
+              </div>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button type="button" variant="outline">
+                    סגור
+                  </Button>
+                </DialogClose>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+        
         {quantityInCart === 0 ? (
           <Button onClick={handleAddToCart} className="w-full sm:w-auto" size="sm">
             <ShoppingCartIcon className="ml-1.5 h-4 w-4" />
