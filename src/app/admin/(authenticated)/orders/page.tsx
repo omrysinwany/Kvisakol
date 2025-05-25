@@ -8,7 +8,7 @@ import { AdminPaginationControls } from '@/components/admin/admin-pagination-con
 import { getOrdersForAdmin, updateOrderStatusService } from '@/services/order-service';
 import type { Order } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Download, CalendarIcon, X } from 'lucide-react';
+import { Download, CalendarIcon, X, UserSearch } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -16,7 +16,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format, startOfDay, endOfDay, subDays } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { cn } from "@/lib/utils";
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation'; // Added useRouter
 
 type StatusFilterValue = Order['status'] | 'all';
 
@@ -37,10 +37,15 @@ export default function AdminOrdersPage() {
   const [allOrders, setAllOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
+  const router = useRouter(); // Initialize router
   const searchParams = useSearchParams(); 
   const initialStatusFilter = searchParams.get('status') as StatusFilterValue | null;
+  const initialCustomerPhoneFilter = searchParams.get('customerPhone') as string | null;
+  const initialPeriodFilter = searchParams.get('period') as string | null;
+
 
   const [statusFilter, setStatusFilter] = useState<StatusFilterValue>(initialStatusFilter || 'all');
+  const [customerPhoneFilter, setCustomerPhoneFilter] = useState<string | null>(initialCustomerPhoneFilter);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [currentPage, setCurrentPage] = useState(1); 
@@ -67,14 +72,12 @@ export default function AdminOrdersPage() {
     const statusFromUrl = searchParams.get('status') as StatusFilterValue | null;
     if (statusFromUrl && availableStatuses.includes(statusFromUrl)) {
       setStatusFilter(statusFromUrl);
-    } else if (!statusFromUrl && initialStatusFilter) {
-      // If status was initially set from URL and then removed, reset to 'all'
-      // This handles navigating back or clearing URL params
-      // setStatusFilter('all'); 
-    } else if (!statusFromUrl && !initialStatusFilter) {
-      // Default to 'all' if no URL param and no initial filter
-      // setStatusFilter('all');
+    } else if (!statusFromUrl && initialStatusFilter && !initialCustomerPhoneFilter && !initialPeriodFilter) {
+      setStatusFilter('all');
     }
+    
+    const phoneFromUrl = searchParams.get('customerPhone');
+    setCustomerPhoneFilter(phoneFromUrl);
     
     const periodFromUrl = searchParams.get('period');
     if (periodFromUrl) {
@@ -87,9 +90,12 @@ export default function AdminOrdersPage() {
         setStartDate(startOfDay(sevenDaysAgo));
         setEndDate(endOfDay(today));
       }
-    } 
+    } else if (!phoneFromUrl) { // Don't clear dates if filtering by customer phone
+      // setStartDate(undefined);
+      // setEndDate(undefined);
+    }
     setCurrentPage(1);
-  }, [searchParams, initialStatusFilter]);
+  }, [searchParams, initialStatusFilter, initialCustomerPhoneFilter, initialPeriodFilter]);
 
 
   const handleUpdateStatus = async (orderId: string, newStatus: Order['status']) => {
@@ -116,6 +122,10 @@ export default function AdminOrdersPage() {
   const filteredOrders = useMemo(() => {
     let ordersToFilter = allOrders;
 
+    if (customerPhoneFilter) {
+      ordersToFilter = ordersToFilter.filter(order => order.customerPhone === customerPhoneFilter);
+    }
+
     if (statusFilter !== 'all') {
       ordersToFilter = ordersToFilter.filter(order => order.status === statusFilter);
     }
@@ -128,7 +138,7 @@ export default function AdminOrdersPage() {
     }
 
     return ordersToFilter;
-  }, [allOrders, statusFilter, startDate, endDate]);
+  }, [allOrders, statusFilter, startDate, endDate, customerPhoneFilter]);
   
   const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
   const paginatedOrders = filteredOrders.slice(
@@ -145,7 +155,21 @@ export default function AdminOrdersPage() {
     setStartDate(undefined);
     setEndDate(undefined);
     setCurrentPage(1);
+    // Remove period from URL if dates are cleared manually
+    const newParams = new URLSearchParams(searchParams.toString());
+    newParams.delete('period');
+    router.replace(`/admin/orders?${newParams.toString()}`);
   };
+  
+  const handleClearCustomerFilter = () => {
+    setCustomerPhoneFilter(null);
+    setCurrentPage(1);
+    // Remove customerPhone from URL
+    const newParams = new URLSearchParams(searchParams.toString());
+    newParams.delete('customerPhone');
+    router.replace(`/admin/orders?${newParams.toString()}`);
+  };
+
 
   const handleExportOrders = () => {
     toast({
@@ -164,10 +188,10 @@ export default function AdminOrdersPage() {
         <h1 className="text-3xl font-bold tracking-tight">ניהול הזמנות</h1>
       </div>
 
-      <div className="mb-4 p-3 border rounded-lg bg-muted/30 shadow-sm">
+      <div className="mb-4 p-2 border rounded-lg bg-muted/30 shadow-sm">
         <div className="flex flex-wrap items-center gap-2">
           <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value as StatusFilterValue); setCurrentPage(1); }}>
-            <SelectTrigger className="h-9 w-auto px-3 text-xs">
+            <SelectTrigger className="h-9 w-auto px-3 text-xs min-w-[130px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -236,6 +260,18 @@ export default function AdminOrdersPage() {
               </Button>
           )}
         </div>
+         {customerPhoneFilter && (
+          <div className="mt-2 flex items-center gap-2">
+            <Badge variant="secondary" className="text-xs py-1 px-2">
+              <UserSearch className="h-3.5 w-3.5 ml-1" />
+              מציג הזמנות עבור לקוח: {customerPhoneFilter}
+            </Badge>
+            <Button variant="outline" size="xs" onClick={handleClearCustomerFilter} className="h-auto py-0.5 px-1.5">
+              <X className="h-3 w-3 ml-0.5" />
+              נקה סינון לקוח
+            </Button>
+          </div>
+        )}
       </div>
       
       <Card className="shadow-lg">
@@ -266,7 +302,9 @@ export default function AdminOrdersPage() {
           ) : (
             <div className="text-center py-8">
               <p className="text-muted-foreground">
-                {allOrders.length === 0 ? 'לא קיימות הזמנות במערכת.' : 'לא נמצאו הזמנות התואמות את הסינון הנוכחי.'}
+                {allOrders.length === 0 ? 'לא קיימות הזמנות במערכת.' : 
+                 customerPhoneFilter ? 'לא נמצאו הזמנות עבור לקוח זה או בהתאם לסינונים הנוספים.' :
+                 'לא נמצאו הזמנות התואמות את הסינון הנוכחי.'}
               </p>
             </div>
           )}
@@ -275,4 +313,3 @@ export default function AdminOrdersPage() {
     </>
   );
 }
-

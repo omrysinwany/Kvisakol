@@ -9,7 +9,8 @@ import { getUniqueCustomersFromOrders } from '@/services/order-service';
 import type { CustomerSummary } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Search, Download } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 15;
 
@@ -66,6 +67,13 @@ export default function AdminCustomersPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleExportCustomers = () => {
+    toast({
+      title: "ייצוא לקוחות",
+      description: "פונקציונליות ייצוא ל-CSV תתווסף בעתיד.",
+    });
+  };
+
   if (isLoading) {
     return <div className="container mx-auto px-4 py-8"><p>טוען רשימת לקוחות...</p></div>;
   }
@@ -74,15 +82,21 @@ export default function AdminCustomersPage() {
     <>
       <div className="mb-4 flex flex-col sm:flex-row justify-between items-center gap-4">
         <h1 className="text-3xl font-bold tracking-tight">ניהול לקוחות</h1>
-        <div className="relative w-full sm:w-auto sm:max-w-xs">
-          <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="חיפוש לפי שם או טלפון..."
-            className="pl-10 rtl:pr-10 w-full"
-            value={searchTerm}
-            onChange={handleSearchChange}
-          />
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="relative flex-grow sm:flex-grow-0">
+            <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="חיפוש לפי שם או טלפון..."
+              className="pl-10 rtl:pr-10 w-full sm:max-w-xs"
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
+          </div>
+          <Button variant="outline" size="sm" onClick={handleExportCustomers} className="text-xs">
+            <Download className="ml-1.5 h-3.5 w-3.5" />
+            ייצא CSV
+          </Button>
         </div>
       </div>
 
