@@ -117,7 +117,7 @@ export default function CatalogPage() {
       <header className="mb-8 text-center">
         <h1 className="text-4xl font-bold tracking-tight text-primary">קטלוג המוצרים שלנו</h1>
         <p className="mt-2 text-lg text-muted-foreground">
-          עיין במגוון מוצרי "כביסכל" האיכותיים והוסף לעגלה בקלות.
+          עיין במגוון מוצרי "כביסכל" והוסף לעגלה בקלות.
         </p>
       </header>
       
