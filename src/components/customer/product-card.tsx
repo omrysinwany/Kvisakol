@@ -93,7 +93,7 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <Card className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg">
-        <DialogTrigger asChild>
+        
           <CardHeader className="p-0 cursor-pointer" onClick={() => setIsDialogOpen(true)}>
             <div className="aspect-square relative w-full">
               <Image
@@ -118,20 +118,20 @@ export function ProductCard({ product }: ProductCardProps) {
               )}
             </div>
           </CardHeader>
-        </DialogTrigger>
-        <DialogTrigger asChild>
+        
+       
           <CardContent className="p-3 pb-1 flex-1 cursor-pointer" onClick={() => setIsDialogOpen(true)}>
             <CardTitle className="text-primary text-sm h-10 leading-tight overflow-hidden text-center line-clamp-2">
               {product.name}
             </CardTitle>
           </CardContent>
-        </DialogTrigger>
+        
         <CardFooter 
           className={cn(
             "p-3 flex items-center mt-auto",
-            isAdminPreview ? "justify-start" : "flex-col sm:flex-row justify-between gap-1"
+            isAdminPreview ? "justify-center" : "flex-col sm:flex-row justify-between items-center gap-1"
           )}
-          onClick={(e) => e.stopPropagation()} // Prevent footer click from opening dialog
+          onClick={(e) => e.stopPropagation()} 
         >
           <div className="flex items-center gap-1">
             <p className="text-sm font-semibold text-foreground">{formatPrice(product.price)}</p>
