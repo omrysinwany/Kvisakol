@@ -11,8 +11,6 @@ import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { CustomerDetailView } from '@/components/admin/customer-detail-view';
 
-// Removed unused statusTranslationsForToast: Record<Order['status'], string> = { ... }
-
 
 export default function AdminCustomerDetailPage() {
   const params = useParams();
@@ -27,36 +25,38 @@ export default function AdminCustomerDetailPage() {
 
   useEffect(() => {
     if (customerId) {
-      console.log('Customer ID from params:', customerId);
+      console.log('AdminCustomerDetailPage: Customer ID from params:', customerId);
       const fetchCustomerData = async () => {
         setIsLoading(true);
         setError(null);
         try {
           const customerOrders = await getOrdersByCustomerPhone(customerId);
+          console.log(`AdminCustomerDetailPage: Fetched ${customerOrders.length} orders for customerId ${customerId}`);
 
           if (customerOrders.length > 0) {
-            const latestOrder = customerOrders[0]; 
-            const totalSpent = customerOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+            // Sort orders to ensure the latest is first for correct latestAddress and lastOrderDate
+            const sortedOrders = [...customerOrders].sort((a, b) => new Date(b.orderTimestamp).getTime() - new Date(a.orderTimestamp).getTime());
+            const latestOrder = sortedOrders[0]; 
+            const totalSpent = sortedOrders.reduce((sum, order) => sum + order.totalAmount, 0);
             
             const customerSummaryData: CustomerSummary = {
               id: customerId, 
-              phone: customerId,
+              phone: customerId, // Assuming customerId from URL is the phone number
               name: latestOrder.customerName,
               lastOrderDate: latestOrder.orderTimestamp,
-              totalOrders: customerOrders.length,
+              totalOrders: sortedOrders.length,
               totalSpent: totalSpent,
               latestAddress: latestOrder.customerAddress,
             };
             setCustomer(customerSummaryData);
-            setOrders(customerOrders);
+            setOrders(sortedOrders);
           } else {
             setError('לא נמצאו הזמנות עבור לקוח זה, או שהלקוח אינו קיים במערכת ההזמנות.');
-            // Removed toast here as error message is displayed on page
             setCustomer(null);
             setOrders([]);
           }
         } catch (err) {
-          console.error("Failed to fetch customer data:", err);
+          console.error("AdminCustomerDetailPage: Failed to fetch customer data:", err);
           setError('שגיאה בטעינת נתוני הלקוח.');
           toast({ variant: 'destructive', title: 'שגיאה', description: 'אירעה שגיאה בטעינת נתוני הלקוח.' });
         } finally {
@@ -68,7 +68,6 @@ export default function AdminCustomerDetailPage() {
   }, [customerId, toast]);
 
   const handleUpdateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
-    // Define statusTranslationsForToast locally or import if used more broadly
     const statusTranslationsToast: Record<Order['status'], string> = {
       new: 'חדשה',
       received: 'התקבלה',
@@ -89,7 +88,7 @@ export default function AdminCustomerDetailPage() {
         toast({ variant: "destructive", title: "שגיאה", description: "לא ניתן היה לעדכן את סטטוס ההזמנה." });
       }
     } catch (error) {
-      console.error("Failed to update order status:", error);
+      console.error("AdminCustomerDetailPage: Failed to update order status:", error);
       toast({ variant: "destructive", title: "שגיאה", description: "אירעה תקלה בעדכון סטטוס ההזמנה." });
     }
   };

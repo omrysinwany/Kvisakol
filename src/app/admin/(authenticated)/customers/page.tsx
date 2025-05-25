@@ -20,9 +20,9 @@ type LastOrderDateFilter = 'all' | 'last7days' | 'last30days' | 'over90days';
 
 const lastOrderDateFilterTranslations: Record<LastOrderDateFilter, string> = {
   all: 'כל התקופות',
-  last7days: 'הזמינו ב-7 ימים אחרונים',
-  last30days: 'הזמינו ב-30 ימים אחרונים',
-  over90days: 'לא הזמינו מעל 90 יום',
+  last7days: 'ב-7 ימים אחרונים',
+  last30days: 'ב-30 ימים אחרונים',
+  over90days: 'מעל 90 יום (לא פעיל)',
 };
 
 export default function AdminCustomersPage() {
@@ -67,11 +67,11 @@ export default function AdminCustomersPage() {
       customersToFilter = customersToFilter.filter(customer => {
         const customerLastOrderDate = new Date(customer.lastOrderDate);
         if (lastOrderFilter === 'last7days') {
-          const sevenDaysAgo = startOfDay(subDays(now, 6));
+          const sevenDaysAgo = startOfDay(subDays(now, 6)); // Corrected to include today, so 6 days back + today = 7 days
           return isWithinInterval(customerLastOrderDate, { start: sevenDaysAgo, end: now });
         }
         if (lastOrderFilter === 'last30days') {
-          const thirtyDaysAgo = startOfDay(subDays(now, 29));
+          const thirtyDaysAgo = startOfDay(subDays(now, 29)); // Corrected to include today
           return isWithinInterval(customerLastOrderDate, { start: thirtyDaysAgo, end: now });
         }
         if (lastOrderFilter === 'over90days') {
@@ -123,9 +123,9 @@ export default function AdminCustomersPage() {
       </div>
       
       <div className="mb-4 p-3 border rounded-lg bg-muted/30 shadow-sm">
-        <div className="flex flex-row flex-wrap items-end gap-3">
-          <div className="relative flex-1 min-w-[150px]"> {/* Allow search to grow and shrink */}
-            <label htmlFor="customer-search" className="text-xs font-medium text-muted-foreground block mb-1.5">חיפוש</label> {/* Shorter label */}
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-end">
+          <div className="relative">
+            <label htmlFor="customer-search" className="text-xs font-medium text-muted-foreground block mb-1.5">חיפוש</label>
             <div className="relative">
               <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -138,10 +138,10 @@ export default function AdminCustomersPage() {
               />
             </div>
           </div>
-          <div className="min-w-[180px]"> {/* Select with a minimum width for usability */}
-            <label htmlFor="last-order-filter" className="text-xs font-medium text-muted-foreground block mb-1.5">הזמנה אחרונה</label> {/* Shorter label */}
+          <div className="w-full sm:w-auto">
+            <label htmlFor="last-order-filter" className="text-xs font-medium text-muted-foreground block mb-1.5">הזמנה אחרונה</label>
             <Select value={lastOrderFilter} onValueChange={handleLastOrderFilterChange}>
-              <SelectTrigger id="last-order-filter" className="h-9 w-full px-3 text-xs">
+              <SelectTrigger id="last-order-filter" className="h-9 w-full sm:w-auto min-w-[180px] px-3 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
