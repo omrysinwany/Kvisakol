@@ -23,10 +23,10 @@ const firebaseConfig = {
 let app: FirebaseApp;
 if (!getApps().length) {
   app = initializeApp(firebaseConfig);
-  console.log("Firebase app initialized.");
+  console.log("Firebase app initialized for seeding.");
 } else {
   app = getApp();
-  console.log("Firebase app already exists, getting instance.");
+  console.log("Firebase app already exists for seeding, getting instance.");
 }
 
 let db: Firestore;
@@ -34,14 +34,14 @@ try {
   db = initializeFirestore(app, {
     ignoreUndefinedProperties: true,
   });
-  console.log("Firestore initialized with ignoreUndefinedProperties:true using initializeFirestore(app, {options}).");
+  console.log("Firestore initialized for seeding with ignoreUndefinedProperties:true using initializeFirestore(app, {options}).");
 } catch (e: any) {
   if (e.code === 'failed-precondition') {
-    console.warn("initializeFirestore() with options failed, likely already called. Attempting to get existing instance via getFirestore(app).");
+    console.warn("initializeFirestore() for seeding failed, likely already called. Attempting to get existing instance via getFirestore(app).");
     db = getFirestore(app);
   } else {
-    console.error("Unexpected error during Firestore initialization with options:", e);
-    console.warn("Falling back to basic getFirestore(app).");
+    console.error("Unexpected error during Firestore initialization for seeding with options:", e);
+    console.warn("Falling back to basic getFirestore(app) for seeding.");
     db = getFirestore(app);
   }
 }
@@ -56,7 +56,7 @@ if (isEmulatorEnabled && isDevelopment && db) {
     console.log("Firestore Emulator connected (seed script).");
   } catch (e: any) {
     if (e.code === 'failed-precondition' && e.message.includes('emulator has already been connected')) {
-      console.warn("Firestore Emulator was already connected.");
+      console.warn("Firestore Emulator was already connected for this db instance (seed script).");
     } else {
       console.error("Error connecting to Firestore Emulator (seed script):", e);
     }
@@ -86,8 +86,13 @@ async function seedCollection<T extends { id?: string }>(
   let count = 0;
 
   data.forEach((item) => {
-    const docId = idField ? String(item[idField]) : item.id;
-    const docRef = docId ? doc(db, collectionName, docId) : doc(collectionRef);
+    const docId = idField ? String(item[idField]) : item.id; // Use item.id if idField is not provided
+    
+    if (!docId) {
+        console.warn(`Item in ${collectionName} is missing an ID (original ID field: ${String(idField)}). Skipping.`);
+        return;
+    }
+    const docRef = doc(db, collectionName, docId);
     
     let dataToSet: any;
     if (transform) {
@@ -97,16 +102,9 @@ async function seedCollection<T extends { id?: string }>(
       dataToSet = restOfItem;
     }
     
-    // If idField was used, we might not want to store it as a field if it's the same as the document ID
-    // For example, if customers use phone as ID, 'phone' field is still useful.
-    // This logic is simplified; specific transforms handle data structure best.
-    if (idField && dataToSet.hasOwnProperty(idField as string) && dataToSet[idField as string] === docId) {
-        // Optionally remove the field if it's redundant with the doc ID,
-        // but often it's fine to keep it. For 'customers' where ID is phone, 'phone' field is useful.
-        // For 'products' or 'orders' where ID is 'id', we remove 'id' field.
-        if (idField === 'id') {
-            delete dataToSet.id;
-        }
+    // Ensure the explicit 'id' field is not written into the document if it matches the document's ID
+    if (dataToSet.hasOwnProperty('id') && dataToSet.id === docId) {
+        delete dataToSet.id;
     }
 
 
@@ -140,47 +138,54 @@ async function seedCustomersCollection() {
 
     const customerDataMap = new Map<string, CustomerSummary>();
 
-    for (const order of placeholderOrders) {
+    // Sort orders by timestamp to correctly determine first/last order dates & addresses
+    const sortedOrders = [...placeholderOrders].sort((a, b) => 
+        new Date(a.orderTimestamp).getTime() - new Date(b.orderTimestamp).getTime()
+    );
+
+    for (const order of sortedOrders) {
         const phone = order.customerPhone;
-        if (!phone) continue;
+        if (!phone) {
+            console.warn("Order found without customerPhone during customer seeding. Skipping this order for customer summary.");
+            continue;
+        }
 
         const orderTimestamp = order.orderTimestamp instanceof Date ? Timestamp.fromDate(order.orderTimestamp) : Timestamp.now();
 
         if (!customerDataMap.has(phone)) {
             customerDataMap.set(phone, {
-                id: phone,
-                phone: phone,
+                id: phone, // This will be the document ID
+                phone: phone, // Store phone as a field as well for consistency
                 name: order.customerName,
                 firstOrderDate: orderTimestamp.toDate(),
                 lastOrderDate: orderTimestamp.toDate(),
-                totalOrders: 0,
-                totalSpent: 0,
+                totalOrders: 0, // Will be incremented
+                totalSpent: 0,  // Will be incremented
                 latestAddress: order.customerAddress,
             });
         }
         const summary = customerDataMap.get(phone)!;
         summary.totalOrders += 1;
         summary.totalSpent += order.totalAmount;
-        if (orderTimestamp.toDate() > summary.lastOrderDate) {
-            summary.lastOrderDate = orderTimestamp.toDate();
-            summary.latestAddress = order.customerAddress;
-            summary.name = order.customerName;
-        }
-        if (summary.firstOrderDate && orderTimestamp.toDate() < summary.firstOrderDate) {
-            summary.firstOrderDate = orderTimestamp.toDate();
-        }
+        // Since orders are sorted, the current order is always the latest for this iteration step
+        summary.lastOrderDate = orderTimestamp.toDate();
+        summary.latestAddress = order.customerAddress;
+        summary.name = order.customerName; // Update name to the one from the latest order
+        // firstOrderDate is already set correctly due to sorted orders and initial map entry.
     }
     
     const batch = writeBatch(db);
     let count = 0;
     customerDataMap.forEach((customerSummary) => {
-        const { id, ...customerData } = customerSummary; // id is the phone number, used as doc ID
+        const { id, ...customerDataFields } = customerSummary; 
         const dataToSet = {
-            ...customerData,
-            firstOrderDate: customerSummary.firstOrderDate ? Timestamp.fromDate(customerSummary.firstOrderDate) : null,
-            lastOrderDate: Timestamp.fromDate(customerSummary.lastOrderDate),
+            ...customerDataFields,
+            // Ensure Date objects are converted to Timestamps for Firestore
+            firstOrderDate: customerSummary.firstOrderDate ? Timestamp.fromDate(new Date(customerSummary.firstOrderDate)) : null,
+            lastOrderDate: Timestamp.fromDate(new Date(customerSummary.lastOrderDate)),
         };
-        const customerDocRef = doc(db, 'customers', customerSummary.id);
+        console.log(`Seeding customer ${id} with data:`, dataToSet);
+        const customerDocRef = doc(db, 'customers', id); // id is the phone number
         batch.set(customerDocRef, dataToSet);
         count++;
     });
@@ -204,6 +209,7 @@ async function main() {
 
   if (!envProjectId) {
     console.error("Error: NEXT_PUBLIC_FIREBASE_PROJECT_ID is not set in your .env.local file.");
+    console.error("Please ensure your .env.local file is correctly configured with your Firebase project details.");
     process.exit(1);
   }
   if (envProjectId !== sdkProjectId) {
@@ -211,7 +217,7 @@ async function main() {
       `Warning: Project ID mismatch. Script will use SDK-initialized project ID: ${sdkProjectId}. .env.local: ${envProjectId}. Ensure this is correct.`
     );
   }
-  console.log(`Attempting to seed Firestore for project ID: ${sdkProjectId}`);
+  console.log(`Seeding Firestore for project ID: ${sdkProjectId}`);
 
   await seedCollection<AdminUser>('adminUsers', placeholderAdminUsers, user => {
     const { id, ...userData } = user; 
@@ -233,15 +239,16 @@ async function main() {
     const { id, ...orderData } = order;
     return {
       ...orderData,
-      orderTimestamp: order.orderTimestamp instanceof Date ? Timestamp.fromDate(order.orderTimestamp) : Timestamp.now(), 
+      customerPhone: orderData.customerPhone || '', // Ensure customerPhone is always a string
+      orderTimestamp: order.orderTimestamp instanceof Date ? Timestamp.fromDate(order.orderTimestamp) : Timestamp.fromDate(new Date(order.orderTimestamp)), 
       totalAmount: Number(order.totalAmount),
-      customerNotes: orderData.customerNotes || undefined, 
-      agentNotes: orderData.agentNotes || undefined, 
+      customerNotes: orderData.customerNotes || '', 
+      agentNotes: orderData.agentNotes || '', 
       isViewedByAgent: orderData.isViewedByAgent !== undefined ? orderData.isViewedByAgent : false,
     };
   }, 'id');
 
-  await seedCustomersCollection(); // Seed the new customers collection
+  await seedCustomersCollection(); 
 
   console.log('Firestore seeding process completed.');
 }
@@ -251,3 +258,4 @@ main().catch((error) => {
     process.exit(1); 
 });
 
+    

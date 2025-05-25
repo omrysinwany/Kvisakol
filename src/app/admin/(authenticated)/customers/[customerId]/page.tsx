@@ -3,13 +3,14 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { getOrdersByCustomerPhone, getCustomerSummaryById } from '@/services/order-service'; // Re-added getCustomerSummaryById
+import { getOrdersByCustomerPhone, getCustomerSummaryById } from '@/services/order-service'; 
 import type { CustomerSummary, Order } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { CustomerDetailView } from '@/components/admin/customer-detail-view';
+import { updateOrderStatusService } from '@/services/order-service'; // For status update
 
 
 export default function AdminCustomerDetailPage() {
@@ -24,22 +25,22 @@ export default function AdminCustomerDetailPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('AdminCustomerDetailPage: useEffect triggered. Customer ID from params:', customerId);
     if (customerId) {
-      console.log('AdminCustomerDetailPage: Customer ID from params:', customerId);
       const fetchCustomerData = async () => {
         setIsLoading(true);
         setError(null);
         try {
-          // Fetch customer summary directly from 'customers' collection
+          console.log(`AdminCustomerDetailPage: Attempting to fetch summary for customer ID: ${customerId}`);
           const customerSummaryData = await getCustomerSummaryById(customerId);
           console.log('AdminCustomerDetailPage: Fetched customer summary:', customerSummaryData);
 
           if (customerSummaryData) {
             setCustomer(customerSummaryData);
-            // Fetch all orders for this customer phone number
-            const customerOrders = await getOrdersByCustomerPhone(customerSummaryData.phone); // Use phone from summary for consistency
-            console.log(`AdminCustomerDetailPage: Fetched ${customerOrders.length} orders for customer phone ${customerSummaryData.phone}`);
-            setOrders(customerOrders); // Already sorted by service
+            console.log(`AdminCustomerDetailPage: Attempting to fetch orders for customer phone: ${customerSummaryData.phone}`);
+            const customerOrders = await getOrdersByCustomerPhone(customerSummaryData.phone); 
+            console.log(`AdminCustomerDetailPage: Fetched ${customerOrders.length} orders for customer phone ${customerSummaryData.phone}:`, customerOrders.map(o => o.id));
+            setOrders(customerOrders.sort((a, b) => new Date(b.orderTimestamp).getTime() - new Date(a.orderTimestamp).getTime())); 
           } else {
             setError('הלקוח המבוקש לא נמצא במערכת הלקוחות.');
             console.warn(`AdminCustomerDetailPage: No customer document found for ID ${customerId} in 'customers' collection.`);
@@ -55,9 +56,9 @@ export default function AdminCustomerDetailPage() {
       };
       fetchCustomerData();
     } else {
-        console.log('AdminCustomerDetailPage: customerId is missing from params.');
+        console.warn('AdminCustomerDetailPage: customerId is missing or invalid from params.');
         setIsLoading(false);
-        setError('שגיאה: מזהה לקוח חסר.');
+        setError('שגיאה: מזהה לקוח חסר או לא תקין.');
     }
   }, [customerId]);
 
@@ -139,4 +140,5 @@ export default function AdminCustomerDetailPage() {
     </>
   );
 }
+
     
