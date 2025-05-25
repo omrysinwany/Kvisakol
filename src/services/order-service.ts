@@ -87,7 +87,7 @@ export async function createOrderService(orderDetails: {
       orderTimestamp: Timestamp.fromDate(new Date()), // Use Firestore Timestamp
       status: 'new' as Order['status'],
       isViewedByAgent: false,
-      agentNotes: orderDetails.customerNotes || '', 
+      agentNotes: '', // Initialize agentNotes as an empty string
     };
 
     const orderDocRef = doc(db, 'orders', newOrderId);
@@ -191,3 +191,4 @@ export async function updateOrderAgentNotes(orderId: string, notes: string): Pro
     return null;
   }
 }
+
