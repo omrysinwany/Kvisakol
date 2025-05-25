@@ -27,7 +27,7 @@ export function ProductTable({ products, onDeleteProduct, onToggleActive }: Prod
   const router = useRouter();
 
   const formatPrice = (price: number) => {
-    return `₪${price.toFixed(2)}`;
+    return `₪${price.toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
   const handleRowClick = (productId: string) => {
@@ -110,4 +110,3 @@ export function ProductTable({ products, onDeleteProduct, onToggleActive }: Prod
     </Table>
   );
 }
-

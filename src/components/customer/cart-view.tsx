@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -11,7 +12,7 @@ export function CartView() {
   const { cartItems, totalPrice, totalItems, clearCart } = useCart();
 
   const formatPrice = (price: number) => {
-    return `₪${price.toFixed(2)}`;
+    return `₪${price.toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
   if (totalItems === 0) {

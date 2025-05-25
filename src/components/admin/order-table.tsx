@@ -4,7 +4,6 @@
 import { useRouter } from 'next/navigation'; // Import useRouter
 import type { Order } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-// Button component is no longer needed directly here if we remove the actions dropdown trigger button
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, XCircle, Hourglass, ClipboardCheck } from 'lucide-react'; 
 import {
@@ -49,7 +48,7 @@ export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
   const router = useRouter(); 
 
   const formatPrice = (price: number) => {
-    return `₪${price.toFixed(2)}`;
+    return `₪${price.toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
   const handleRowClick = (orderId: string) => {
@@ -87,15 +86,15 @@ export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
             <TableCell className="hidden sm:table-cell">{formatPrice(order.totalAmount)}</TableCell>
             <TableCell 
               className="text-right cursor-default"
-              onClick={(e) => e.stopPropagation()} // Prevent row click when interacting with status badge
+              onClick={(e) => e.stopPropagation()} 
             >
               <DropdownMenu dir="rtl">
                 <DropdownMenuTrigger asChild>
                   <Badge 
                     variant="default" 
-                    className={`${statusColors[order.status]} text-white cursor-pointer hover:opacity-80 transition-opacity text-xs px-2 py-0.5`} // Adjusted padding for Badge
+                    className={`${statusColors[order.status]} text-white cursor-pointer hover:opacity-80 transition-opacity text-xs px-2 py-0.5`}
                   >
-                    <StatusIcon className="h-3 w-3 ml-1" /> {/* Adjusted margin for icon */}
+                    <StatusIcon className="h-3 w-3 ml-1" />
                     {statusTranslations[order.status]}
                   </Badge>
                 </DropdownMenuTrigger>

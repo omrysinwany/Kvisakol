@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -24,7 +25,7 @@ export function CartItemCard({ item }: CartItemProps) {
   };
   
   const formatPrice = (price: number) => {
-    return `₪${price.toFixed(2)}`;
+    return `₪${price.toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
   return (

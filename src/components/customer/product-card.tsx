@@ -86,7 +86,7 @@ export function ProductCard({ product }: ProductCardProps) {
   };
   
   const formatPrice = (price: number) => {
-    return `₪${price.toFixed(2)}`;
+    return `₪${price.toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
   const openDialog = () => setIsDialogOpen(true);
@@ -130,13 +130,12 @@ export function ProductCard({ product }: ProductCardProps) {
         <CardFooter 
           className={cn(
             "p-3 flex mt-auto",
-            isAdminPreview ? "justify-center" : "flex-col sm:flex-row justify-between items-center gap-1"
+            isAdminPreview ? "justify-center items-center" : "flex-col sm:flex-row justify-between items-center gap-1"
           )}
           onClick={(e) => e.stopPropagation()} 
         >
           <div className={cn("flex items-center", isAdminPreview ? "justify-center w-full" : "")}>
             <p className="text-sm font-semibold text-foreground">{formatPrice(product.price)}</p>
-            {/* Info icon removed */}
           </div>
           
           {!isAdminPreview && (

@@ -42,8 +42,6 @@ export function OrderForm() {
   });
 
   useEffect(() => {
-    // Redirect to cart if cart is empty, runs only on client after mount
-    // and only if an order has not just been submitted.
     if (!orderSubmitted && typeof window !== 'undefined' && cartItems.length === 0) {
       router.push('/cart');
     }
@@ -72,8 +70,9 @@ export function OrderForm() {
       });
       
       clearCart();
-      setOrderSubmitted(true); // Mark order as submitted to prevent redirect to /cart
-      router.push('/'); // Redirect to homepage
+      console.log('Attempting to redirect to / from OrderForm');
+      router.push('/'); 
+      setOrderSubmitted(true); 
 
     } catch (error) {
       console.error('Failed to submit order:', error);
@@ -86,10 +85,9 @@ export function OrderForm() {
   };
   
   const formatPrice = (price: number) => {
-    return `₪${price.toFixed(2)}`;
+    return `₪${price.toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
-  // Return null or a loading state while redirecting or if cart is empty
   if (!orderSubmitted && cartItems.length === 0 && typeof window !== 'undefined') { 
     return (
       <div className="container mx-auto px-4 py-8 text-center">

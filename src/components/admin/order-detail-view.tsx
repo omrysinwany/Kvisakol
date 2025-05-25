@@ -48,7 +48,7 @@ const statusIcons: Record<Order['status'], React.ElementType> = {
 }
 
 export function OrderDetailView({ order, onUpdateStatus, onSaveAgentNotes }: OrderDetailViewProps) {
-  const formatPrice = (price: number) => `₪${price.toFixed(2)}`;
+  const formatPrice = (price: number) => `₪${price.toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const StatusIcon = statusIcons[order.status];
   const [currentAgentNotes, setCurrentAgentNotes] = useState(order.agentNotes || '');
   const [isSavingNotes, setIsSavingNotes] = useState(false);
