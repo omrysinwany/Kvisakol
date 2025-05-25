@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { createOrderService } from '@/services/order-service';
 import type { OrderItem } from '@/lib/types';
-import { useEffect } from 'react'; // Import useEffect
+import { useEffect } from 'react';
 
 const orderFormSchema = z.object({
   customerName: z.string().min(2, { message: 'שם חייב להכיל לפחות 2 תווים.' }),
@@ -65,11 +65,12 @@ export function OrderForm() {
 
       toast({
         title: "הזמנה נשלחה בהצלחה!",
-        description: `תודה רבה, ${data.customerName}. הזמנתך התקבלה. הסוכן ייצור עמך קשר בהקדם.`, // Order ID removed from toast as confirmation page is skipped.
+        description: `תודה רבה, ${data.customerName}. הזמנתך התקבלה. הסוכן ייצור עמך קשר בהקדם.`,
         duration: 5000,
       });
       
       clearCart();
+      console.log('Attempting to redirect to / from OrderForm'); // For diagnostics
       router.push('/'); // Redirect to homepage
 
     } catch (error) {
@@ -87,7 +88,7 @@ export function OrderForm() {
   }
 
   // Return null or a loading state while redirecting or if cart is empty
-  if (cartItems.length === 0) {
+  if (cartItems.length === 0 && typeof window !== 'undefined') { // Added typeof window check for initial render
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <p className="text-lg text-muted-foreground">העגלה שלך ריקה, מעביר אותך לדף העגלה...</p>
@@ -193,3 +194,4 @@ export function OrderForm() {
     </div>
   );
 }
+
