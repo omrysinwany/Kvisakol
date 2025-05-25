@@ -73,12 +73,20 @@ export default function AdminCustomerDetailPage() {
         setOrders(prevOrders =>
           prevOrders.map(o => (o.id === orderId ? { ...updatedOrder } : o))
         );
-        // Also update customer summary if the order status change affects it (e.g. totalSpent on 'completed')
-        // For now, we rely on the summary in `customers` collection. A more robust solution might re-fetch or re-calculate.
         toast({
           title: "סטטוס הזמנה עודכן",
           description: `הסטטוס של הזמנה ${orderId.substring(orderId.length - 6)} שונה ל: ${statusTranslationsToast[newStatus]}.`,
         });
+        // Refresh customer summary if an order impacting totalSpent is completed/cancelled
+        if (newStatus === 'completed' || newStatus === 'cancelled') {
+            if (customer) {
+                const updatedCustomerSummary = await getCustomerSummaryById(customer.id);
+                if (updatedCustomerSummary) {
+                    setCustomer(updatedCustomerSummary);
+                }
+            }
+        }
+
       } else {
         toast({ variant: "destructive", title: "שגיאה", description: "לא ניתן היה לעדכן את סטטוס ההזמנה." });
       }
@@ -110,8 +118,6 @@ export default function AdminCustomerDetailPage() {
   }
 
   if (!customer) {
-    // This case covers when getCustomerSummaryById returns null.
-    // It implies the customerId (phone) from URL wasn't found in 'customers' collection.
     return (
         <div className="container mx-auto px-4 py-8">
             <p className="text-center text-lg">לא נמצא לקוח עם המזהה (טלפון) שהתקבל: {customerId}.</p>
@@ -130,7 +136,6 @@ export default function AdminCustomerDetailPage() {
     );
   }
   
-  // If customer summary is found, but orders might be empty
   if (customer && orders.length === 0) {
     console.log(`AdminCustomerDetailPage: Customer ${customer.name} found, but they have 0 orders fetched from 'orders' collection.`);
   }
@@ -146,8 +151,6 @@ export default function AdminCustomerDetailPage() {
           </Link>
         </Button>
       </div>
-      {/* CustomerDetailView will show customer.totalOrders which might be stale if orders were manually deleted. 
-          The order list itself will show orders.length which is the live count. */}
       <CustomerDetailView customer={customer} orders={orders} onUpdateOrderStatus={handleUpdateOrderStatus} />
     </>
   );
