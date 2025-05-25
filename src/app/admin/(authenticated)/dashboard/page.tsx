@@ -45,7 +45,6 @@ interface DashboardSummary {
   totalOrders: number;
   newOrdersUnviewed: number;
   receivedOrders: number;
-  // allTimeRevenue: number; // No longer directly used in summary state
   latestOrders: Order[];
   ordersToday: number;
   ordersThisWeek: number;
@@ -100,7 +99,6 @@ export default function AdminDashboardPage() {
           totalOrders,
           newOrdersUnviewed: newOrdersUnviewedCount,
           receivedOrders: receivedOrdersCount,
-          // allTimeRevenue is calculated in a separate effect now
           latestOrders,
           ordersToday: ordersTodayCount,
           ordersThisWeek: ordersThisWeekCount,
@@ -116,7 +114,7 @@ export default function AdminDashboardPage() {
   }, [toast]);
 
   useEffect(() => {
-    if (!allOrders.length) { // Check if allOrders is empty
+    if (!allOrders.length) { 
         setFilteredRevenue(0);
         return;
     }
@@ -149,12 +147,11 @@ export default function AdminDashboardPage() {
             } else if (customRevenueEndDate) {
                  relevantOrders = relevantOrders.filter(o => new Date(o.orderTimestamp) <= endOfDay(customRevenueEndDate));
             } else {
-                 relevantOrders = []; // No dates selected for custom, so no revenue
+                 relevantOrders = []; 
             }
             break;
         case 'allTime':
         default:
-            // No filtering needed for allTime, uses all completed orders
             break;
     }
     const newFilteredRevenue = relevantOrders.reduce((sum, order) => sum + order.totalAmount, 0);
@@ -293,16 +290,13 @@ export default function AdminDashboardPage() {
       <div className="mt-8">
         <Card className="col-span-2">
           <CardHeader className="pb-3">
-            <div className="flex flex-row items-center justify-between gap-2"> {/* Ensured flex-row and items-center for alignment */}
-              <div className="flex items-center">
-                <DollarSign className="h-5 w-5 text-muted-foreground ml-2" />
-                <CardTitle className="text-2xl font-bold">
-                  הכנסות בתקופה הנבחרת
-                </CardTitle>
-              </div>
+            <div className="flex flex-row items-center justify-between gap-2">
+              <CardTitle>
+                הכנסות בתקופה הנבחרת
+              </CardTitle>
               <DropdownMenu dir="rtl">
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="justify-between"> {/* Removed min-w and self-start/center */}
+                  <Button variant="outline" size="sm" className="justify-between">
                     {revenuePeriodTranslations[selectedRevenuePeriod]}
                     <ChevronDown className="h-4 w-4 opacity-50 mr-1" />
                   </Button>
@@ -390,4 +384,3 @@ export default function AdminDashboardPage() {
     </>
   );
 }
-
