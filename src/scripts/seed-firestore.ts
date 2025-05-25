@@ -28,15 +28,22 @@ async function seedCollection<T extends { id?: string }>(
   let count = 0;
 
   data.forEach((item) => {
-    const docId = item.id || doc(collectionRef).id; 
+    const docId = item.id || doc(collectionRef).id; // If item.id is undefined, a new ID is generated
     const docRef = doc(db, collectionName, docId);
     
-    const dataToSet = transform ? transform(item) : { ...item };
-    if (item.id && dataToSet.id) { // Ensure id from item is used for docId, not as a field if it's the same
-        delete dataToSet.id;
+    let dataToSet: any;
+    if (transform) {
+      dataToSet = transform(item); // The transform function is responsible for ensuring 'id' is handled correctly
+    } else {
+      // If no transform, and item.id was used for docId, remove it from the data to be set.
+      if (item.id) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { id, ...restOfItem } = item;
+        dataToSet = restOfItem;
+      } else {
+        dataToSet = { ...item }; 
+      }
     }
-
-
     batch.set(docRef, dataToSet);
     count++;
     if (count % 400 === 0) { 
@@ -64,11 +71,13 @@ async function main() {
 
 
   await seedCollection<AdminUser>('adminUsers', placeholderAdminUsers, user => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id, ...userData } = user; 
     return userData;
   });
 
   await seedCollection<Product>('products', placeholderProducts, product => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id, ...productData } = product;
     return {
         ...productData,
@@ -77,11 +86,12 @@ async function main() {
   });
 
   await seedCollection<Order>('orders', placeholderOrders, order => {
-    const { id, orderTimestamp, ...orderData } = order;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id, ...orderData } = order; // Destructure id so it's not in orderData
     return {
       ...orderData,
-      orderTimestamp: orderTimestamp instanceof Date ? Timestamp.fromDate(orderTimestamp) : Timestamp.now(), 
-      totalAmount: Number(orderData.totalAmount) 
+      orderTimestamp: order.orderTimestamp instanceof Date ? Timestamp.fromDate(order.orderTimestamp) : Timestamp.now(), 
+      totalAmount: Number(order.totalAmount) 
     };
   });
 
