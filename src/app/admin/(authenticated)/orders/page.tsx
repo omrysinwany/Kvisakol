@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { OrderTable } from '@/components/admin/order-table';
-import { AdminPaginationControls } from '@/components/admin/admin-pagination-controls'; // Assuming this exists
+import { AdminPaginationControls } from '@/components/admin/admin-pagination-controls';
 import { getOrdersForAdmin, updateOrderStatusService } from '@/services/order-service';
 import type { Order } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -16,11 +16,11 @@ import { Calendar } from "@/components/ui/calendar";
 import { format, startOfDay, endOfDay } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { cn } from "@/lib/utils";
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation'; // Import useSearchParams
 
 type StatusFilterValue = Order['status'] | 'all';
 
-const ITEMS_PER_PAGE = 10; // Changed from 15 to 10
+const ITEMS_PER_PAGE = 10; 
 
 const statusTranslationsForFilter: Record<StatusFilterValue, string> = {
   all: 'כל הסטטוסים',
@@ -36,12 +36,17 @@ const availableStatuses: StatusFilterValue[] = ['all', 'new', 'received', 'compl
 export default function AdminOrdersPage() {
   const [allOrders, setAllOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<StatusFilterValue>('all');
+  
+  const pathname = usePathname();
+  const searchParams = useSearchParams(); // Get search params
+  const initialStatusFilter = searchParams.get('status') as StatusFilterValue | null;
+
+  const [statusFilter, setStatusFilter] = useState<StatusFilterValue>(initialStatusFilter || 'all');
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-  const [currentPage, setCurrentPage] = useState(1); // Added for pagination
+  const [currentPage, setCurrentPage] = useState(1); 
   const { toast } = useToast();
-  const pathname = usePathname();
+
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -58,6 +63,20 @@ export default function AdminOrdersPage() {
     };
     fetchOrders();
   }, [toast, pathname]);
+
+  // Effect to set status filter from URL on initial load or if URL changes
+  useEffect(() => {
+    const statusFromUrl = searchParams.get('status') as StatusFilterValue | null;
+    if (statusFromUrl && availableStatuses.includes(statusFromUrl)) {
+      setStatusFilter(statusFromUrl);
+    } else if (!statusFromUrl) {
+        // If no status in URL, could default to 'all' or keep current state
+        // For simplicity, if URL changes and has no status, we might not want to reset user's manual filter.
+        // But if we want URL to always dictate:
+        // setStatusFilter('all');
+    }
+  }, [searchParams]);
+
 
   const handleUpdateStatus = async (orderId: string, newStatus: Order['status']) => {
     try {
@@ -105,6 +124,9 @@ export default function AdminOrdersPage() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+     // Scroll to top of table or a relevant section might be good here
+    // For now, let's scroll to the top of the window
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleClearDates = () => {
@@ -131,7 +153,7 @@ export default function AdminOrdersPage() {
 
       <div className="mb-4 p-2 border rounded-lg bg-muted/30 shadow-sm">
         <div className="flex flex-wrap items-center gap-2">
-          <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilterValue)}>
+          <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value as StatusFilterValue); setCurrentPage(1); }}>
             <SelectTrigger className="h-9 px-3 text-xs">
               <SelectValue />
             </SelectTrigger>
@@ -162,7 +184,7 @@ export default function AdminOrdersPage() {
                   <Calendar
                   mode="single"
                   selected={startDate}
-                  onSelect={setStartDate}
+                  onSelect={(date) => {setStartDate(date); setCurrentPage(1);}}
                   initialFocus
                   disabled={(date) => endDate ? date > endDate : false}
                   />
@@ -187,7 +209,7 @@ export default function AdminOrdersPage() {
                   <Calendar
                   mode="single"
                   selected={endDate}
-                  onSelect={setEndDate}
+                  onSelect={(date) => {setEndDate(date); setCurrentPage(1);}}
                   disabled={(date) => startDate && date < startDate}
                   initialFocus
                   />
@@ -195,7 +217,7 @@ export default function AdminOrdersPage() {
           </Popover>
 
           {(startDate || endDate) && (
-              <Button variant="ghost" onClick={handleClearDates} size="icon" className="h-9 w-9 shrink-0">
+              <Button variant="ghost" onClick={() => {handleClearDates(); setCurrentPage(1);}} size="icon" className="h-9 w-9 shrink-0">
                   <X className="h-4 w-4" />
                   <span className="sr-only">נקה תאריכים</span>
               </Button>

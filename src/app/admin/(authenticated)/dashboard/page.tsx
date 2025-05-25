@@ -7,7 +7,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { getAllProductsForAdmin } from "@/services/product-service";
 import { getOrdersForAdmin } from "@/services/order-service";
 import type { Product, Order } from "@/lib/types";
-import { DollarSign, Package, ShoppingCart, Activity, ClipboardCheck, Eye, Users, CalendarDays, CalendarCheck, CalendarIcon, X, Hourglass, ChevronDown } from "lucide-react";
+import { Package, ShoppingCart, Activity, ClipboardCheck, Eye, Users, CalendarDays, CalendarCheck, CalendarIcon, X, Hourglass, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -147,11 +147,15 @@ export default function AdminDashboardPage() {
             } else if (customRevenueEndDate) {
                  relevantOrders = relevantOrders.filter(o => new Date(o.orderTimestamp) <= endOfDay(customRevenueEndDate));
             } else {
+                 // If only one date is selected for custom, or no dates, show 0 revenue or all revenue based on desired logic.
+                 // For now, if not both dates are set, show all relevant (completed) orders.
+                 // Or, if you want to show 0 unless both are set:
                  relevantOrders = []; 
             }
             break;
         case 'allTime':
         default:
+            // No date filtering needed for 'allTime'
             break;
     }
     const newFilteredRevenue = relevantOrders.reduce((sum, order) => sum + order.totalAmount, 0);
@@ -188,76 +192,88 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">הזמנות חדשות (טרם נצפו)</CardTitle>
-            <Hourglass className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{summary.newOrdersUnviewed}</div>
-            <p className="text-xs text-muted-foreground">מתוך {summary.totalOrders} הזמנות בסה"כ</p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-6"> {/* Main grid for summary cards */}
+        <Link href="/admin/orders?status=new" className="block hover:shadow-lg transition-shadow rounded-lg">
+          <Card className="h-full">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">הזמנות חדשות (טרם נצפו)</CardTitle>
+              <Hourglass className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{summary.newOrdersUnviewed}</div>
+              <p className="text-xs text-muted-foreground">מתוך {summary.totalOrders} הזמנות בסה"כ</p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">הזמנות שהתקבלו (נצפו)</CardTitle>
-            <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{summary.receivedOrders}</div>
-            <p className="text-xs text-muted-foreground">ממתינות להמשך טיפול</p>
-          </CardContent>
-        </Card>
+        <Link href="/admin/orders?status=received" className="block hover:shadow-lg transition-shadow rounded-lg">
+          <Card className="h-full">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">הזמנות שהתקבלו (נצפו)</CardTitle>
+              <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{summary.receivedOrders}</div>
+              <p className="text-xs text-muted-foreground">ממתינות להמשך טיפול</p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">הזמנות מהיום</CardTitle>
-            <CalendarCheck className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{summary.ordersToday}</div>
-             <p className="text-xs text-muted-foreground">התקבלו היום</p>
-          </CardContent>
-        </Card>
+        <Link href="/admin/orders" className="block hover:shadow-lg transition-shadow rounded-lg">
+          <Card className="h-full">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">הזמנות מהיום</CardTitle>
+              <CalendarCheck className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{summary.ordersToday}</div>
+              <p className="text-xs text-muted-foreground">התקבלו היום</p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">הזמנות מהשבוע</CardTitle>
-            <CalendarDays className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{summary.ordersThisWeek}</div>
-            <p className="text-xs text-muted-foreground">ב-7 הימים האחרונים</p>
-          </CardContent>
-        </Card>
+        <Link href="/admin/orders" className="block hover:shadow-lg transition-shadow rounded-lg">
+          <Card className="h-full">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">הזמנות מהשבוע</CardTitle>
+              <CalendarDays className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{summary.ordersThisWeek}</div>
+              <p className="text-xs text-muted-foreground">ב-7 הימים האחרונים</p>
+            </CardContent>
+          </Card>
+        </Link>
         
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">מוצרים פעילים</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{summary.totalProducts}</div>
-            <p className="text-xs text-muted-foreground">זמינים בקטלוג</p>
-          </CardContent>
-        </Card>
+        <Link href="/admin/products" className="block hover:shadow-lg transition-shadow rounded-lg">
+          <Card className="h-full">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">מוצרים פעילים</CardTitle>
+              <Package className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{summary.totalProducts}</div>
+              <p className="text-xs text-muted-foreground">זמינים בקטלוג</p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">סה"כ הזמנות</CardTitle>
-             <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{summary.totalOrders}</div>
-            <p className="text-xs text-muted-foreground">הזמנות במערכת</p>
-          </CardContent>
-        </Card>
+        <Link href="/admin/orders" className="block hover:shadow-lg transition-shadow rounded-lg">
+          <Card className="h-full">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">סה"כ הזמנות</CardTitle>
+              <Activity className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{summary.totalOrders}</div>
+              <p className="text-xs text-muted-foreground">הזמנות במערכת</p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
-      <div className="mt-8 grid gap-6">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="md:col-span-2"> {/* Recent Orders card spanning full width on md+ */}
           <CardHeader>
             <CardTitle>הזמנות אחרונות</CardTitle>
             <CardDescription>סקירה מהירה של {summary.latestOrders.length > 0 ? Math.min(summary.latestOrders.length, 5) : '0'} ההזמנות האחרונות.</CardDescription>
@@ -285,18 +301,16 @@ export default function AdminDashboardPage() {
             </Button>
           </CardContent>
         </Card>
-      </div>
 
-      <div className="mt-8">
-        <Card className="col-span-2">
+        <Card className="md:col-span-2"> {/* Revenue card spanning full width on md+ */}
           <CardHeader className="pb-3">
             <div className="flex flex-row items-center justify-between gap-2">
-              <CardTitle>
+              <CardTitle className="text-2xl font-semibold"> 
                 הכנסות בתקופה הנבחרת
               </CardTitle>
               <DropdownMenu dir="rtl">
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="justify-between">
+                  <Button variant="outline" size="sm" className="justify-between min-w-[130px]">
                     {revenuePeriodTranslations[selectedRevenuePeriod]}
                     <ChevronDown className="h-4 w-4 opacity-50 mr-1" />
                   </Button>
