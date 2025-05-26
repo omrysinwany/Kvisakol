@@ -99,7 +99,7 @@ export function CustomerDetailView({ customer, onSaveGeneralNotes, onSaveCustome
           <CardDescription className="flex items-center gap-1.5 text-sm pt-1">
              <Phone className="w-3.5 h-3.5 text-muted-foreground"/> 
              <a href={`tel:${customer.phone}`} className="text-primary hover:underline">{customer.phone}</a>
-             <span className="text-muted-foreground text-xs">(מספר טלפון אינו ניתן לעריכה)</span>
+             {/* <span className="text-muted-foreground text-xs">(מספר טלפון אינו ניתן לעריכה)</span> Removed this line */}
           </CardDescription>
         </CardHeader>
         <CardContent>
