@@ -10,7 +10,7 @@ import type { CustomerSummary } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search } from 'lucide-react';
+import { Search, Download } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { subDays, isWithinInterval, startOfDay, endOfDay, isBefore } from 'date-fns';
 
@@ -34,28 +34,30 @@ const customerStatusFilterTranslations: Record<CustomerStatusFilter, string> = {
   returning: 'חוזרים',
 };
 
+// Helper function to determine customer display status
 const getCustomerDisplayStatus = (customer: CustomerSummary): CustomerStatusFilter => {
   const now = endOfDay(new Date());
   const ninetyDaysAgo = subDays(now, 90);
   const isNewCustomer = customer.totalOrders === 1;
-  const customerLastOrderDate = new Date(customer.lastOrderDate);
+  // Ensure lastOrderDate is valid before comparison
+  const customerLastOrderDate = customer.lastOrderDate ? new Date(customer.lastOrderDate) : new Date(0); // Treat undefined as very old date
   const isInactive = isBefore(customerLastOrderDate, ninetyDaysAgo);
 
   if (customer.totalOrders >= 5 && !isInactive) return 'vip';
   if (isNewCustomer) return 'new';
-  if (isInactive) return 'inactive';
-  if (customer.totalOrders > 1 && !isInactive) return 'returning';
-  return 'all'; // Should ideally not happen if logic is correct
+  if (isInactive) return 'inactive'; // This will catch customers who are not new but are inactive
+  if (customer.totalOrders > 1 && !isInactive) return 'returning'; // Not new, not VIP, not inactive = returning
+  return 'all'; // Fallback, though ideally all customers should fit a status
 };
 
 
 export default function AdminCustomersPage() {
   const [allCustomers, setAllCustomers] = useState<CustomerSummary[]>([]);
-  const [filteredCustomers, setFilteredCustomers] = useState<CustomerSummary[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [lastOrderFilter, setLastOrderFilter] = useState<LastOrderDateFilter>('all');
   const [customerStatusFilter, setCustomerStatusFilter] = useState<CustomerStatusFilter>('all');
-  const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
 
@@ -65,7 +67,6 @@ export default function AdminCustomersPage() {
       try {
         const fetchedCustomers = await getUniqueCustomers();
         setAllCustomers(fetchedCustomers);
-        setFilteredCustomers(fetchedCustomers);
       } catch (error) {
         console.error("Failed to fetch customers:", error);
         toast({ variant: "destructive", title: "שגיאה", description: "לא ניתן היה לטעון את רשימת הלקוחות." });
@@ -76,7 +77,7 @@ export default function AdminCustomersPage() {
     fetchCustomers();
   }, [toast]);
 
-  useEffect(() => {
+  const filteredCustomers = useMemo(() => {
     let customersToFilter = [...allCustomers];
     const now = endOfDay(new Date());
 
@@ -93,11 +94,11 @@ export default function AdminCustomersPage() {
         if (!customer.lastOrderDate) return false;
         const customerLastOrderDate = new Date(customer.lastOrderDate);
         if (lastOrderFilter === 'last7days') {
-          const sevenDaysAgo = startOfDay(subDays(now, 6));
+          const sevenDaysAgo = startOfDay(subDays(now, 6)); // last 7 days including today
           return isWithinInterval(customerLastOrderDate, { start: sevenDaysAgo, end: now });
         }
         if (lastOrderFilter === 'last30days') {
-          const thirtyDaysAgo = startOfDay(subDays(now, 29));
+          const thirtyDaysAgo = startOfDay(subDays(now, 29)); // last 30 days including today
           return isWithinInterval(customerLastOrderDate, { start: thirtyDaysAgo, end: now });
         }
         if (lastOrderFilter === 'over90days') {
@@ -114,20 +115,26 @@ export default function AdminCustomersPage() {
       });
     }
 
-    setFilteredCustomers(customersToFilter);
-    setCurrentPage(1);
+    // Sort by name after filtering
+    customersToFilter.sort((a, b) => a.name.localeCompare(b.name, 'he'));
+    
+    return customersToFilter;
   }, [searchTerm, lastOrderFilter, customerStatusFilter, allCustomers]);
+
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
+    setCurrentPage(1);
   };
 
   const handleLastOrderFilterChange = (value: LastOrderDateFilter) => {
     setLastOrderFilter(value);
+    setCurrentPage(1);
   };
 
   const handleCustomerStatusFilterChange = (value: CustomerStatusFilter) => {
     setCustomerStatusFilter(value);
+    setCurrentPage(1);
   };
 
   const totalPages = Math.ceil(filteredCustomers.length / ITEMS_PER_PAGE);
@@ -152,7 +159,7 @@ export default function AdminCustomersPage() {
       </div>
 
       <Card className="shadow-lg">
-      <CardHeader>
+      <CardHeader className="pb-3">
           <div className="flex flex-row items-center justify-between space-x-2 rtl:space-x-reverse">
             <div>
               <CardTitle className="text-xl">רשימת לקוחות ({filteredCustomers.length})</CardTitle>
@@ -160,25 +167,41 @@ export default function AdminCustomersPage() {
                 סקירה של כל הלקוחות שביצעו הזמנות במערכת.
               </CardDescription>
             </div>
-            {/* Export button removed */}
           </div>
-           {/* Filters Area */}
-          <div className="pt-3">
-            <div className="grid grid-cols-3 gap-3 items-end">
-              <div className="relative col-span-1">
-                <div className="relative">
-                  <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    id="customer-search"
-                    type="search"
-                    placeholder="חיפוש שם או טלפון..."
-                    className="pl-10 rtl:pr-10 w-full h-9 text-xs"
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                  />
-                </div>
+           
+          <div className="pt-3 space-y-2">
+            {/* Row 1: Search and Status Filter */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+              <div className="relative">
+                <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="customer-search"
+                  type="search"
+                  placeholder="חיפוש שם או טלפון..."
+                  className="pl-10 rtl:pr-10 w-full h-9 text-xs"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                />
               </div>
-              <div className="col-span-1">
+              <div>
+                <Select value={customerStatusFilter} onValueChange={handleCustomerStatusFilterChange}>
+                  <SelectTrigger id="customer-status-filter" className="h-9 w-full px-3 text-xs">
+                    <SelectValue placeholder="סינון לפי סטטוס לקוח" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(customerStatusFilterTranslations).map(([key, value]) => (
+                      <SelectItem key={key} value={key} className="text-xs">
+                        {value}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Row 2: Last Order Date and Placeholder for new filter */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+              <div>
                 <Select value={lastOrderFilter} onValueChange={handleLastOrderFilterChange}>
                   <SelectTrigger id="last-order-filter" className="h-9 w-full px-3 text-xs">
                     <SelectValue placeholder="סינון לפי הזמנה אחרונה" />
@@ -192,17 +215,13 @@ export default function AdminCustomersPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="col-span-1">
-                <Select value={customerStatusFilter} onValueChange={handleCustomerStatusFilterChange}>
-                  <SelectTrigger id="customer-status-filter" className="h-9 w-full px-3 text-xs">
-                    <SelectValue placeholder="סינון לפי סטטוס לקוח" />
+              <div>
+                <Select disabled> {/* Placeholder for a new filter */}
+                  <SelectTrigger id="new-future-filter" className="h-9 w-full px-3 text-xs text-muted-foreground">
+                    <SelectValue placeholder="פילטר נוסף (בקרוב)" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.entries(customerStatusFilterTranslations).map(([key, value]) => (
-                      <SelectItem key={key} value={key} className="text-xs">
-                        {value}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="placeholder" className="text-xs">אפשרות א'</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -233,6 +252,4 @@ export default function AdminCustomersPage() {
     </>
   );
 }
-    
-
     
