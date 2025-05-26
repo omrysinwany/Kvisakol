@@ -21,14 +21,14 @@ type CustomerStatusFilter = 'all' | 'new' | 'vip' | 'inactive' | 'returning';
 type TotalOrdersFilter = 'all' | '1' | '2-4' | '5+';
 
 const lastOrderDateFilterTranslations: Record<LastOrderDateFilter, string> = {
-  all: 'הזמנה אחרונה: הכל',
+  all: 'סינון לפי הזמנה אחרונה',
   last7days: 'ב-7 ימים אחרונים',
   last30days: 'ב-30 ימים אחרונים',
   over90days: 'מעל 90 יום',
 };
 
 const customerStatusFilterTranslations: Record<CustomerStatusFilter, string> = {
-  all: 'סטטוס לקוח: הכל',
+  all: 'סינון לפי סטטוס לקוח',
   new: 'חדשים',
   vip: 'VIP',
   inactive: 'לא פעילים',
@@ -36,7 +36,7 @@ const customerStatusFilterTranslations: Record<CustomerStatusFilter, string> = {
 };
 
 const totalOrdersFilterTranslations: Record<TotalOrdersFilter, string> = {
-  all: 'סה"כ הזמנות: הכל',
+  all: 'סינון לפי סהכ הזמנות',
   '1': 'הזמנה 1',
   '2-4': '2-4 הזמנות',
   '5+': '5+ הזמנות',
@@ -184,7 +184,7 @@ export default function AdminCustomersPage() {
       </div>
 
       <Card className="shadow-lg">
-      <CardHeader className="pb-3">
+        <CardHeader className="pb-3">
           <div className="flex flex-row items-center justify-between space-x-2 rtl:space-x-reverse">
             <div>
               <CardTitle className="text-xl">רשימת לקוחות ({filteredCustomers.length})</CardTitle>
@@ -192,6 +192,7 @@ export default function AdminCustomersPage() {
                 סקירה של כל הלקוחות שביצעו הזמנות במערכת.
               </CardDescription>
             </div>
+            {/* Removed CSV export button from here */}
           </div>
            
           <div className="pt-3 space-y-2">

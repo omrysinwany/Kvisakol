@@ -8,7 +8,7 @@ import { AdminPaginationControls } from '@/components/admin/admin-pagination-con
 import { getOrdersForAdmin, updateOrderStatusService } from '@/services/order-service';
 import type { Order } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, X, UserSearch } from 'lucide-react';
+import { CalendarIcon, X, UserSearch, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -25,7 +25,7 @@ type StatusFilterValue = Order['status'] | 'all';
 const ITEMS_PER_PAGE = 10;
 
 const statusTranslationsForFilter: Record<StatusFilterValue, string> = {
-  all: 'כל הסטטוסים',
+  all: 'סינון לפי סטטוס',
   new: 'חדשה',
   received: 'התקבלה',
   completed: 'הושלמה',
@@ -205,13 +205,14 @@ export default function AdminOrdersPage() {
 
       <Card className="shadow-lg">
         <CardHeader className="pb-3">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <div className="flex flex-row items-center justify-between gap-2">
             <div>
               <CardTitle className="text-xl">רשימת הזמנות ({filteredOrders.length})</CardTitle>
               <CardDescription>
                 נהל את כל ההזמנות שהתקבלו
               </CardDescription>
             </div>
+            {/* Removed CSV export button from here */}
           </div>
           
           <div className="pt-3 space-y-2">
