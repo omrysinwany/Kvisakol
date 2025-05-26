@@ -180,8 +180,8 @@ export default function AdminDashboardPage() {
 
   return (
     <>
-      <div className="flex items-center justify-center space-y-2 mb-6">
-        <h1 className="text-3xl font-bold tracking-tight">לוח בקרה</h1>
+      <div className="w-full py-4 mb-8 text-center bg-card shadow-sm rounded-lg">
+        <h1 className="text-3xl font-bold tracking-tight text-primary">לוח בקרה</h1>
       </div>
       
       <div className="grid grid-cols-2 gap-6">
@@ -252,7 +252,7 @@ export default function AdminDashboardPage() {
         </Link>
 
         <Link href="/admin/orders" className="block hover:shadow-lg transition-shadow rounded-lg">
-          <Card className="h-full col-span-2 sm:col-span-1"> {/* Ensure it takes full width on small screens if it's the last odd one */}
+          <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">סה"כ הזמנות</CardTitle>
               <Eye className="h-4 w-4 text-muted-foreground" />
@@ -264,7 +264,6 @@ export default function AdminDashboardPage() {
           </Card>
         </Link>
 
-        {/* Row 2: Recent Orders - Full Width */}
         <Card className="col-span-2"> 
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><ListOrdered className="h-5 w-5 text-primary"/>הזמנות אחרונות</CardTitle>
@@ -297,7 +296,6 @@ export default function AdminDashboardPage() {
           </CardContent>
         </Card>
         
-        {/* Row 3: Revenue Card - Full Width */}
         <Card className="col-span-2">
           <CardHeader className="pb-3">
             <div className="flex flex-row items-center justify-between gap-2">
