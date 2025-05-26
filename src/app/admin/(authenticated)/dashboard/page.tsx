@@ -56,15 +56,15 @@ type RevenuePeriod = 'allTime' | 'today' | 'thisWeek' | 'thisMonth' | 'custom';
 const revenuePeriodTranslations: Record<RevenuePeriod, string> = {
   allTime: 'כל הזמן',
   today: 'היום',
-  thisWeek: 'השבוע',
-  thisMonth: 'החודש',
+  thisWeek: 'השבוע הנוכחי',
+  thisMonth: 'החודש הנוכחי',
   custom: 'מותאם אישית',
 };
 
 type OrdersCountPeriod = 'thisWeek' | 'thisMonth' | 'allTime';
 const ordersCountPeriodTranslations: Record<OrdersCountPeriod, string> = {
-  thisWeek: 'שבוע אחרון',
-  thisMonth: 'חודש אחרון',
+  thisWeek: 'השבוע הנוכחי',
+  thisMonth: 'החודש הנוכחי',
   allTime: 'כל הזמן',
 };
 
@@ -95,7 +95,7 @@ export default function AdminDashboardPage() {
         const [ordersData, topCustomersData, recentOrdersData, newCustomersCount] = await Promise.all([
           getOrdersForAdmin(),
           getTopCustomers(3),
-          getRecentOrders(7),
+          getRecentOrders(7), // For popular products from last 7 days
           getNewCustomersThisMonthCount(),
         ]);
         
@@ -167,9 +167,8 @@ export default function AdminDashboardPage() {
             relevantOrders = relevantOrders.filter(o => isToday(new Date(o.orderTimestamp)));
             break;
         case 'thisWeek': 
-            const lastSevenDaysStart = startOfDay(subDays(now, 6));
-            relevantOrders = relevantOrders.filter(o => 
-                isWithinInterval(new Date(o.orderTimestamp), { start: lastSevenDaysStart, end: endOfDay(now) })
+             relevantOrders = relevantOrders.filter(o => 
+                isWithinInterval(new Date(o.orderTimestamp), { start: startOfWeek(now, { locale: he }), end: endOfWeek(now, { locale: he }) })
             );
             break;
         case 'thisMonth':
@@ -187,11 +186,13 @@ export default function AdminDashboardPage() {
             } else if (customRevenueEndDate) {
                  relevantOrders = relevantOrders.filter(o => new Date(o.orderTimestamp) <= endOfDay(customRevenueEndDate));
             } else {
+                 // If custom is selected but no dates, show 0 or allTime based on preference. Let's show 0.
                  relevantOrders = []; 
             }
             break;
         case 'allTime':
         default:
+            // No date filtering needed for 'allTime'
             break;
     }
     const newFilteredRevenue = relevantOrders.reduce((sum, order) => sum + order.totalAmount, 0);
@@ -210,9 +211,8 @@ export default function AdminDashboardPage() {
 
     switch (selectedOrdersCountPeriod) {
       case 'thisWeek':
-        const lastSevenDaysStart = startOfDay(subDays(now, 6));
         ordersForCount = ordersForCount.filter(o =>
-          isWithinInterval(new Date(o.orderTimestamp), { start: lastSevenDaysStart, end: endOfDay(now) })
+          isWithinInterval(new Date(o.orderTimestamp), { start: startOfWeek(now, { locale: he }), end: endOfWeek(now, { locale: he }) })
         );
         break;
       case 'thisMonth':
@@ -236,6 +236,8 @@ export default function AdminDashboardPage() {
   const handleClearCustomDates = () => {
     setCustomRevenueStartDate(undefined);
     setCustomRevenueEndDate(undefined);
+    // Optionally, you might want to revert to a default period like 'thisMonth'
+    // setSelectedRevenuePeriod('thisMonth'); 
   };
 
   if (isLoading) {
@@ -285,15 +287,15 @@ export default function AdminDashboardPage() {
              <DropdownMenu dir="rtl">
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="xs" className="text-xs h-6 px-1.5 -mr-1.5">
-                    {ordersCountPeriodTranslations[selectedOrdersCountPeriod]}
+                    בחר תקופה
                     <ChevronDown className="h-3 w-3 opacity-75 mr-0.5" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuRadioGroup value={selectedOrdersCountPeriod} onValueChange={(value) => setSelectedOrdersCountPeriod(value as OrdersCountPeriod)}>
-                    <DropdownMenuRadioItem value="thisWeek" className="text-xs">שבוע אחרון</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="thisMonth" className="text-xs">חודש אחרון</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="allTime" className="text-xs">כל הזמן</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="thisWeek" className="text-xs">{ordersCountPeriodTranslations.thisWeek}</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="thisMonth" className="text-xs">{ordersCountPeriodTranslations.thisMonth}</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="allTime" className="text-xs">{ordersCountPeriodTranslations.allTime}</DropdownMenuRadioItem>
                   </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -403,11 +405,11 @@ export default function AdminDashboardPage() {
                   <DropdownMenuLabel className="text-xs">בחר תקופה</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuRadioGroup value={selectedRevenuePeriod} onValueChange={(value) => setSelectedRevenuePeriod(value as RevenuePeriod)}>
-                    <DropdownMenuRadioItem value="thisMonth" className="text-xs">החודש</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="thisWeek" className="text-xs">השבוע</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="today" className="text-xs">היום</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="allTime" className="text-xs">כל הזמן</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="custom" className="text-xs">מותאם אישית</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="thisMonth" className="text-xs">{revenuePeriodTranslations.thisMonth}</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="thisWeek" className="text-xs">{revenuePeriodTranslations.thisWeek}</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="today" className="text-xs">{revenuePeriodTranslations.today}</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="allTime" className="text-xs">{revenuePeriodTranslations.allTime}</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="custom" className="text-xs">{revenuePeriodTranslations.custom}</DropdownMenuRadioItem>
                   </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
