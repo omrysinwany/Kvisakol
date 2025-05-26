@@ -209,7 +209,7 @@ export default function AdminOrdersPage() {
             <div>
               <CardTitle className="text-xl">רשימת הזמנות ({filteredOrders.length})</CardTitle>
               <CardDescription>
-                נהל את כל ההזמנות שהתקבלו
+                 נהל את כל ההזמנות שהתקבלו
               </CardDescription>
             </div>
           </div>
