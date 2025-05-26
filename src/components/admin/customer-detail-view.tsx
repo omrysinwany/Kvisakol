@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
-import { Phone, MapPin, CalendarDays, ShoppingBag, UserCircle, ListOrdered, Edit2, Save, UserRoundX } from 'lucide-react';
+import { Phone, MapPin, CalendarDays, ShoppingBag, UserCircle, ListOrdered, Edit2, Save, UserRoundX, PlusCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Textarea } from '../ui/textarea';
 
@@ -20,37 +20,44 @@ interface CustomerDetailViewProps {
 
 export function CustomerDetailView({ customer, onSaveGeneralNotes, onSaveCustomerName }: CustomerDetailViewProps) {
   const formatPrice = (price: number) => `₪${price.toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  
   const [currentGeneralNotes, setCurrentGeneralNotes] = useState(customer.generalAgentNotes || '');
   const [isSavingGeneralNotes, setIsSavingGeneralNotes] = useState(false);
+  const [isEditingGeneralNotes, setIsEditingGeneralNotes] = useState(false);
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState(customer.name);
 
-  // Update editedName if customer prop changes (e.g., after a save and re-fetch)
   useEffect(() => {
     setEditedName(customer.name);
     setCurrentGeneralNotes(customer.generalAgentNotes || '');
+    setIsEditingGeneralNotes(false); // Reset edit mode if customer data changes externally
   }, [customer]);
 
-  const handleSaveNotes = async () => {
+  const handleSaveNotesInternal = async () => {
     setIsSavingGeneralNotes(true);
     await onSaveGeneralNotes(customer.id, currentGeneralNotes);
     setIsSavingGeneralNotes(false);
+    setIsEditingGeneralNotes(false); 
+  };
+  
+  const handleCancelEditGeneralNotes = () => {
+    setCurrentGeneralNotes(customer.generalAgentNotes || '');
+    setIsEditingGeneralNotes(false);
   };
 
+
   const handleEditNameToggle = () => {
-    if (isEditingName) { // If currently editing, try to save
+    if (isEditingName) { 
       if (editedName.trim() && editedName.trim() !== customer.name) {
         onSaveCustomerName(customer.id, editedName.trim()).then(() => {
-          setIsEditingName(false); // Switch back to view mode only after successful save (or if no change)
+          setIsEditingName(false); 
         });
       } else if (editedName.trim() === customer.name) {
-        setIsEditingName(false); // No change, just switch back
-      } else {
-        // Name is empty, don't save, stay in edit mode or show error (handled by onSaveCustomerName)
+        setIsEditingName(false); 
       }
-    } else { // If not editing, switch to edit mode
-      setEditedName(customer.name); // Ensure input starts with current name
+    } else { 
+      setEditedName(customer.name); 
       setIsEditingName(true);
     }
   };
@@ -64,23 +71,23 @@ export function CustomerDetailView({ customer, onSaveGeneralNotes, onSaveCustome
       <Card className="shadow-lg">
         <CardHeader>
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 flex-grow min-w-0"> {/* Added flex-grow and min-w-0 */}
-                <UserCircle className="h-8 w-8 text-primary shrink-0" /> {/* Added shrink-0 */}
+            <div className="flex items-center gap-3 flex-grow min-w-0">
+                <UserCircle className="h-8 w-8 text-primary shrink-0" />
                 {!isEditingName ? (
                     <CardTitle className="text-2xl truncate" title={customer.name}>{customer.name}</CardTitle> 
                 ) : (
                     <Input 
                         value={editedName} 
                         onChange={handleNameInputChange} 
-                        className="text-2xl font-semibold h-10 flex-grow" // Use font-semibold for consistency with CardTitle
+                        className="text-2xl font-semibold h-10 flex-grow"
                         autoFocus
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
-                            e.preventDefault(); // Prevent form submission if inside one
-                            handleEditNameToggle(); // Trigger save
+                            e.preventDefault(); 
+                            handleEditNameToggle(); 
                           } else if (e.key === 'Escape') {
                             setIsEditingName(false);
-                            setEditedName(customer.name); // Revert to original name
+                            setEditedName(customer.name); 
                           }
                         }}
                     />
@@ -91,7 +98,7 @@ export function CustomerDetailView({ customer, onSaveGeneralNotes, onSaveCustome
                 size="icon" 
                 onClick={handleEditNameToggle} 
                 title={isEditingName ? "שמור שם" : "ערוך שם"}
-                className="shrink-0" // Added shrink-0
+                className="shrink-0"
             >
                 {isEditingName ? <Save className="h-5 w-5 text-green-600" /> : <Edit2 className="h-5 w-5 text-muted-foreground hover:text-primary" />}
             </Button>
@@ -127,21 +134,47 @@ export function CustomerDetailView({ customer, onSaveGeneralNotes, onSaveCustome
           </div>
 
           <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-2 flex items-center gap-1.5">
-                <Edit2 className="w-4 h-4 text-primary"/>
-                הערות כלליות לסוכן (פנימי)
-            </h3>
-            <Textarea
-              placeholder="הוסף הערות כלליות לגבי הלקוח (למשל, העדפות, מידע חשוב)..."
-              value={currentGeneralNotes}
-              onChange={(e) => setCurrentGeneralNotes(e.target.value)}
-              rows={3}
-              className="bg-background text-sm"
-            />
-            <Button onClick={handleSaveNotes} size="sm" className="mt-2" disabled={isSavingGeneralNotes}>
-              <Save className="ml-2 h-3.5 w-3.5" />
-              {isSavingGeneralNotes ? 'שומר...' : 'שמור הערות כלליות'}
-            </Button>
+            {isEditingGeneralNotes ? (
+              <>
+                <h4 className="text-sm font-medium mb-1.5 text-muted-foreground">ערוך הערות כלליות לסוכן</h4>
+                <Textarea
+                  placeholder="הוסף הערות כלליות לגבי הלקוח (למשל, העדפות, מידע חשוב)..."
+                  value={currentGeneralNotes}
+                  onChange={(e) => setCurrentGeneralNotes(e.target.value)}
+                  rows={3}
+                  className="bg-background text-sm"
+                />
+                <div className="flex items-center gap-2 mt-1.5">
+                  <Button onClick={handleSaveNotesInternal} size="xs" disabled={isSavingGeneralNotes}>
+                    <Save className="ml-1.5 h-3.5 w-3.5" />
+                    {isSavingGeneralNotes ? 'שומר...' : 'שמור הערות'}
+                  </Button>
+                  <Button variant="outline" size="xs" onClick={handleCancelEditGeneralNotes} disabled={isSavingGeneralNotes}>
+                    ביטול
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                {(customer.generalAgentNotes && customer.generalAgentNotes.trim() !== '') ? (
+                  <div>
+                    <div className="flex justify-between items-center mb-0.5">
+                        <h4 className="text-sm font-medium text-muted-foreground">הערות כלליות לסוכן:</h4>
+                        <Button variant="ghost" size="xs" onClick={() => setIsEditingGeneralNotes(true)} className="text-xs h-6 px-1.5">
+                            <Edit2 className="h-3 w-3 ml-1" />
+                            ערוך
+                        </Button>
+                    </div>
+                    <p className="text-sm bg-muted/30 p-2 rounded-md whitespace-pre-wrap min-h-[40px]">{customer.generalAgentNotes}</p>
+                  </div>
+                ) : (
+                  <Button variant="outline" size="xs" onClick={() => { setCurrentGeneralNotes(''); setIsEditingGeneralNotes(true);}} className="text-xs">
+                    <PlusCircle className="h-3.5 w-3.5 ml-1"/>
+                    הוסף הערות כלליות
+                  </Button>
+                )}
+              </>
+            )}
           </div>
 
 
@@ -157,7 +190,7 @@ export function CustomerDetailView({ customer, onSaveGeneralNotes, onSaveCustome
         </CardContent>
          <CardFooter className="flex justify-end items-center bg-muted/30 p-3 rounded-b-md mt-6">
             <div className="text-sm">
-              <span>סך כל ההוצאות של הלקוח (מהזמנות שהושלמו): </span>
+              <span>סך כל ההוצאות של הלקוח: </span>
               <span className="font-semibold text-primary">{formatPrice(customer.totalSpent)}</span>
             </div>
         </CardFooter>
