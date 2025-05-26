@@ -10,7 +10,7 @@ import type { CustomerSummary } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search } from 'lucide-react';
+import { Search, Download } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { subDays, isWithinInterval, startOfDay, endOfDay, isBefore } from 'date-fns';
 
@@ -187,15 +187,16 @@ export default function AdminCustomersPage() {
 
       <Card className="shadow-lg">
         <CardHeader className="pb-3">
-           <div className="flex flex-row items-center justify-between space-x-2 rtl:space-x-reverse">
+          <div className="flex flex-row items-center justify-between space-x-2 rtl:space-x-reverse">
             <div>
               <CardTitle className="text-xl">רשימת לקוחות ({filteredCustomers.length})</CardTitle>
               <CardDescription>
                 סקירה של כל הלקוחות שביצעו הזמנות במערכת.
               </CardDescription>
             </div>
+            {/* Removed CSV export button */}
           </div>
-           
+          
           <div className="pt-3 space-y-2">
             {/* Row 1: Search and Status Filter */}
             <div className="grid grid-cols-2 gap-3 items-end">
@@ -204,7 +205,7 @@ export default function AdminCustomersPage() {
                 <Input
                   id="customer-search"
                   type="search"
-                  placeholder="חיפוש שם או טלפון..."
+                  placeholder="חיפוש"
                   className="pl-10 rtl:pr-10 w-full h-9 text-xs"
                   value={searchTerm}
                   onChange={handleSearchChange}
