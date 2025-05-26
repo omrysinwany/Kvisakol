@@ -15,7 +15,7 @@ import { PlusCircle, Search, List, LayoutGrid } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ProductGrid } from '@/components/admin/product-grid';
 import { cn } from '@/lib/utils';
-import { CartProvider } from '@/contexts/cart-context'; // Added import
+import { CartProvider } from '@/contexts/cart-context';
 
 const ITEMS_PER_PAGE = 15;
 const ALL_CATEGORIES_VALUE = "all"; 
@@ -28,7 +28,7 @@ export default function AdminProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>(ALL_CATEGORIES_VALUE); 
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid'); // Changed default to 'grid'
   
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
@@ -65,6 +65,9 @@ export default function AdminProductsPage() {
         (p.description && p.description.toLowerCase().includes(lowerSearchTerm))
       );
     }
+    
+    // Sort products by name in Hebrew after filtering
+    productsToFilter.sort((a, b) => a.name.localeCompare(b.name, 'he'));
     
     setFilteredProducts(productsToFilter);
     setCurrentPage(1); 
@@ -205,7 +208,7 @@ export default function AdminProductsPage() {
         </CardHeader>
         <CardContent>
           {paginatedProducts.length > 0 ? (
-            <CartProvider> {/* CartProvider wraps the content that uses useCart */}
+            <CartProvider>
               <>
                 {viewMode === 'list' ? (
                   <ProductTable products={paginatedProducts} onDeleteProduct={handleDeleteProduct} onToggleActive={handleToggleActive} />
