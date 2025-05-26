@@ -13,8 +13,9 @@ import { getAllProductsForAdmin, deleteProductService, toggleProductActiveStatus
 import type { Product } from '@/lib/types';
 import { PlusCircle, Search, List, LayoutGrid } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { ProductGrid } from '@/components/admin/product-grid'; // New import
+import { ProductGrid } from '@/components/admin/product-grid';
 import { cn } from '@/lib/utils';
+import { CartProvider } from '@/contexts/cart-context'; // Added import
 
 const ITEMS_PER_PAGE = 15;
 const ALL_CATEGORIES_VALUE = "all"; 
@@ -27,7 +28,7 @@ export default function AdminProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>(ALL_CATEGORIES_VALUE); 
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list'); // New state for view mode
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
@@ -174,9 +175,8 @@ export default function AdminProductsPage() {
               </Button>
             </div>
           </div>
-          {/* Filters part */}
           <div className="grid grid-cols-2 gap-2 pt-2">
-            <div className="relative"> {/* Search container */}
+            <div className="relative">
               <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="search"
@@ -186,7 +186,7 @@ export default function AdminProductsPage() {
                 onChange={handleSearchChange}
               />
             </div>
-            <div className="w-full"> {/* Select container */}
+            <div className="w-full">
               <Select value={selectedCategory} onValueChange={handleCategoryChange}>
                 <SelectTrigger className="w-full h-9 text-xs px-3">
                   <SelectValue placeholder="סינון לפי קטגוריה" />
@@ -205,20 +205,22 @@ export default function AdminProductsPage() {
         </CardHeader>
         <CardContent>
           {paginatedProducts.length > 0 ? (
-            <>
-              {viewMode === 'list' ? (
-                <ProductTable products={paginatedProducts} onDeleteProduct={handleDeleteProduct} onToggleActive={handleToggleActive} />
-              ) : (
-                <ProductGrid products={paginatedProducts} />
-              )}
-              {totalPages > 1 && (
-                <AdminPaginationControls
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={handlePageChange}
-                />
-              )}
-            </>
+            <CartProvider> {/* CartProvider wraps the content that uses useCart */}
+              <>
+                {viewMode === 'list' ? (
+                  <ProductTable products={paginatedProducts} onDeleteProduct={handleDeleteProduct} onToggleActive={handleToggleActive} />
+                ) : (
+                  <ProductGrid products={paginatedProducts} />
+                )}
+                {totalPages > 1 && (
+                  <AdminPaginationControls
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                  />
+                )}
+              </>
+            </CartProvider>
           ) : (
             <div className="text-center py-8">
               <p className="text-muted-foreground mb-4">
