@@ -8,7 +8,7 @@ import { AdminPaginationControls } from '@/components/admin/admin-pagination-con
 import { getOrdersForAdmin, updateOrderStatusService } from '@/services/order-service';
 import type { Order } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Download, CalendarIcon, X, UserSearch } from 'lucide-react';
+import { CalendarIcon, X, UserSearch } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -193,13 +193,6 @@ export default function AdminOrdersPage() {
   };
 
 
-  const handleExportOrders = () => {
-    toast({
-      title: "ייצוא הזמנות",
-      description: "פונקציונליות ייצוא ל-CSV תתווסף בעתיד.",
-    });
-  };
-
   if (isLoading) {
     return <div className="container mx-auto px-4 py-8"><p>טוען הזמנות...</p></div>;
   }
@@ -219,10 +212,7 @@ export default function AdminOrdersPage() {
                 נהל את כל ההזמנות שהתקבלו מלקוחות. עקוב אחר סטטוסים ופרטי הזמנות.
               </CardDescription>
             </div>
-            <Button variant="ghost" size="sm" onClick={handleExportOrders} className="text-xs text-muted-foreground hover:text-foreground whitespace-nowrap">
-                <Download className="ml-1.5 h-3.5 w-3.5" />
-                ייצא CSV
-            </Button>
+            {/* Export button removed */}
           </div>
           
           <div className="pt-3 space-y-2">
@@ -358,3 +348,4 @@ export default function AdminOrdersPage() {
   );
 }
     
+

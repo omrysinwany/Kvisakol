@@ -10,7 +10,7 @@ import type { CustomerSummary } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Download } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { subDays, isWithinInterval, startOfDay, endOfDay, isBefore } from 'date-fns';
 
@@ -141,13 +141,6 @@ export default function AdminCustomersPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleExportCustomers = () => {
-    toast({
-      title: "ייצוא לקוחות",
-      description: "פונקציונליות ייצוא ל-CSV תתווסף בעתיד.",
-    });
-  };
-
   if (isLoading) {
     return <div className="container mx-auto px-4 py-8"><p>טוען רשימת לקוחות...</p></div>;
   }
@@ -167,15 +160,12 @@ export default function AdminCustomersPage() {
                 סקירה של כל הלקוחות שביצעו הזמנות במערכת.
               </CardDescription>
             </div>
-            <Button variant="ghost" size="sm" onClick={handleExportCustomers} className="text-xs text-muted-foreground hover:text-foreground whitespace-nowrap">
-              <Download className="ml-1.5 h-3.5 w-3.5" />
-              ייצא CSV
-            </Button>
+            {/* Export button removed */}
           </div>
            {/* Filters Area */}
           <div className="pt-3">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
-              <div className="relative col-span-1 sm:col-span-1"> {/* Search takes full width on small, 1/3 on sm+ */}
+            <div className="grid grid-cols-3 gap-3 items-end">
+              <div className="relative col-span-1">
                 <div className="relative">
                   <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
