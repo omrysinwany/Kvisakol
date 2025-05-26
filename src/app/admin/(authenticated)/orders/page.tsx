@@ -113,7 +113,7 @@ export default function AdminOrdersPage() {
         const statusKeyForToast = newStatus as keyof typeof statusTranslationsForFilter;
         toast({
           title: "סטטוס הזמנה עודכן",
-          description: `הסטטוס של הזמנה ${orderId.substring(orderId.length - 6)} שונה ל: ${statusTranslationsForFilter[statusKeyForToast]}.`,
+          description: `הסטטוס של הזמנה ${updatedOrder.id.substring(updatedOrder.id.length - 6)} שונה ל: ${statusTranslationsForFilter[statusKeyForToast]}.`,
         });
       } else {
         toast({ variant: "destructive", title: "שגיאה", description: "לא ניתן היה לעדכן את סטטוס ההזמנה." });
@@ -222,7 +222,7 @@ export default function AdminOrdersPage() {
                 <Input
                   id="order-customer-phone-search"
                   type="tel"
-                  placeholder="טלפון לקוח..."
+                  placeholder="חיפוש"
                   value={customerPhoneInput}
                   onChange={handleCustomerPhoneInputChange}
                   onKeyPress={(e) => { if (e.key === 'Enter') handleApplyCustomerPhoneFilter(); }}
