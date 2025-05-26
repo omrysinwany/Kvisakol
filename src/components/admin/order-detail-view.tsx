@@ -133,16 +133,16 @@ export function OrderDetailView({ order, onUpdateStatus, onSaveAgentNotes }: Ord
           </div>
 
           <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-2">הערות סוכן (פנימי)</h3>
+            <h3 className="text-base font-semibold mb-1.5">הערות סוכן (פנימי)</h3>
             <Textarea
               placeholder="הוסף הערות פנימיות לגבי ההזמנה..."
               value={currentAgentNotes}
               onChange={(e) => setCurrentAgentNotes(e.target.value)}
-              rows={3}
-              className="bg-background"
+              rows={2}
+              className="bg-background text-sm"
             />
-            <Button onClick={handleSaveNotes} size="sm" className="mt-2" disabled={isSavingNotes}>
-              <Save className="ml-2 h-4 w-4" />
+            <Button onClick={handleSaveNotes} size="xs" className="mt-1.5" disabled={isSavingNotes}>
+              <Save className="ml-1.5 h-3.5 w-3.5" />
               {isSavingNotes ? 'שומר...' : 'שמור הערות'}
             </Button>
           </div>
@@ -182,4 +182,3 @@ export function OrderDetailView({ order, onUpdateStatus, onSaveAgentNotes }: Ord
     </div>
   );
 }
-
