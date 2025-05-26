@@ -3,13 +3,14 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { getCustomerSummaryById, updateCustomerGeneralNotes } from '@/services/order-service'; // Added updateCustomerGeneralNotes
+import { getCustomerSummaryById, updateCustomerGeneralNotes, updateCustomerName } from '@/services/order-service'; 
 import type { CustomerSummary } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, AlertTriangle, UserRoundX } from 'lucide-react'; // Added UserRoundX
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { CustomerDetailView } from '@/components/admin/customer-detail-view';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function AdminCustomerDetailPage() {
   const params = useParams();
@@ -42,7 +43,7 @@ export default function AdminCustomerDetailPage() {
             setCustomer(customerSummaryData);
             console.log(`AdminCustomerDetailPage: Successfully set customer state for ${customerSummaryData.name}`);
           } else {
-            setError(`הלקוח עם מזהה ${cleanedCustomerId} לא נמצא בקולקציית 'customers'.`);
+            setError(`הלקוח עם מזהה ${cleanedCustomerId} לא נמצא. ייתכן שלא ביצע הזמנות או שהמזהה שגוי.`);
             console.warn(`AdminCustomerDetailPage: No customer document found for ID ${cleanedCustomerId} in 'customers' collection.`);
             setCustomer(null);
           }
@@ -66,7 +67,7 @@ export default function AdminCustomerDetailPage() {
     try {
       const updatedCustomer = await updateCustomerGeneralNotes(customerId, notes);
       if (updatedCustomer) {
-        setCustomer(updatedCustomer); // Update local state with the updated customer summary
+        setCustomer(updatedCustomer); 
         toast({
           title: "הערות כלליות נשמרו",
           description: "ההערות הכלליות ללקוח נשמרו בהצלחה.",
@@ -80,6 +81,28 @@ export default function AdminCustomerDetailPage() {
     }
   };
 
+  const handleSaveCustomerName = async (customerId: string, newName: string) => {
+    if (!customer || !newName.trim()) {
+        toast({ variant: 'destructive', title: 'שגיאה', description: 'שם לקוח אינו יכול להיות ריק.' });
+        return;
+    }
+    try {
+      const updatedCustomer = await updateCustomerName(customerId, newName.trim());
+      if (updatedCustomer) {
+        setCustomer(updatedCustomer); // Update local state with the full updated customer summary
+        toast({
+          title: "שם לקוח עודכן",
+          description: `שם הלקוח עודכן ל: ${updatedCustomer.name}.`,
+        });
+      } else {
+        toast({ variant: 'destructive', title: 'שגיאה', description: 'לא ניתן היה לעדכן את שם הלקוח.' });
+      }
+    } catch (err) {
+      console.error("Failed to update customer name:", err);
+      toast({ variant: 'destructive', title: 'שגיאה', description: 'אירעה תקלה בעדכון שם הלקוח.' });
+    }
+  };
+
 
   if (isLoading) {
     return <div className="container mx-auto px-4 py-8"><p>טוען פרטי לקוח...</p></div>;
@@ -87,16 +110,22 @@ export default function AdminCustomerDetailPage() {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <p className="text-destructive text-center text-lg">{error}</p>
-        <div className="text-center mt-4">
-          <Button asChild variant="outline">
-            <Link href="/admin/customers">
-              <ArrowRight className="ml-2 h-4 w-4" />
-              חזור לרשימת הלקוחות
-            </Link>
-          </Button>
-        </div>
+       <div className="container mx-auto px-4 py-8">
+        <Card className="max-w-lg mx-auto text-center border-destructive">
+          <CardHeader>
+            <AlertTriangle className="mx-auto h-12 w-12 text-destructive mb-2" />
+            <CardTitle className="text-destructive">שגיאה בטעינת נתוני לקוח</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">{error}</p>
+            <Button asChild variant="outline">
+              <Link href="/admin/customers">
+                <ArrowRight className="ml-2 h-4 w-4" />
+                חזור לרשימת הלקוחות
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -104,18 +133,23 @@ export default function AdminCustomerDetailPage() {
   if (!customer) {
     return (
         <div className="container mx-auto px-4 py-8">
-            <p className="text-center text-lg">לא נמצא לקוח עם המזהה (טלפון) שהתקבל: {customerIdFromUrl}.</p>
-            <p className="text-center text-sm text-muted-foreground">
-                ייתכן שהלקוח עדיין לא ביצע הזמנות (ולכן לא קיים בקולקציית 'customers') או שהמזהה אינו תקין.
-            </p>
-            <div className="text-center mt-4">
-            <Button asChild variant="outline">
-                <Link href="/admin/customers">
-                <ArrowRight className="ml-2 h-4 w-4" />
-                חזור לרשימת הלקוחות
-                </Link>
-            </Button>
-            </div>
+            <Card className="max-w-lg mx-auto text-center">
+              <CardHeader>
+                 <UserRoundX className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
+                 <CardTitle>לקוח לא נמצא</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                    לא נמצא לקוח עם המזהה (טלפון) שהתקבל: {customerIdFromUrl}.<br/>
+                </p>
+                <Button asChild variant="outline">
+                    <Link href="/admin/customers">
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                    חזור לרשימת הלקוחות
+                    </Link>
+                </Button>
+              </CardContent>
+            </Card>
         </div>
     );
   }
@@ -133,7 +167,9 @@ export default function AdminCustomerDetailPage() {
       <CustomerDetailView 
         customer={customer} 
         onSaveGeneralNotes={handleSaveGeneralNotes} 
+        onSaveCustomerName={handleSaveCustomerName}
       />
     </>
   );
 }
+

@@ -76,7 +76,8 @@ export async function getOrderByIdForAdmin(orderId: string): Promise<Order | nul
 
 async function getNextOrderId(): Promise<string> {
   const ordersCollectionRef = collection(db, 'orders');
-  const q = query(ordersCollectionRef, orderBy('orderTimestamp', 'desc'), firestoreLimit(5000)); // Increased limit for safety
+  // Query to find the highest numeric part of order IDs like 'o1', 'o2', etc.
+  const q = query(ordersCollectionRef, orderBy('__name__', 'desc')); // Order by document ID descending
   const querySnapshot = await getDocs(q);
 
   let maxNumericId = 0;
@@ -119,7 +120,7 @@ export async function createOrderService(orderDetails: {
 
   const newOrderData: Omit<Order, 'id'> = {
     customerName: orderDetails.customerName,
-    customerPhone: customerPhoneTrimmed,
+    customerPhone: customerPhoneTrimmed, // Storing the cleaned phone number
     customerAddress: orderDetails.customerAddress,
     customerNotes: orderDetails.customerNotes || '',
     items: orderDetails.items,
@@ -144,8 +145,8 @@ export async function createOrderService(orderDetails: {
           phone: customerPhoneTrimmed,
           firstOrderDate: currentTimestamp.toDate(),
           lastOrderDate: currentTimestamp.toDate(),
-          totalOrders: 1,
-          totalSpent: 0, // Initial totalSpent is 0 for new customers
+          totalOrders: 1, // This order is not cancelled
+          totalSpent: 0, // Initial totalSpent is 0 for new customers, updated on 'completed' status
           latestAddress: orderDetails.customerAddress,
           generalAgentNotes: '',
         };
@@ -162,17 +163,17 @@ export async function createOrderService(orderDetails: {
 
         const updatedCustomerData: any = {
           lastOrderDate: currentTimestamp.toDate(),
-          totalOrders: increment(1),
+          totalOrders: increment(1), // Increment for this new, non-cancelled order
           latestAddress: orderDetails.customerAddress,
-          // name: orderDetails.customerName, // Do not update name here, keep original name
+          // name: orderDetails.customerName, // Name is NOT updated automatically
         };
         if (!existingCustomerData.firstOrderDate) {
             updatedCustomerData.firstOrderDate = currentTimestamp.toDate();
         }
-        // totalSpent is updated only when an order is 'completed'.
+        // totalSpent is updated only when an order status changes to 'completed'.
 
         transaction.update(customerDocRef, updatedCustomerData);
-        console.log(`OrderService (createOrderService): UPDATED existing customer document for ${customerPhoneTrimmed}. Update data (excluding totalSpent and name):`, updatedCustomerData);
+        console.log(`OrderService (createOrderService): UPDATED existing customer document for ${customerPhoneTrimmed}. Update data:`, updatedCustomerData);
       }
     });
 
@@ -227,20 +228,36 @@ export async function updateOrderStatusService(orderId: string, newStatus: Order
 
       if (customerSnap.exists()) {
         let amountChange = 0;
+        let orderCountChange = 0;
+
+        // Adjust totalSpent
         if (newStatus === 'completed' && oldStatus !== 'completed') {
           amountChange = orderAmount;
-          console.log(`OrderService: Order ${orderId} completed. Adding ${orderAmount} to customer ${customerPhone}'s totalSpent.`);
         } else if (oldStatus === 'completed' && newStatus !== 'completed') {
           amountChange = -orderAmount;
-          console.log(`OrderService: Order ${orderId} no longer completed. Subtracting ${orderAmount} from customer ${customerPhone}'s totalSpent.`);
         }
 
+        // Adjust totalOrders
+        if (newStatus === 'cancelled' && oldStatus !== 'cancelled') {
+          orderCountChange = -1; // Order is now cancelled, decrement count
+        } else if (oldStatus === 'cancelled' && newStatus !== 'cancelled') {
+          orderCountChange = 1; // Order is no longer cancelled, increment count
+        }
+        
+        const customerUpdatePayload: any = {};
         if (amountChange !== 0) {
-          await updateDoc(customerDocRef, { totalSpent: increment(amountChange) });
-          console.log(`OrderService: Updated customer ${customerPhone}'s totalSpent by ${amountChange}.`);
+            customerUpdatePayload.totalSpent = increment(amountChange);
+        }
+        if (orderCountChange !== 0) {
+            customerUpdatePayload.totalOrders = increment(orderCountChange);
+        }
+
+        if (Object.keys(customerUpdatePayload).length > 0) {
+            await updateDoc(customerDocRef, customerUpdatePayload);
+            console.log(`OrderService: Updated customer ${customerPhone}. totalSpent change: ${amountChange}, totalOrders change: ${orderCountChange}.`);
         }
       } else {
-        console.warn(`OrderService: Customer document not found for phone ${customerPhone} when trying to update totalSpent.`);
+        console.warn(`OrderService: Customer document not found for phone ${customerPhone} when trying to update totals.`);
       }
     }
 
@@ -318,7 +335,7 @@ export async function getUniqueCustomers(): Promise<CustomerSummary[]> {
   console.log("OrderService (getUniqueCustomers): Fetching customers from 'customers' collection in Firestore.");
   try {
     const customersCollectionRef = collection(db, 'customers');
-    const q = query(customersCollectionRef, orderBy('name', 'asc'));
+    const q = query(customersCollectionRef, orderBy('name', 'asc')); // Sort by name
     const querySnapshot = await getDocs(q);
     const customers = querySnapshot.docs.map(docSnap => customerSummaryFromDoc(docSnap));
     console.log(`OrderService (getUniqueCustomers): Fetched ${customers.length} customers from 'customers' collection.`);
@@ -332,7 +349,7 @@ export async function getUniqueCustomers(): Promise<CustomerSummary[]> {
 
 export async function getOrdersByCustomerPhone(phone: string): Promise<Order[]> {
   const cleanedPhoneInput = String(phone || '').trim();
-  console.log(`OrderService (getOrdersByCustomerPhone): Querying orders for phone (service): >>${cleanedPhoneInput}<< (Type: ${typeof cleanedPhoneInput})`);
+  console.log(`OrderService (getOrdersByCustomerPhone): Querying orders for phone (cleaned): >>${cleanedPhoneInput}<< (Type: ${typeof cleanedPhoneInput})`);
 
   if (!cleanedPhoneInput) {
     console.warn('OrderService (getOrdersByCustomerPhone): called with invalid or empty phone number after cleaning. Returning empty array.');
@@ -358,15 +375,25 @@ export async function getOrdersByCustomerPhone(phone: string): Promise<Order[]> 
     const orders: Order[] = [];
     querySnapshot.forEach(docSnap => {
         const orderData = orderFromDoc(docSnap);
-        // Additional log to verify data being processed
-        console.log(`OrderService (getOrdersByCustomerPhone): Processing order doc ID: ${docSnap.id}, customerPhone in doc: ${orderData.customerPhone}`);
-        orders.push(orderData);
+        const phoneInOrder = String(orderData.customerPhone || '').trim();
+        // console.log(`OrderService (getOrdersByCustomerPhone): Processing order doc ID: ${docSnap.id}, customerPhone in doc: >>${phoneInOrder}<<. Comparing with >>${cleanedPhoneInput}<<`);
+        if (phoneInOrder === cleanedPhoneInput) { // Double check, though 'where' clause should handle this
+            orders.push(orderData);
+        } else {
+            // This log should ideally not be reached if Firestore 'where' clause works as expected
+            console.warn(`OrderService (getOrdersByCustomerPhone): Mismatch after query! Doc ID: ${docSnap.id}, Phone in doc: ${phoneInOrder}, Searched phone: ${cleanedPhoneInput}`);
+        }
     });
-
-    console.log(`OrderService (getOrdersByCustomerPhone): Found ${orders.length} orders for phone ${cleanedPhoneInput}. Orders Data (first 3):`, orders.slice(0,3).map(o => ({id: o.id, customerName: o.customerName, customerPhoneInOrder: o.customerPhone, status: o.status, totalAmount: o.totalAmount })));
+    
+    // Log details of fetched orders
+    if(orders.length > 0) {
+        console.log(`OrderService (getOrdersByCustomerPhone): Matched ${orders.length} orders for phone ${cleanedPhoneInput}. First order ID: ${orders[0].id}, Customer: ${orders[0].customerName}, Phone in order: ${orders[0].customerPhone}`);
+    } else {
+        console.log(`OrderService (getOrdersByCustomerPhone): No orders strictly matched after processing for phone ${cleanedPhoneInput}.`);
+    }
     return orders;
   } catch (error: any) {
-    console.error(`OrderService (getOrdersByCustomerPhone): Error fetching orders for customer phone ${cleanedPhoneInput}. Firestore error code: ${error.code}, message: ${error.message}. Stack: ${error.stack}`);
+    console.error(`OrderService (getOrdersByCustomerPhone): Error fetching orders for customer phone ${cleanedPhoneInput}. Firestore error code: ${error.code}, message: ${error.message}.`);
     console.error("Detailed Firestore error object:", error);
     return [];
   }
@@ -384,7 +411,7 @@ export async function getCustomerSummaryById(customerId: string): Promise<Custom
       const docSnap = await getDoc(customerDocRef);
       if (docSnap.exists()) {
         const customerData = customerSummaryFromDoc(docSnap);
-        console.log(`OrderService (getCustomerSummaryById): Customer summary found for ID ${cleanedCustomerId} in 'customers' collection:`, JSON.stringify(customerData, null, 2));
+        console.log(`OrderService (getCustomerSummaryById): Customer summary found for ID ${cleanedCustomerId} in 'customers' collection:`, customerData);
         return customerData;
       } else {
         console.warn(`OrderService (getCustomerSummaryById): No customer document found in 'customers' collection for ID: ${cleanedCustomerId}.`);
@@ -418,6 +445,37 @@ export async function updateCustomerGeneralNotes(customerId: string, notes: stri
     return null;
   }
 }
+
+export async function updateCustomerName(customerId: string, newName: string): Promise<CustomerSummary | null> {
+  const cleanedCustomerId = String(customerId || '').trim();
+  const cleanedNewName = String(newName || '').trim();
+  console.log(`OrderService: Updating name for customer ID: ${cleanedCustomerId} to "${cleanedNewName}" in Firestore.`);
+
+  if (!cleanedCustomerId) {
+    console.warn("OrderService (updateCustomerName): called with no customerId. Cannot update name.");
+    return null;
+  }
+  if (!cleanedNewName) {
+    console.warn("OrderService (updateCustomerName): called with no newName. Cannot update name.");
+    return null; 
+  }
+
+  try {
+    const customerDocRef = doc(db, 'customers', cleanedCustomerId);
+    await updateDoc(customerDocRef, { name: cleanedNewName });
+    const updatedDocSnap = await getDoc(customerDocRef);
+    if (updatedDocSnap.exists()) {
+      console.log(`OrderService: Successfully updated name for customer ${cleanedCustomerId}.`);
+      return customerSummaryFromDoc(updatedDocSnap);
+    }
+    console.warn(`OrderService: Customer document not found for ID ${cleanedCustomerId} after attempting to update name.`);
+    return null;
+  } catch (err) {
+    console.error(`OrderService: Error updating name for ${cleanedCustomerId} in Firestore:`, err);
+    return null;
+  }
+}
+
 
 export async function getTopCustomers(limitAmount: number = 3): Promise<CustomerSummary[]> {
   console.log(`OrderService (getTopCustomers): Fetching top ${limitAmount} customers by totalSpent.`);
