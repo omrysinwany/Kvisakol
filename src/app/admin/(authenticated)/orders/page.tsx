@@ -18,13 +18,13 @@ import { he } from 'date-fns/locale';
 import { cn } from "@/lib/utils";
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input'; // Make sure Input is imported
+import { Input } from '@/components/ui/input';
 
-type StatusFilterValue = Order['status'] | 'all';
+type StatusFilterValue = Order['status'] | 'all' | 'received'; // Added 'received'
 
 const ITEMS_PER_PAGE = 10;
 
-const statusTranslationsForFilter: Record<StatusFilterValue | 'received', string> = {
+const statusTranslationsForFilter: Record<StatusFilterValue, string> = {
   all: 'כל הסטטוסים',
   new: 'חדשה',
   received: 'התקבלה',
@@ -95,9 +95,6 @@ export default function AdminOrdersPage() {
         setStartDate(startOfDay(sevenDaysAgo));
         setEndDate(endOfDay(today));
       }
-    } else if (!phoneFromUrl) {
-      // setStartDate(undefined); // Keep dates if they were set manually
-      // setEndDate(undefined);
     }
     setCurrentPage(1);
   }, [searchParams, initialStatusFilter, initialCustomerPhoneFilter, initialPeriodFilter]);
@@ -210,7 +207,7 @@ export default function AdminOrdersPage() {
       </div>
 
       <Card className="shadow-lg">
-        <CardHeader>
+        <CardHeader className="pb-3">
           <div className="flex flex-row items-center justify-between space-x-2 rtl:space-x-reverse">
             <div>
               <CardTitle className="text-xl">רשימת הזמנות ({filteredOrders.length})</CardTitle>
@@ -242,9 +239,9 @@ export default function AdminOrdersPage() {
             </div>
 
             {/* Status Filter and Date Filters - In a row */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end">
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 items-end">
               {/* Status Filter */}
-              <div className="w-full">
+              <div className="w-full sm:col-span-1">
                 <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value as StatusFilterValue); setCurrentPage(1); }}>
                   <SelectTrigger className="h-9 w-full px-3 text-xs">
                     <SelectValue placeholder="סינון לפי סטטוס" />
@@ -252,15 +249,15 @@ export default function AdminOrdersPage() {
                   <SelectContent>
                     {availableStatuses.map((statusKey) => (
                       <SelectItem key={statusKey} value={statusKey} className="text-xs">
-                        {statusTranslationsForFilter[statusKey as StatusFilterValue | 'received']}
+                        {statusTranslationsForFilter[statusKey as StatusFilterValue]}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               
-              {/* Date Filters */}
-              <div className="w-full">
+              {/* Date Filters Container */}
+              <div className="w-full sm:col-span-1 grid grid-cols-2 gap-2">
                 <Popover>
                     <PopoverTrigger asChild>
                         <Button
@@ -285,8 +282,6 @@ export default function AdminOrdersPage() {
                         />
                     </PopoverContent>
                 </Popover>
-              </div>
-              <div className="w-full">
                 <Popover>
                     <PopoverTrigger asChild>
                         <Button
@@ -314,7 +309,7 @@ export default function AdminOrdersPage() {
               </div>
             </div>
             {/* Clear buttons and badges */}
-            <div className="flex items-center gap-2 mt-2">
+            <div className="flex items-center gap-2 mt-1">
                 {(startDate || endDate) && (
                     <Button variant="ghost" onClick={() => {handleClearDates(); setCurrentPage(1);}} size="icon" className="h-8 w-8 shrink-0">
                         <X className="h-3.5 w-3.5" />
@@ -328,7 +323,7 @@ export default function AdminOrdersPage() {
                     </Badge>
                   )}
                  {(customerPhoneFilter || customerPhoneInput) && (
-                     <Button variant="outline" size="xs" onClick={handleClearCustomerFilter} className="h-auto py-0.5 px-1.5">
+                     <Button variant="outline" size="xs" onClick={handleClearCustomerFilter} className="h-auto py-0.5 px-1.5 text-xs">
                         <X className="h-3 w-3 ml-0.5" />
                         נקה סינון לקוח
                     </Button>
