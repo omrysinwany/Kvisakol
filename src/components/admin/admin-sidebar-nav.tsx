@@ -19,10 +19,10 @@ interface NavItem {
 
 const baseNavItems: NavItem[] = [
   { href: '/admin/dashboard', label: 'לוח בקרה', icon: LayoutDashboard },
-  { href: '/admin/catalog-preview', label: 'קטלוג', icon: LayoutList }, 
-  { href: '/admin/products', label: 'ניהול מוצרים', icon: Package },
   { href: '/admin/orders', label: 'ניהול הזמנות', icon: ShoppingBasket },
   { href: '/admin/customers', label: 'ניהול לקוחות', icon: Users },
+  { href: '/admin/products', label: 'ניהול מוצרים', icon: Package },
+  { href: '/admin/catalog-preview', label: 'קטלוג', icon: LayoutList }, 
   // { href: '/admin/settings', label: 'הגדרות', icon: Settings }, // Example for future extension
 ];
 
@@ -88,3 +88,4 @@ export function AdminSidebarNav({
     </nav>
   );
 }
+

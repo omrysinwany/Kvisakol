@@ -199,8 +199,8 @@ export default function AdminOrdersPage() {
 
   return (
     <>
-      <div className="mb-4">
-        <h1 className="text-3xl font-bold tracking-tight">ניהול הזמנות</h1>
+      <div className="w-full py-4 mb-8 text-center bg-card shadow-sm rounded-lg">
+        <h1 className="text-3xl font-bold tracking-tight text-primary">ניהול הזמנות</h1>
       </div>
 
       <Card className="shadow-lg">
