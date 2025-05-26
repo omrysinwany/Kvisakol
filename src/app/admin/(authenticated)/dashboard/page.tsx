@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { getAllProductsForAdmin } from "@/services/product-service";
-import { getOrdersForAdmin } from "@/services/order-service";
-import type { Product, Order } from "@/lib/types";
-import { Package, ClipboardCheck, Eye, Users, CalendarDays, CalendarCheck, CalendarIcon, X, Hourglass, ChevronDown, ListOrdered } from "lucide-react";
+import { getAllProductsForAdmin, getProductById } from "@/services/product-service";
+import { getOrdersForAdmin, getTopCustomers, getRecentOrders } from "@/services/order-service";
+import type { Product, Order, CustomerSummary } from "@/lib/types";
+import { Package, ClipboardCheck, Eye, Users, CalendarDays, CalendarCheck, CalendarIcon, X, Hourglass, ChevronDown, ListOrdered, Trophy, ListChecks } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -50,6 +50,12 @@ interface DashboardSummary {
   ordersThisWeek: number;
 }
 
+interface PopularProduct {
+  id: string;
+  name: string;
+  count: number;
+}
+
 type RevenuePeriod = 'allTime' | 'today' | 'thisWeek' | 'thisMonth' | 'custom';
 const revenuePeriodTranslations: Record<RevenuePeriod, string> = {
   allTime: 'כל הזמן',
@@ -70,29 +76,37 @@ export default function AdminDashboardPage() {
   const [customRevenueEndDate, setCustomRevenueEndDate] = useState<Date | undefined>();
   const [filteredRevenue, setFilteredRevenue] = useState<number>(0);
 
+  const [topCustomers, setTopCustomers] = useState<CustomerSummary[] | null>(null);
+  const [popularProducts, setPopularProducts] = useState<PopularProduct[] | null>(null);
+
+
   useEffect(() => {
     async function fetchDashboardData() {
       setIsLoading(true);
       try {
-        const [products, orders] = await Promise.all([
+        const [productsData, ordersData, topCustomersData, recentOrdersData] = await Promise.all([
           getAllProductsForAdmin(),
-          getOrdersForAdmin()
+          getOrdersForAdmin(),
+          getTopCustomers(3),
+          getRecentOrders(7) 
         ]);
-        setAllOrders(orders);
-
-        const totalProducts = products.filter(p => p.isActive).length;
-        const totalOrders = orders.length;
-        const newOrdersUnviewedCount = orders.filter(o => o.status === 'new').length;
-        const receivedOrdersCount = orders.filter(o => o.status === 'received').length;
         
-        const ordersTodayCount = orders.filter(o => isToday(new Date(o.orderTimestamp))).length;
+        setAllOrders(ordersData);
+        setTopCustomers(topCustomersData);
+
+        const totalProducts = productsData.filter(p => p.isActive).length;
+        const totalOrders = ordersData.length;
+        const newOrdersUnviewedCount = ordersData.filter(o => o.status === 'new').length;
+        const receivedOrdersCount = ordersData.filter(o => o.status === 'received').length;
+        
+        const ordersTodayCount = ordersData.filter(o => isToday(new Date(o.orderTimestamp))).length;
         const sevenDaysAgo = subDays(new Date(), 6); 
         const today = new Date();
-        const ordersThisWeekCount = orders.filter(o => 
+        const ordersThisWeekCount = ordersData.filter(o => 
             isWithinInterval(new Date(o.orderTimestamp), { start: startOfDay(sevenDaysAgo), end: endOfDay(today) })
         ).length;
         
-        const latestOrders = orders.slice(0, 5);
+        const latestOrders = ordersData.slice(0, 5);
 
         setSummary({
           totalProducts,
@@ -103,6 +117,37 @@ export default function AdminDashboardPage() {
           ordersToday: ordersTodayCount,
           ordersThisWeek: ordersThisWeekCount,
         });
+
+        // Process popular products
+        if (recentOrdersData.length > 0) {
+          const productCounts: Record<string, number> = {};
+          recentOrdersData.forEach(order => {
+            order.items.forEach(item => {
+              productCounts[item.productId] = (productCounts[item.productId] || 0) + item.quantity;
+            });
+          });
+
+          const sortedProductIds = Object.entries(productCounts)
+            .sort(([, aCount], [, bCount]) => bCount - aCount)
+            .slice(0, 3) // Get top 3
+            .map(([productId]) => productId);
+
+          const popularProductsDetails = await Promise.all(
+            sortedProductIds.map(async (productId) => {
+              const product = await getProductById(productId);
+              return {
+                id: productId,
+                name: product?.name || 'מוצר לא ידוע',
+                count: productCounts[productId],
+              };
+            })
+          );
+          setPopularProducts(popularProductsDetails);
+        } else {
+          setPopularProducts([]);
+        }
+
+
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
         toast({ variant: "destructive", title: "שגיאה", description: "לא ניתן היה לטעון את נתוני לוח הבקרה." });
@@ -184,8 +229,7 @@ export default function AdminDashboardPage() {
         <h1 className="text-3xl font-bold tracking-tight text-primary">לוח בקרה</h1>
       </div>
       
-      <div className="grid grid-cols-2 gap-6">
-        {/* Row 1: Summary Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-2 gap-6">
         <Link href="/admin/orders?status=new" className="block hover:shadow-lg transition-shadow rounded-lg">
           <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -295,6 +339,43 @@ export default function AdminDashboardPage() {
             </Button>
           </CardContent>
         </Card>
+
+        {topCustomers && topCustomers.length > 0 && (
+          <Card className="col-span-2 md:col-span-1">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><Trophy className="h-5 w-5 text-yellow-500"/>לקוחות מובילים</CardTitle>
+              <CardDescription>3 הלקוחות עם סך ההוצאות הגבוה ביותר.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {topCustomers.map((customer) => (
+                <div key={customer.id} className="flex items-center justify-between py-2.5 border-b last:border-0">
+                  <div>
+                    <Link href={`/admin/customers/${customer.id}`} className="font-medium text-sm text-primary hover:underline">{customer.name}</Link>
+                    <p className="text-xs text-muted-foreground">{customer.phone}</p>
+                  </div>
+                  <p className="font-semibold text-sm">{formatPrice(customer.totalSpent)}</p>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
+        {popularProducts && popularProducts.length > 0 && (
+          <Card className="col-span-2 md:col-span-1">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><ListChecks className="h-5 w-5 text-green-500"/>מוצרים נפוצים לאחרונה</CardTitle>
+              <CardDescription>3 המוצרים הנפוצים ביותר בהזמנות מהשבוע האחרון.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {popularProducts.map((product) => (
+                <div key={product.id} className="flex items-center justify-between py-2.5 border-b last:border-0">
+                   <Link href={`/admin/products/edit/${product.id}`} className="font-medium text-sm text-primary hover:underline">{product.name}</Link>
+                  <p className="text-sm text-muted-foreground">נמכרו: {product.count} יח'</p>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
         
         <Card className="col-span-2">
           <CardHeader className="pb-3">
