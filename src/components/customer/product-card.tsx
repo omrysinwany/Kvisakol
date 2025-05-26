@@ -19,7 +19,6 @@ import {
   DialogTitle,
   DialogFooter,
   DialogClose,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { cn } from '@/lib/utils';
 
@@ -94,18 +93,19 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
   }
   
   const openDialog = (e?: React.MouseEvent) => {
-    if (isAdminGalleryView) return; // Handled by Link in ProductGrid
-    if (e) e.stopPropagation(); // Prevent parent click if any
+    if (isAdminGalleryView) return;
+    if (e) e.stopPropagation();
     setIsDialogOpen(true);
   };
 
   const handleCardContentClick = (e: React.MouseEvent) => {
-    // Prevents opening dialog when interacting with quantity controls or add to cart button
     const target = e.target as HTMLElement;
     if (target.closest('button') || target.closest('input[type="number"]')) {
       return;
     }
-    openDialog(e);
+    if (!isAdminGalleryView) {
+      openDialog(e);
+    }
   };
 
 
@@ -136,8 +136,8 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
             </Badge>
           </div>
         </CardHeader>
-        <CardContent className="p-3 pb-1 flex-1">
-          <CardTitle className="text-sm h-10 leading-tight text-center line-clamp-2 text-[hsl(var(--ring))]">
+        <CardContent className="p-3 pb-2 flex-1 flex flex-col justify-center">
+          <CardTitle className="text-sm leading-normal text-center line-clamp-2 text-[hsl(var(--ring))]">
             {product.name}
           </CardTitle>
         </CardContent>
@@ -150,11 +150,12 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <Card 
         className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg h-full"
-        onClick={handleCardContentClick} // Changed from handleCardClick to handleCardContentClick for whole card click
       >
         <CardHeader
           className="p-0 relative cursor-pointer"
-          onClick={(e) => openDialog(e)}
+          onClick={(e) => {
+            if (!isAdminPreview && !isAdminGalleryView) openDialog(e);
+          }}
         >
           <div className="aspect-square relative w-full">
             <Image
@@ -177,26 +178,33 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
                 {product.category}
               </Badge>
             )}
-             {!isAdminPreview && (
+             {(!isAdminPreview && !isAdminGalleryView) && (
               <DialogTrigger asChild>
                 <Button 
                   variant="ghost" 
                   size="icon" 
                   className="absolute top-1 right-1 h-7 w-7 text-muted-foreground hover:text-primary hover:bg-background/70 z-10"
-                  onClick={(e) => { e.stopPropagation(); setIsDialogOpen(true);}} // Ensure dialog opens and stop propagation
+                  onClick={(e) => { e.stopPropagation(); setIsDialogOpen(true);}}
+                  aria-label="פרטים נוספים"
                 >
                   <InfoIcon className="h-4 w-4" />
-                   <span className="sr-only">פרטים נוספים</span>
                 </Button>
               </DialogTrigger>
             )}
           </div>
         </CardHeader>
         <CardContent
-          className="p-3 flex-1 cursor-pointer pb-2" // Changed pb-1 to pb-2 for a bit more space
-          onClick={(e) => openDialog(e)}
+          className="p-3 flex-1 pb-2"
+          onClick={(e) => {
+             if (!isAdminPreview && !isAdminGalleryView) handleCardContentClick(e);
+          }}
         >
-          <CardTitle className="text-sm h-10 leading-tight text-center line-clamp-2 text-primary"> {/* Changed text color */}
+          <CardTitle 
+            className={cn(
+              "text-sm leading-normal text-center line-clamp-2 text-[hsl(var(--ring))]",
+              (!isAdminPreview && !isAdminGalleryView) && "cursor-pointer"
+            )}
+          >
             {product.name}
           </CardTitle>
         </CardContent>
@@ -206,17 +214,17 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
             isAdminPreview ? "justify-center" : "flex-col sm:flex-row justify-between gap-1"
           )}
           onClick={(e) => {
-            if (e.target !== e.currentTarget && !targetIsDialogTrigger(e.target as HTMLElement) ) { // Prevent footer click from opening dialog if not on trigger
+            if (!isAdminPreview && !isAdminGalleryView && e.target !== e.currentTarget && !targetIsDialogTrigger(e.target as HTMLElement) ) { 
                  e.stopPropagation();
             }
           }}
         >
-          <div className={cn("flex items-center", isAdminPreview ? "justify-center w-full" : "gap-1")}>
+          <div className={cn("flex items-center", isAdminPreview || isAdminGalleryView ? "justify-center w-full" : "gap-1")}>
             <p className="text-sm text-foreground font-semibold">{formatPrice(product.price)}</p>
           </div>
 
-          {!isAdminPreview && (
-            <>
+          {(!isAdminPreview && !isAdminGalleryView) && (
+            <div className='flex items-center'> {/* Removed min-h-[36px] */}
               {quantityInCart === 0 ? (
                 <Button onClick={(e) => { e.stopPropagation(); handleAddToCart(); }} className="w-full sm:w-auto" size="sm">
                   <ShoppingCartIcon className="ml-1.5 h-4 w-4" />
@@ -233,7 +241,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
                     onClick={(e) => e.stopPropagation()}
                     onChange={(e) => { e.stopPropagation(); handleQuantityChangeViaInput(e);}}
                     onBlur={(e) => { e.stopPropagation(); handleBlurInput();}}
-                    className="h-7 w-10 text-center px-1 text-sm border-border focus:ring-primary focus:border-primary"
+                    className="h-7 w-10 text-center px-1 text-sm border-input focus:ring-primary focus:border-primary"
                     min="0"
                   />
                   <Button variant="outline" size="icon" onClick={(e) => { e.stopPropagation(); handleIncreaseQuantity();}} className="h-7 w-7 rounded-full">
@@ -241,55 +249,56 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
                   </Button>
                 </div>
               )}
-            </>
+            </div>
           )}
         </CardFooter>
       </Card>
-      <DialogContent className="sm:max-w-[525px]">
-        <DialogHeader>
-          <DialogTitle className="text-2xl">{product.name}</DialogTitle>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="relative aspect-square w-full max-w-xs mx-auto">
-            <Image
-              src={product.imageUrl || '/images/products/placeholder.jpg'}
-              alt={product.name}
-              fill
-              sizes="(max-width: 640px) 80vw, 320px"
-              className="object-cover rounded-md"
-              data-ai-hint={product.dataAiHint as string || 'product image'}
-               onError={(e) => {
-                  e.currentTarget.srcset = '/images/products/placeholder.jpg';
-                  e.currentTarget.src = '/images/products/placeholder.jpg';
-              }}
-            />
-             {product.category && (
-              <Badge
-                variant="secondary"
-                className="absolute top-2 left-2 z-10 text-xs"
-              >
-                {product.category}
-              </Badge>
-            )}
+      {(!isAdminPreview && !isAdminGalleryView) && (
+        <DialogContent className="sm:max-w-[525px]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">{product.name}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="relative aspect-square w-full max-w-xs mx-auto">
+              <Image
+                src={product.imageUrl || '/images/products/placeholder.jpg'}
+                alt={product.name}
+                fill
+                sizes="(max-width: 640px) 80vw, 320px"
+                className="object-cover rounded-md"
+                data-ai-hint={product.dataAiHint as string || 'product image'}
+                onError={(e) => {
+                    e.currentTarget.srcset = '/images/products/placeholder.jpg';
+                    e.currentTarget.src = '/images/products/placeholder.jpg';
+                }}
+              />
+              {product.category && (
+                <Badge
+                  variant="secondary"
+                  className="absolute top-2 left-2 z-10 text-xs"
+                >
+                  {product.category}
+                </Badge>
+              )}
+            </div>
+            <p className="text-xl font-semibold">{formatPrice(product.price)}</p>
+            <DialogDescription className="text-sm text-muted-foreground whitespace-pre-wrap max-h-[200px] overflow-y-auto">
+              {product.description}
+            </DialogDescription>
           </div>
-          <p className="text-xl font-semibold">{formatPrice(product.price)}</p>
-          <DialogDescription className="text-sm text-muted-foreground whitespace-pre-wrap max-h-[200px] overflow-y-auto">
-            {product.description}
-          </DialogDescription>
-        </div>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button type="button" variant="outline">
-              סגור
-            </Button>
-          </DialogClose>
-        </DialogFooter>
-      </DialogContent>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="outline">
+                סגור
+              </Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      )}
     </Dialog>
   );
 }
 
-// Helper function to check if a target or its parents is a DialogTrigger
 function targetIsDialogTrigger(target: HTMLElement | null): boolean {
   while (target) {
     if (target.getAttribute && target.getAttribute('data-radix-dialog-trigger') !== null) {
@@ -299,3 +308,5 @@ function targetIsDialogTrigger(target: HTMLElement | null): boolean {
   }
   return false;
 }
+
+    
