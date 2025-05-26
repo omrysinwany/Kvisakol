@@ -18,6 +18,7 @@ import { he } from 'date-fns/locale';
 import { cn } from "@/lib/utils";
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 
 type StatusFilterValue = Order['status'] | 'all'; 
 
@@ -224,11 +225,10 @@ export default function AdminOrdersPage() {
                 <Input
                   id="order-customer-phone-search"
                   type="tel"
-                  placeholder="חיפוש"
                   value={customerPhoneInput}
                   onChange={handleCustomerPhoneInputChange}
                   onKeyPress={(e) => { if (e.key === 'Enter') handleApplyCustomerPhoneFilter(); }}
-                  className="h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-10 rtl:pr-10"
+                  className="h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-10 rtl:pr-10 placeholder:text-right"
                 />
               </div>
               <div>
