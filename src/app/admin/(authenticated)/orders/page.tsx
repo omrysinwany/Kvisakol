@@ -16,12 +16,12 @@ import { Calendar } from "@/components/ui/calendar";
 import { format, startOfDay, endOfDay, subDays } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { cn } from "@/lib/utils";
-import { useSearchParams, useRouter } from 'next/navigation'; 
-import { Badge } from '@/components/ui/badge'; // Added missing import
+import { useSearchParams, useRouter } from 'next/navigation';
+import { Badge } from '@/components/ui/badge';
 
 type StatusFilterValue = Order['status'] | 'all';
 
-const ITEMS_PER_PAGE = 10; 
+const ITEMS_PER_PAGE = 10;
 
 const statusTranslationsForFilter: Record<StatusFilterValue | 'received', string> = {
   all: 'כל הסטטוסים',
@@ -37,9 +37,9 @@ const availableStatuses: StatusFilterValue[] = ['all', 'new', 'received', 'compl
 export default function AdminOrdersPage() {
   const [allOrders, setAllOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
-  const router = useRouter(); 
-  const searchParams = useSearchParams(); 
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const initialStatusFilter = searchParams.get('status') as StatusFilterValue | null;
   const initialCustomerPhoneFilter = searchParams.get('customerPhone') as string | null;
   const initialPeriodFilter = searchParams.get('period') as string | null;
@@ -47,9 +47,10 @@ export default function AdminOrdersPage() {
 
   const [statusFilter, setStatusFilter] = useState<StatusFilterValue>(initialStatusFilter || 'all');
   const [customerPhoneFilter, setCustomerPhoneFilter] = useState<string | null>(initialCustomerPhoneFilter);
+  const [customerPhoneInput, setCustomerPhoneInput] = useState<string>(initialCustomerPhoneFilter || '');
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-  const [currentPage, setCurrentPage] = useState(1); 
+  const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
 
 
@@ -76,10 +77,12 @@ export default function AdminOrdersPage() {
     } else if (!statusFromUrl && initialStatusFilter && !initialCustomerPhoneFilter && !initialPeriodFilter) {
       setStatusFilter('all');
     }
-    
+
     const phoneFromUrl = searchParams.get('customerPhone');
     setCustomerPhoneFilter(phoneFromUrl);
-    
+    setCustomerPhoneInput(phoneFromUrl || '');
+
+
     const periodFromUrl = searchParams.get('period');
     if (periodFromUrl) {
       const today = new Date();
@@ -91,7 +94,7 @@ export default function AdminOrdersPage() {
         setStartDate(startOfDay(sevenDaysAgo));
         setEndDate(endOfDay(today));
       }
-    } else if (!phoneFromUrl) { 
+    } else if (!phoneFromUrl) {
       // setStartDate(undefined); // Keep dates if they were set manually
       // setEndDate(undefined);
     }
@@ -124,7 +127,7 @@ export default function AdminOrdersPage() {
     let ordersToFilter = allOrders;
 
     if (customerPhoneFilter) {
-      ordersToFilter = ordersToFilter.filter(order => order.customerPhone === customerPhoneFilter);
+      ordersToFilter = ordersToFilter.filter(order => order.customerPhone.includes(customerPhoneFilter));
     }
 
     if (statusFilter !== 'all') {
@@ -140,7 +143,7 @@ export default function AdminOrdersPage() {
 
     return ordersToFilter;
   }, [allOrders, statusFilter, startDate, endDate, customerPhoneFilter]);
-  
+
   const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
   const paginatedOrders = filteredOrders.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -156,14 +159,31 @@ export default function AdminOrdersPage() {
     setStartDate(undefined);
     setEndDate(undefined);
     setCurrentPage(1);
-    
+
     const newParams = new URLSearchParams(searchParams.toString());
     newParams.delete('period');
     router.replace(`/admin/orders?${newParams.toString()}`);
   };
-  
+
+  const handleCustomerPhoneInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCustomerPhoneInput(e.target.value);
+  };
+
+  const handleApplyCustomerPhoneFilter = () => {
+    setCustomerPhoneFilter(customerPhoneInput.trim() || null);
+    setCurrentPage(1);
+    const newParams = new URLSearchParams(searchParams.toString());
+    if (customerPhoneInput.trim()) {
+      newParams.set('customerPhone', customerPhoneInput.trim());
+    } else {
+      newParams.delete('customerPhone');
+    }
+    router.replace(`/admin/orders?${newParams.toString()}`);
+  };
+
   const handleClearCustomerFilter = () => {
     setCustomerPhoneFilter(null);
+    setCustomerPhoneInput('');
     setCurrentPage(1);
     const newParams = new URLSearchParams(searchParams.toString());
     newParams.delete('customerPhone');
@@ -188,104 +208,128 @@ export default function AdminOrdersPage() {
         <h1 className="text-3xl font-bold tracking-tight">ניהול הזמנות</h1>
       </div>
 
-      <div className="mb-4 p-2 border rounded-lg bg-muted/30 shadow-sm">
-        <div className="flex flex-wrap items-center gap-2">
-          <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value as StatusFilterValue); setCurrentPage(1); }}>
-            <SelectTrigger className="h-9 w-auto px-3 text-xs min-w-[130px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {availableStatuses.map((statusKey) => (
-                <SelectItem key={statusKey} value={statusKey} className="text-xs">
-                  {statusTranslationsForFilter[statusKey as StatusFilterValue | 'received']}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Popover>
-              <PopoverTrigger asChild>
-                  <Button
-                  variant={"outline"}
-                  size="sm" 
-                  className={cn(
-                      "h-9 w-auto px-2 text-xs justify-start text-left font-normal",
-                      !startDate && "text-muted-foreground"
-                  )}
-                  >
-                  <CalendarIcon className="mr-1 h-3.5 w-3.5" />
-                  {startDate ? format(startDate, "d/M/yy", { locale: he }) : <span className="text-xs">מתאריך</span>}
-                  </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                  <Calendar
-                  mode="single"
-                  selected={startDate}
-                  onSelect={(date) => {setStartDate(date); setCurrentPage(1);}}
-                  initialFocus
-                  disabled={(date) => endDate ? date > endDate : false}
-                  />
-              </PopoverContent>
-          </Popover>
-          
-          <Popover>
-              <PopoverTrigger asChild>
-                  <Button
-                  variant={"outline"}
-                  size="sm" 
-                  className={cn(
-                      "h-9 w-auto px-2 text-xs justify-start text-left font-normal",
-                      !endDate && "text-muted-foreground"
-                  )}
-                  >
-                  <CalendarIcon className="mr-1 h-3.5 w-3.5" />
-                  {endDate ? format(endDate, "d/M/yy", { locale: he }) : <span className="text-xs">עד תאריך</span>}
-                  </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                  <Calendar
-                  mode="single"
-                  selected={endDate}
-                  onSelect={(date) => {setEndDate(date); setCurrentPage(1);}}
-                  disabled={(date) => startDate && date < startDate}
-                  initialFocus
-                  />
-              </PopoverContent>
-          </Popover>
-
-          {(startDate || endDate) && (
-              <Button variant="ghost" onClick={() => {handleClearDates(); setCurrentPage(1);}} size="icon" className="h-9 w-9 shrink-0">
-                  <X className="h-4 w-4" />
-                  <span className="sr-only">נקה תאריכים</span>
-              </Button>
-          )}
-        </div>
-         {customerPhoneFilter && (
-          <div className="mt-2 flex items-center gap-2">
-            <Badge variant="secondary" className="text-xs py-1 px-2">
-              <UserSearch className="h-3.5 w-3.5 ml-1" />
-              מציג הזמנות עבור לקוח: {customerPhoneFilter}
-            </Badge>
-            <Button variant="outline" size="xs" onClick={handleClearCustomerFilter} className="h-auto py-0.5 px-1.5">
-              <X className="h-3 w-3 ml-0.5" />
-              נקה סינון לקוח
+      <Card className="shadow-lg">
+        <CardHeader>
+          <div className="flex flex-row items-center justify-between space-x-2">
+            <div>
+              <CardTitle className="text-xl">רשימת הזמנות ({filteredOrders.length})</CardTitle>
+              <CardDescription>
+                נהל את כל ההזמנות שהתקבלו מלקוחות. עקוב אחר סטטוסים ופרטי הזמנות.
+              </CardDescription>
+            </div>
+            <Button variant="ghost" size="sm" onClick={handleExportOrders} className="text-xs text-muted-foreground hover:text-foreground whitespace-nowrap">
+                <Download className="ml-1.5 h-3.5 w-3.5" />
+                ייצא CSV
             </Button>
           </div>
-        )}
-      </div>
-      
-      <Card className="shadow-lg">
-        <CardHeader className="flex flex-row items-center justify-between space-x-2">
-          <div>
-            <CardTitle className="text-xl">רשימת הזמנות ({filteredOrders.length})</CardTitle>
-            <CardDescription>
-              נהל את כל ההזמנות שהתקבלו מלקוחות. עקוב אחר סטטוסים ופרטי הזמנות.
-            </CardDescription>
+          {/* Filters Area */}
+          <div className="pt-3"> {/* Added padding-top */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 items-end">
+              {/* Status Filter */}
+              <div className="w-full">
+                <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value as StatusFilterValue); setCurrentPage(1); }}>
+                  <SelectTrigger className="h-9 w-full px-3 text-xs">
+                    <SelectValue placeholder="סינון לפי סטטוס" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableStatuses.map((statusKey) => (
+                      <SelectItem key={statusKey} value={statusKey} className="text-xs">
+                        {statusTranslationsForFilter[statusKey as StatusFilterValue | 'received']}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {/* Customer Phone Filter Input */}
+              <div className="relative w-full">
+                 <UserSearch className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="tel"
+                  placeholder="טלפון לקוח..."
+                  value={customerPhoneInput}
+                  onChange={handleCustomerPhoneInputChange}
+                  onKeyPress={(e) => e.key === 'Enter' && handleApplyCustomerPhoneFilter()}
+                  className={cn(
+                    "flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                    "pl-10 rtl:pr-10"
+                  )}
+                />
+              </div>
+              {/* Date Filters */}
+              <div className="w-full">
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button
+                        variant={"outline"}
+                        size="sm"
+                        className={cn(
+                            "h-9 w-full px-2 text-xs justify-start text-left font-normal",
+                            !startDate && "text-muted-foreground"
+                        )}
+                        >
+                        <CalendarIcon className="mr-1 h-3.5 w-3.5" />
+                        {startDate ? format(startDate, "d/M/yy", { locale: he }) : <span className="text-xs">מתאריך</span>}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                        <Calendar
+                        mode="single"
+                        selected={startDate}
+                        onSelect={(date) => {setStartDate(date); setCurrentPage(1);}}
+                        initialFocus
+                        disabled={(date) => endDate ? date > endDate : false}
+                        />
+                    </PopoverContent>
+                </Popover>
+              </div>
+              <div className="w-full">
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button
+                        variant={"outline"}
+                        size="sm"
+                        className={cn(
+                            "h-9 w-full px-2 text-xs justify-start text-left font-normal",
+                            !endDate && "text-muted-foreground"
+                        )}
+                        >
+                        <CalendarIcon className="mr-1 h-3.5 w-3.5" />
+                        {endDate ? format(endDate, "d/M/yy", { locale: he }) : <span className="text-xs">עד תאריך</span>}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                        <Calendar
+                        mode="single"
+                        selected={endDate}
+                        onSelect={(date) => {setEndDate(date); setCurrentPage(1);}}
+                        disabled={(date) => startDate && date < startDate}
+                        initialFocus
+                        />
+                    </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+                {(startDate || endDate) && (
+                    <Button variant="ghost" onClick={() => {handleClearDates(); setCurrentPage(1);}} size="icon" className="h-8 w-8 shrink-0">
+                        <X className="h-3.5 w-3.5" />
+                        <span className="sr-only">נקה תאריכים</span>
+                    </Button>
+                )}
+                 {customerPhoneFilter && (
+                    <Badge variant="secondary" className="text-xs py-1 px-2">
+                      <UserSearch className="h-3.5 w-3.5 ml-1" />
+                      מציג הזמנות עבור לקוח: {customerPhoneFilter}
+                    </Badge>
+                  )}
+                 {(customerPhoneFilter || customerPhoneInput) && (
+                     <Button variant="outline" size="xs" onClick={handleClearCustomerFilter} className="h-auto py-0.5 px-1.5">
+                        <X className="h-3 w-3 ml-0.5" />
+                        נקה סינון לקוח
+                    </Button>
+                 )}
+            </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleExportOrders} className="text-xs text-muted-foreground hover:text-foreground whitespace-nowrap">
-              <Download className="ml-1.5 h-3.5 w-3.5" />
-              ייצא CSV
-          </Button>
         </CardHeader>
         <CardContent>
           {paginatedOrders.length > 0 ? (
@@ -302,9 +346,9 @@ export default function AdminOrdersPage() {
           ) : (
             <div className="text-center py-8">
               <p className="text-muted-foreground">
-                {allOrders.length === 0 ? 'לא קיימות הזמנות במערכת.' : 
-                 customerPhoneFilter ? 'לא נמצאו הזמנות עבור לקוח זה או בהתאם לסינונים הנוספים.' :
-                 'לא נמצאו הזמנות התואמות את הסינון הנוכחי.'}
+                {allOrders.length === 0 ? 'לא קיימות הזמנות במערכת.' :
+                 (customerPhoneFilter || statusFilter !== 'all' || startDate || endDate) ? 'לא נמצאו הזמנות התואמות את הסינון הנוכחי.' :
+                 'לא קיימות הזמנות במערכת.'}
               </p>
             </div>
           )}
@@ -313,5 +357,6 @@ export default function AdminOrdersPage() {
     </>
   );
 }
+    
 
     

@@ -157,68 +157,67 @@ export default function AdminCustomersPage() {
       <div className="mb-4">
         <h1 className="text-3xl font-bold tracking-tight">ניהול לקוחות</h1>
       </div>
-      
-      <div className="mb-4 p-3 border rounded-lg bg-muted/30 shadow-sm">
-        <div className="grid grid-cols-3 gap-3 items-end">
-          <div className="relative col-span-1">
-            <label htmlFor="customer-search" className="text-xs font-medium text-muted-foreground block mb-1.5">חיפוש</label>
-            <div className="relative">
-              <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                id="customer-search"
-                type="search"
-                placeholder="שם או טלפון..." 
-                className="pl-10 rtl:pr-10 w-full h-9 text-xs"
-                value={searchTerm}
-                onChange={handleSearchChange}
-              />
-            </div>
-          </div>
-          <div className="col-span-1">
-            <label htmlFor="last-order-filter" className="text-xs font-medium text-muted-foreground block mb-1.5">הזמנה אחרונה</label>
-            <Select value={lastOrderFilter} onValueChange={handleLastOrderFilterChange}>
-              <SelectTrigger id="last-order-filter" className="h-9 w-full px-3 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(lastOrderDateFilterTranslations).map(([key, value]) => (
-                  <SelectItem key={key} value={key} className="text-xs">
-                    {value}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="col-span-1">
-            <label htmlFor="customer-status-filter" className="text-xs font-medium text-muted-foreground block mb-1.5">סטטוס לקוח</label>
-            <Select value={customerStatusFilter} onValueChange={handleCustomerStatusFilterChange}>
-              <SelectTrigger id="customer-status-filter" className="h-9 w-full px-3 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(customerStatusFilterTranslations).map(([key, value]) => (
-                  <SelectItem key={key} value={key} className="text-xs">
-                    {value}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </div>
 
       <Card className="shadow-lg">
-      <CardHeader className="flex flex-row items-center justify-between space-x-2 rtl:space-x-reverse">
-          <div>
-            <CardTitle className="text-xl">רשימת לקוחות ({filteredCustomers.length})</CardTitle>
-            <CardDescription>
-              סקירה של כל הלקוחות שביצעו הזמנות במערכת.
-            </CardDescription>
+      <CardHeader>
+          <div className="flex flex-row items-center justify-between space-x-2 rtl:space-x-reverse">
+            <div>
+              <CardTitle className="text-xl">רשימת לקוחות ({filteredCustomers.length})</CardTitle>
+              <CardDescription>
+                סקירה של כל הלקוחות שביצעו הזמנות במערכת.
+              </CardDescription>
+            </div>
+            <Button variant="ghost" size="sm" onClick={handleExportCustomers} className="text-xs text-muted-foreground hover:text-foreground whitespace-nowrap">
+              <Download className="ml-1.5 h-3.5 w-3.5" />
+              ייצא CSV
+            </Button>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleExportCustomers} className="text-xs text-muted-foreground hover:text-foreground whitespace-nowrap">
-            <Download className="ml-1.5 h-3.5 w-3.5" />
-            ייצא CSV
-          </Button>
+           {/* Filters Area */}
+          <div className="pt-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+              <div className="relative col-span-1 sm:col-span-1"> {/* Search takes full width on small, 1/3 on sm+ */}
+                <div className="relative">
+                  <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="customer-search"
+                    type="search"
+                    placeholder="חיפוש שם או טלפון..."
+                    className="pl-10 rtl:pr-10 w-full h-9 text-xs"
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                  />
+                </div>
+              </div>
+              <div className="col-span-1">
+                <Select value={lastOrderFilter} onValueChange={handleLastOrderFilterChange}>
+                  <SelectTrigger id="last-order-filter" className="h-9 w-full px-3 text-xs">
+                    <SelectValue placeholder="סינון לפי הזמנה אחרונה" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(lastOrderDateFilterTranslations).map(([key, value]) => (
+                      <SelectItem key={key} value={key} className="text-xs">
+                        {value}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="col-span-1">
+                <Select value={customerStatusFilter} onValueChange={handleCustomerStatusFilterChange}>
+                  <SelectTrigger id="customer-status-filter" className="h-9 w-full px-3 text-xs">
+                    <SelectValue placeholder="סינון לפי סטטוס לקוח" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(customerStatusFilterTranslations).map(([key, value]) => (
+                      <SelectItem key={key} value={key} className="text-xs">
+                        {value}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {paginatedCustomers.length > 0 ? (
@@ -244,4 +243,6 @@ export default function AdminCustomersPage() {
     </>
   );
 }
+    
+
     
