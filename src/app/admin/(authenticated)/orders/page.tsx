@@ -205,14 +205,13 @@ export default function AdminOrdersPage() {
 
       <Card className="shadow-lg">
         <CardHeader className="pb-3">
-          <div className="flex flex-row items-center justify-between space-x-2 rtl:space-x-reverse">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <div>
               <CardTitle className="text-xl">רשימת הזמנות ({filteredOrders.length})</CardTitle>
               <CardDescription>
-                נהל את כל ההזמנות שהתקבלו מלקוחות. עקוב אחר סטטוסים ופרטי הזמנות.
+                נהל את כל ההזמנות שהתקבלו
               </CardDescription>
             </div>
-            {/* Export button removed */}
           </div>
           
           <div className="pt-3 space-y-2">
@@ -348,4 +347,3 @@ export default function AdminOrdersPage() {
   );
 }
     
-
