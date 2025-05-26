@@ -19,7 +19,7 @@ import {
   DialogTitle,
   DialogFooter,
   DialogClose,
-  DialogTrigger, // Added missing import
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { cn } from '@/lib/utils';
 
@@ -94,20 +94,22 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
   }
   
   const openDialog = (e?: React.MouseEvent) => {
-    if (isAdminGalleryView || isAdminPreview) return; // In admin gallery/preview, dialog is not used this way
-    if (e) e.stopPropagation();
+    if (isAdminPreview || isAdminGalleryView) return;
+    if (e) e.stopPropagation(); // Prevent card click if it's also a trigger
     setIsDialogOpen(true);
   };
-
+  
   const handleCardContentClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
+    // Check if the click is on the title or image area specifically, and not on buttons inside the footer
     if (target.closest('button') || target.closest('input[type="number"]')) {
-      return;
+      return; // Don't open dialog if click is on interactive elements
     }
-    if (!isAdminGalleryView && !isAdminPreview) {
-        openDialog(e);
+    if (!isAdminPreview && !isAdminGalleryView) {
+      openDialog(e);
     }
   };
+
 
   if (isAdminGalleryView) {
     return (
@@ -141,7 +143,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
             {product.name}
           </CardTitle>
         </CardContent>
-        <CardFooter className="p-0" /> 
+        <CardFooter className="p-0" />
       </Card>
     );
   }
@@ -179,40 +181,31 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
                 {product.category}
               </Badge>
             )}
-             {(!isAdminPreview && !isAdminGalleryView) && (
-              <DialogTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="absolute top-1 right-1 h-7 w-7 text-muted-foreground hover:text-primary hover:bg-background/70 z-10"
-                  onClick={(e) => { e.stopPropagation(); setIsDialogOpen(true);}}
-                  aria-label="פרטים נוספים"
-                >
-                  <InfoIcon className="h-4 w-4" />
-                </Button>
-              </DialogTrigger>
-            )}
           </div>
         </CardHeader>
         <CardContent
-          className="p-3 pb-2 flex-1"
+          className="p-3 pb-1 flex-1" // Changed pb-2 to pb-1
           onClick={(e) => {
              if (!isAdminPreview && !isAdminGalleryView) handleCardContentClick(e);
           }}
         >
           <CardTitle 
             className={cn(
-              "text-sm leading-normal text-center line-clamp-2 text-[hsl(var(--ring))]",
+              "text-sm leading-normal text-center line-clamp-2 text-primary",
               (!isAdminPreview && !isAdminGalleryView) && "cursor-pointer"
             )}
+            onClick={(e) => {
+              if (!isAdminPreview && !isAdminGalleryView) openDialog(e);
+            }}
           >
             {product.name}
           </CardTitle>
         </CardContent>
         <CardFooter
           className={cn(
-            "p-3 flex mt-auto items-center", 
-            isAdminPreview || isAdminGalleryView ? "justify-center w-full" : "flex-col sm:flex-row justify-between gap-1"
+            "pt-1 px-3 pb-2 flex mt-auto items-center", // Changed p-3 to pt-1 px-3 pb-2
+            isAdminPreview ? "justify-center w-full" : "flex-col sm:flex-row justify-between gap-1",
+            isAdminGalleryView && "justify-center w-full"
           )}
           onClick={(e) => {
             if (!isAdminPreview && !isAdminGalleryView && e.target !== e.currentTarget) { 
@@ -276,7 +269,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
               {product.category && (
                 <Badge
                   variant="secondary"
-                  className="absolute top-2 left-2 z-10 text-xs"
+                  className="absolute top-2 left-2 z-10 text-xs px-1.5 py-0.5"
                 >
                   {product.category}
                 </Badge>
