@@ -6,8 +6,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { format, isBefore, subDays, startOfDay } from 'date-fns';
 import { he } from 'date-fns/locale';
-import { UserCheck, UserX } from 'lucide-react';
+import { UserCheck, UserX, Star, Repeat, UserCircle } from 'lucide-react'; // Added Star, Repeat
 import { useRouter } from 'next/navigation';
+import { Button } from '../ui/button';
+import Link from 'next/link';
 
 interface CustomerTableProps {
   customers: CustomerSummary[];
@@ -19,10 +21,6 @@ export function CustomerTable({ customers }: CustomerTableProps) {
   const handleRowClick = (customerId: string) => {
     router.push(`/admin/customers/${customerId}`);
   };
-
-  const formatPrice = (price: number) => {
-    return `₪${price.toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  }
 
   return (
     <Table className="text-xs">
@@ -41,6 +39,40 @@ export function CustomerTable({ customers }: CustomerTableProps) {
           const isNewCustomer = customer.totalOrders === 1;
           const ninetyDaysAgo = startOfDay(subDays(new Date(), 90));
           const isInactiveCustomer = isBefore(new Date(customer.lastOrderDate), ninetyDaysAgo);
+          const isVipCustomer = customer.totalOrders >= 5 && !isInactiveCustomer;
+          const isReturningCustomer = customer.totalOrders > 1 && !isInactiveCustomer && !isVipCustomer && !isNewCustomer;
+
+          let statusBadge = <span className="text-muted-foreground">-</span>;
+          if (isVipCustomer) {
+            statusBadge = (
+              <Badge variant="outline" className="border-yellow-500 text-yellow-600 text-[10px] px-1.5 py-0.5 bg-yellow-500/10">
+                <Star className="h-3 w-3 ml-0.5" />
+                VIP
+              </Badge>
+            );
+          } else if (isNewCustomer) {
+            statusBadge = (
+              <Badge variant="outline" className="border-green-500 text-green-600 text-[10px] px-1.5 py-0.5 bg-green-500/10">
+                <UserCheck className="h-3 w-3 ml-0.5" />
+                חדש
+              </Badge>
+            );
+          } else if (isInactiveCustomer) {
+            statusBadge = (
+              <Badge variant="outline" className="border-amber-500 text-amber-600 text-[10px] px-1.5 py-0.5 bg-amber-500/10">
+                <UserX className="h-3 w-3 ml-0.5" />
+                לא פעיל
+              </Badge>
+            );
+          } else if (isReturningCustomer) {
+            statusBadge = (
+              <Badge variant="outline" className="border-sky-500 text-sky-600 text-[10px] px-1.5 py-0.5 bg-sky-500/10">
+                <Repeat className="h-3 w-3 ml-0.5" />
+                חוזר
+              </Badge>
+            );
+          }
+
 
           return (
             <TableRow 
@@ -53,27 +85,13 @@ export function CustomerTable({ customers }: CustomerTableProps) {
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-1">
-                  {isNewCustomer && (
-                    <Badge variant="outline" className="border-green-500 text-green-600 text-[10px] px-1.5 py-0.5">
-                      <UserCheck className="h-3 w-3 ml-0.5" />
-                      חדש
-                    </Badge>
-                  )}
-                  {isInactiveCustomer && !isNewCustomer && ( 
-                    <Badge variant="outline" className="border-amber-500 text-amber-600 text-[10px] px-1.5 py-0.5">
-                       <UserX className="h-3 w-3 ml-0.5" />
-                      לא פעיל
-                    </Badge>
-                  )}
-                  {!isNewCustomer && !isInactiveCustomer && (
-                    <span className="text-muted-foreground">-</span> 
-                  )}
+                 {statusBadge}
                 </div>
               </TableCell>
               <TableCell>{customer.phone}</TableCell>
               <TableCell className="hidden md:table-cell">{customer.latestAddress || '-'}</TableCell>
               <TableCell className="hidden lg:table-cell">
-                {format(new Date(customer.lastOrderDate), 'dd/MM/yyyy', { locale: he })}
+                {customer.lastOrderDate ? format(new Date(customer.lastOrderDate), 'dd/MM/yyyy', { locale: he }) : '-'}
               </TableCell>
               <TableCell className="hidden sm:table-cell text-center">{customer.totalOrders}</TableCell>
             </TableRow>

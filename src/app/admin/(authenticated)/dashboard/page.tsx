@@ -7,7 +7,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { getAllProductsForAdmin } from "@/services/product-service";
 import { getOrdersForAdmin } from "@/services/order-service";
 import type { Product, Order } from "@/lib/types";
-import { Package, ClipboardCheck, Eye, Users, CalendarDays, CalendarCheck, CalendarIcon, X, Hourglass, ChevronDown } from "lucide-react";
+import { Package, ClipboardCheck, Eye, Users, CalendarDays, CalendarCheck, CalendarIcon, X, Hourglass, ChevronDown, ListOrdered } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -257,7 +257,7 @@ export default function AdminDashboardPage() {
         </Link>
 
         <Link href="/admin/orders" className="block hover:shadow-lg transition-shadow rounded-lg">
-          <Card className="h-full">
+          <Card className="h-full col-span-2 sm:col-span-1"> {/* Ensure it takes full width on small screens if it's the last odd one */}
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">סה"כ הזמנות</CardTitle>
               <Eye className="h-4 w-4 text-muted-foreground" />
@@ -272,28 +272,31 @@ export default function AdminDashboardPage() {
         {/* Row 2: Recent Orders - Full Width */}
         <Card className="col-span-2"> 
           <CardHeader>
-            <CardTitle>הזמנות אחרונות</CardTitle>
+            <CardTitle className="flex items-center gap-2"><ListOrdered className="h-5 w-5 text-primary"/>הזמנות אחרונות</CardTitle>
             <CardDescription>סקירה מהירה של {summary.latestOrders.length > 0 ? Math.min(summary.latestOrders.length, 5) : '0'} ההזמנות האחרונות.</CardDescription>
           </CardHeader>
           <CardContent>
             {summary.latestOrders.length > 0 ? summary.latestOrders.slice(0,5).map(order => (
-              <div key={order.id} className="flex items-center justify-between py-2 border-b last:border-0">
-                <div>
-                  <p className="font-medium">{order.customerName}</p>
-                  <p className="text-xs text-muted-foreground">{order.customerPhone}</p>
+              <div key={order.id} className="flex items-center justify-between py-2.5 border-b last:border-0">
+                <div className="flex items-center gap-2">
+                   <span className="text-xs text-muted-foreground">({format(new Date(order.orderTimestamp), 'dd/MM', { locale: he })})</span>
+                  <div>
+                    <p className="font-medium text-sm">{order.customerName}</p>
+                    <p className="text-xs text-muted-foreground">{order.customerPhone}</p>
+                  </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Badge variant="default" className={`${statusColorsForDashboard[order.status]} text-white text-xs`}>
+                  <Badge variant="default" className={`${statusColorsForDashboard[order.status]} text-white text-xs px-1.5 py-0.5`}>
                     {statusTranslationsForDashboard[order.status]}
                   </Badge>
                   <div className="text-right">
-                     <p className="font-semibold">{formatPrice(order.totalAmount)}</p>
+                     <p className="font-semibold text-sm">{formatPrice(order.totalAmount)}</p>
                      <Link href={`/admin/orders/${order.id}`} className="text-xs text-primary hover:underline">צפה בפרטים</Link>
                   </div>
                 </div>
               </div>
-            )) : <p className="text-muted-foreground text-center">אין הזמנות אחרונות להצגה.</p>}
-             <Button variant="outline" className="w-full mt-4" asChild>
+            )) : <p className="text-muted-foreground text-center py-4">אין הזמנות אחרונות להצגה.</p>}
+             <Button variant="outline" className="w-full mt-4 text-xs" asChild size="sm">
                 <Link href="/admin/orders">כל ההזמנות</Link>
             </Button>
           </CardContent>
@@ -303,25 +306,25 @@ export default function AdminDashboardPage() {
         <Card className="col-span-2">
           <CardHeader className="pb-3">
             <div className="flex flex-row items-center justify-between gap-2">
-              <CardTitle className="text-2xl font-semibold"> 
+              <CardTitle className="text-xl font-semibold"> 
                 הכנסות בתקופה הנבחרת
               </CardTitle>
               <DropdownMenu dir="rtl">
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="justify-between min-w-[130px]">
+                  <Button variant="outline" size="sm" className="justify-between min-w-[130px] text-xs">
                     {revenuePeriodTranslations[selectedRevenuePeriod]}
-                    <ChevronDown className="h-4 w-4 opacity-50 mr-1" />
+                    <ChevronDown className="h-3.5 w-3.5 opacity-75 mr-1" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>בחר תקופה</DropdownMenuLabel>
+                  <DropdownMenuLabel className="text-xs">בחר תקופה</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuRadioGroup value={selectedRevenuePeriod} onValueChange={(value) => setSelectedRevenuePeriod(value as RevenuePeriod)}>
-                    <DropdownMenuRadioItem value="thisMonth">החודש</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="thisWeek">השבוע</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="today">היום</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="allTime">כל הזמן</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="custom">מותאם אישית</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="thisMonth" className="text-xs">החודש</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="thisWeek" className="text-xs">השבוע</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="today" className="text-xs">היום</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="allTime" className="text-xs">כל הזמן</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="custom" className="text-xs">מותאם אישית</DropdownMenuRadioItem>
                   </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
               </DropdownMenu>

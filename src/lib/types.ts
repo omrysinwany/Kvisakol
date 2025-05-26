@@ -6,8 +6,8 @@ export interface Product {
   price: number;
   imageUrl: string;
   dataAiHint?: string;
-  category?: string; // Optional: if filtering by category is needed later
-  isActive: boolean; // For admin to toggle visibility
+  category?: string; 
+  isActive: boolean; 
 }
 
 export interface CartItem extends Product {
@@ -18,7 +18,7 @@ export interface OrderItem {
   productId: string;
   productName: string;
   quantity: number;
-  priceAtOrder: number; // Price at the time of order
+  priceAtOrder: number; 
 }
 
 export interface Order {
@@ -44,12 +44,13 @@ export interface AdminUser {
 }
 
 export interface CustomerSummary {
-  id: string; // Using phone number as ID for simplicity
+  id: string; 
   name: string;
   phone: string;
-  firstOrderDate?: Date; // Added
+  firstOrderDate?: Date; 
   lastOrderDate: Date;
   totalOrders: number;
   totalSpent: number;
   latestAddress?: string;
+  generalAgentNotes?: string; // Added new field
 }

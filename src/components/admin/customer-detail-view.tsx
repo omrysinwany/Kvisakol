@@ -7,16 +7,26 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
-import { Phone, MapPin, CalendarDays, ShoppingBag, Hash, UserCircle, ListOrdered } from 'lucide-react';
+import { Phone, MapPin, CalendarDays, ShoppingBag, Hash, UserCircle, ListOrdered, Edit3, Save } from 'lucide-react'; // Added Edit3, Save
+import { useState } from 'react';
+import { Textarea } from '../ui/textarea';
 
 interface CustomerDetailViewProps {
   customer: CustomerSummary;
-  // orders prop is removed as we will link to the orders page
+  onSaveGeneralNotes: (customerId: string, notes: string) => Promise<void>;
 }
 
-export function CustomerDetailView({ customer }: CustomerDetailViewProps) {
+export function CustomerDetailView({ customer, onSaveGeneralNotes }: CustomerDetailViewProps) {
   const formatPrice = (price: number) => `₪${price.toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const [currentGeneralNotes, setCurrentGeneralNotes] = useState(customer.generalAgentNotes || '');
+  const [isSavingGeneralNotes, setIsSavingGeneralNotes] = useState(false);
 
+  const handleSaveNotes = async () => {
+    setIsSavingGeneralNotes(true);
+    await onSaveGeneralNotes(customer.id, currentGeneralNotes);
+    setIsSavingGeneralNotes(false);
+  };
+  
   return (
     <div className="space-y-6">
       <Card className="shadow-lg">
@@ -54,6 +64,25 @@ export function CustomerDetailView({ customer }: CustomerDetailViewProps) {
               </div>
             </div>
           </div>
+
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-2 flex items-center gap-1.5">
+                <Edit3 className="w-4 h-4 text-primary"/>
+                הערות כלליות לסוכן (פנימי)
+            </h3>
+            <Textarea
+              placeholder="הוסף הערות כלליות לגבי הלקוח (למשל, העדפות, מידע חשוב)..."
+              value={currentGeneralNotes}
+              onChange={(e) => setCurrentGeneralNotes(e.target.value)}
+              rows={3}
+              className="bg-background text-sm"
+            />
+            <Button onClick={handleSaveNotes} size="sm" className="mt-2" disabled={isSavingGeneralNotes}>
+              <Save className="ml-2 h-3.5 w-3.5" />
+              {isSavingGeneralNotes ? 'שומר...' : 'שמור הערות כלליות'}
+            </Button>
+          </div>
+
 
           <h3 className="text-lg font-semibold mb-3 flex items-center gap-1.5">
             <ListOrdered className="w-4 h-4 text-primary"/>

@@ -3,7 +3,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { getCustomerSummaryById } from '@/services/order-service';
+import { getCustomerSummaryById, updateCustomerGeneralNotes } from '@/services/order-service'; // Added updateCustomerGeneralNotes
 import type { CustomerSummary } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
@@ -61,6 +61,25 @@ export default function AdminCustomerDetailPage() {
     }
   }, [customerIdFromUrl]);
 
+  const handleSaveGeneralNotes = async (customerId: string, notes: string) => {
+    if (!customer) return;
+    try {
+      const updatedCustomer = await updateCustomerGeneralNotes(customerId, notes);
+      if (updatedCustomer) {
+        setCustomer(updatedCustomer); // Update local state with the updated customer summary
+        toast({
+          title: "הערות כלליות נשמרו",
+          description: "ההערות הכלליות ללקוח נשמרו בהצלחה.",
+        });
+      } else {
+        toast({ variant: 'destructive', title: 'שגיאה', description: 'לא ניתן היה לשמור את ההערות הכלליות.' });
+      }
+    } catch (err) {
+      console.error("Failed to save general agent notes:", err);
+      toast({ variant: 'destructive', title: 'שגיאה', description: 'אירעה תקלה בשמירת ההערות הכלליות.' });
+    }
+  };
+
 
   if (isLoading) {
     return <div className="container mx-auto px-4 py-8"><p>טוען פרטי לקוח...</p></div>;
@@ -111,7 +130,10 @@ export default function AdminCustomerDetailPage() {
           </Link>
         </Button>
       </div>
-      <CustomerDetailView customer={customer} />
+      <CustomerDetailView 
+        customer={customer} 
+        onSaveGeneralNotes={handleSaveGeneralNotes} 
+      />
     </>
   );
 }
