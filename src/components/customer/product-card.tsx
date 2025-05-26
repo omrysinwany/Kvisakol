@@ -25,23 +25,23 @@ import { cn } from '@/lib/utils';
 
 interface ProductCardProps {
   product: Product;
+  isAdminPreview?: boolean; // For /admin/catalog-preview
+  isAdminGalleryView?: boolean; // For admin products page gallery view
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, isAdminPreview = false, isAdminGalleryView = false }: ProductCardProps) {
   const { addToCart, updateQuantity, getItemQuantity } = useCart();
   const { toast } = useToast();
   const quantityInCart = getItemQuantity(product.id);
   const [inputValue, setInputValue] = useState(quantityInCart.toString());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const pathname = usePathname();
-  const isAdminPreview = pathname === '/admin/catalog-preview';
-
   useEffect(() => {
     setInputValue(quantityInCart.toString());
   }, [quantityInCart]);
 
   const handleAddToCart = () => {
+    if (isAdminGalleryView || isAdminPreview) return; // Should not happen if controls are hidden
     addToCart(product);
     toast({
       title: "מוצר נוסף לעגלה",
@@ -51,6 +51,7 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   const handleQuantityChangeViaInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isAdminGalleryView || isAdminPreview) return;
     const value = e.target.value;
     setInputValue(value); 
 
@@ -63,6 +64,7 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   const handleBlurInput = () => {
+    if (isAdminGalleryView || isAdminPreview) return;
     const currentCartQty = getItemQuantity(product.id);
     if (inputValue === '' || isNaN(parseInt(inputValue, 10)) || parseInt(inputValue, 10) <= 0) {
       if (currentCartQty > 0) {
@@ -74,12 +76,14 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   const handleIncreaseQuantity = () => {
+    if (isAdminGalleryView || isAdminPreview) return;
     const newQuantity = quantityInCart + 1;
     updateQuantity(product.id, newQuantity);
     setInputValue(newQuantity.toString());
   };
 
   const handleDecreaseQuantity = () => {
+    if (isAdminGalleryView || isAdminPreview) return;
     const newQuantity = quantityInCart - 1;
     updateQuantity(product.id, newQuantity);
     setInputValue(newQuantity > 0 ? newQuantity.toString() : "0");
@@ -89,44 +93,91 @@ export function ProductCard({ product }: ProductCardProps) {
     return `₪${price.toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
-  const openDialog = () => setIsDialogOpen(true);
+  const openDialog = () => {
+    if (isAdminGalleryView) return; // In admin gallery, clicking the card navigates to edit
+    setIsDialogOpen(true);
+  }
 
+  // Admin Gallery View: Simplified card, no Dialog, no cart controls.
+  // The parent Link in ProductGrid handles navigation to edit.
+  if (isAdminGalleryView) {
+    return (
+      <Card className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg h-full">
+        <CardHeader className="p-0 relative">
+          <div className="aspect-square relative w-full">
+            <Image
+              src={product.imageUrl || '/images/products/placeholder.jpg'}
+              alt={product.name}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover"
+              data-ai-hint={product.dataAiHint as string || 'product image'}
+              onError={(e) => {
+                e.currentTarget.srcset = '/images/products/placeholder.jpg';
+                e.currentTarget.src = '/images/products/placeholder.jpg';
+              }}
+            />
+            {product.category && (
+              <Badge
+                variant="secondary"
+                className="absolute top-2 left-2 z-10 text-xs" 
+              >
+                {product.category}
+              </Badge>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="p-3 pb-1 flex-1">
+          <CardTitle className="text-sm h-10 leading-tight overflow-hidden text-center line-clamp-2">
+            {product.name}
+          </CardTitle>
+        </CardContent>
+        <CardFooter className="p-3 flex mt-auto justify-center items-center">
+          <p className="text-sm font-semibold text-foreground">{formatPrice(product.price)}</p>
+        </CardFooter>
+      </Card>
+    );
+  }
+
+  // Customer View or Admin Catalog Preview View
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <Card className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg">
-        
-          <CardHeader className="p-0 cursor-pointer" onClick={openDialog}>
-            <div className="aspect-square relative w-full">
-              <Image
-                src={product.imageUrl || '/images/products/placeholder.jpg'}
-                alt={product.name}
-                fill
-                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                className="object-cover"
-                data-ai-hint={product.dataAiHint as string || 'product image'}
-                onError={(e) => {
-                  e.currentTarget.srcset = '/images/products/placeholder.jpg';
-                  e.currentTarget.src = '/images/products/placeholder.jpg';
-                }}
-              />
-              {product.category && (
-                <Badge
-                  variant="secondary"
-                  className="absolute top-2 left-2 z-10 text-xs" 
-                >
-                  {product.category}
-                </Badge>
-              )}
-            </div>
-          </CardHeader>
-        
-       
-          <CardContent className="p-3 pb-1 flex-1 cursor-pointer" onClick={openDialog}>
-            <CardTitle className="text-primary text-sm h-10 leading-tight overflow-hidden text-center line-clamp-2">
-              {product.name}
-            </CardTitle>
-          </CardContent>
-        
+      <Card className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg h-full">
+        <CardHeader 
+          className="p-0 relative cursor-pointer" 
+          onClick={openDialog}
+        >
+          <div className="aspect-square relative w-full">
+            <Image
+              src={product.imageUrl || '/images/products/placeholder.jpg'}
+              alt={product.name}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover"
+              data-ai-hint={product.dataAiHint as string || 'product image'}
+              onError={(e) => {
+                e.currentTarget.srcset = '/images/products/placeholder.jpg';
+                e.currentTarget.src = '/images/products/placeholder.jpg';
+              }}
+            />
+            {product.category && (
+              <Badge
+                variant="secondary"
+                className="absolute top-2 left-2 z-10 text-xs" 
+              >
+                {product.category}
+              </Badge>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent 
+          className="p-3 pb-1 flex-1 cursor-pointer"
+          onClick={openDialog}
+        >
+          <CardTitle className="text-sm h-10 leading-tight overflow-hidden text-center line-clamp-2">
+            {product.name}
+          </CardTitle>
+        </CardContent>
         <CardFooter 
           className={cn(
             "p-3 flex mt-auto",
@@ -138,7 +189,7 @@ export function ProductCard({ product }: ProductCardProps) {
             <p className="text-sm font-semibold text-foreground">{formatPrice(product.price)}</p>
           </div>
           
-          {!isAdminPreview && (
+          {!isAdminPreview && ( /* Cart controls only for customer view */
             <>
               {quantityInCart === 0 ? (
                 <Button onClick={handleAddToCart} className="w-full sm:w-auto" size="sm">
