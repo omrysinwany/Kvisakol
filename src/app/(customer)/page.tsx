@@ -32,7 +32,8 @@ const ORDERED_PRODUCT_IDS_MBSMM = [
   'kmb11', // רוז 750 מ"ל
 ];
 
-const PRIORITY_LAUNDRY_IDS = ['kbio2', 'kbio3', 'kbio4', 'kbio5'];
+// Updated list for "All" filter priority
+const PRIORITY_ALL_FILTER_IDS = ['pkg5', 'pkg1', 'kbio2', 'kbio3'];
 
 
 export default function CatalogPage() {
@@ -69,20 +70,20 @@ export default function CatalogPage() {
     let processedProducts = [...allProducts];
 
     if (selectedCategory === null && searchTerm === '') {
-        // Special sorting for "All" view: prioritize specific laundry liquids
+        // Special sorting for "All" view: prioritize specific items
         const prioritizedItems: Product[] = [];
         const otherItems: Product[] = [];
 
         processedProducts.forEach(p => {
-            if (PRIORITY_LAUNDRY_IDS.includes(p.id)) {
+            if (PRIORITY_ALL_FILTER_IDS.includes(p.id)) {
                 prioritizedItems.push(p);
             } else {
                 otherItems.push(p);
             }
         });
 
-        // Sort prioritized items according to the order in PRIORITY_LAUNDRY_IDS
-        prioritizedItems.sort((a, b) => PRIORITY_LAUNDRY_IDS.indexOf(a.id) - PRIORITY_LAUNDRY_IDS.indexOf(b.id));
+        // Sort prioritized items according to the order in PRIORITY_ALL_FILTER_IDS
+        prioritizedItems.sort((a, b) => PRIORITY_ALL_FILTER_IDS.indexOf(a.id) - PRIORITY_ALL_FILTER_IDS.indexOf(b.id));
         
         // Sort other items alphabetically
         otherItems.sort((a,b) => a.name.localeCompare(b.name, 'he'));
@@ -162,19 +163,18 @@ export default function CatalogPage() {
   useEffect(() => {
     if (allProducts.length > 0 && filteredProducts.length === 0 && selectedCategory === null && searchTerm === '') {
         // This block ensures that initial "All" view sorting is applied when products first load
-        const priorityLaundryIds = ['kbio2', 'kbio3', 'kbio4', 'kbio5']; // Updated this list
         let initialProcessedProducts = [...allProducts];
         const prioritizedItems: Product[] = [];
         const otherItems: Product[] = [];
 
         initialProcessedProducts.forEach(p => {
-            if (priorityLaundryIds.includes(p.id)) {
+            if (PRIORITY_ALL_FILTER_IDS.includes(p.id)) {
                 prioritizedItems.push(p);
             } else {
                 otherItems.push(p);
             }
         });
-        prioritizedItems.sort((a, b) => priorityLaundryIds.indexOf(a.id) - priorityLaundryIds.indexOf(b.id));
+        prioritizedItems.sort((a, b) => PRIORITY_ALL_FILTER_IDS.indexOf(a.id) - PRIORITY_ALL_FILTER_IDS.indexOf(b.id));
         otherItems.sort((a,b) => a.name.localeCompare(b.name, 'he'));
         initialProcessedProducts = [...prioritizedItems, ...otherItems];
         setFilteredProducts(initialProcessedProducts);
@@ -273,4 +273,3 @@ export default function CatalogPage() {
     </div>
   );
 }
-
