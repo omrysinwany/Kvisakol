@@ -110,7 +110,15 @@ export function OrderDetailView({ order, onUpdateStatus, onSaveAgentNotes }: Ord
                   <a href={`tel:${order.customerPhone}`} className="text-primary hover:underline">{order.customerPhone}</a>
                 </p>
                 <p className="flex items-start gap-1">
-                  <MapPin className="w-3 h-3 text-muted-foreground mt-1"/> <strong>כתובת:</strong> {order.customerAddress}
+                  <MapPin className="w-3 h-3 text-muted-foreground mt-1"/> <strong>כתובת:</strong> 
+                  <a
+                    href={`waze://?q=${encodeURIComponent(order.customerAddress)}&navigate=yes`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    {order.customerAddress}
+                  </a>
                 </p>
               </div>
             </div>
@@ -174,3 +182,4 @@ export function OrderDetailView({ order, onUpdateStatus, onSaveAgentNotes }: Ord
     </div>
   );
 }
+
