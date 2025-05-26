@@ -65,8 +65,8 @@ type OrdersCountPeriod = 'thisWeek' | 'thisMonth' | 'allTime';
 
 // This dictionary will hold the full display names for the text below the count
 const ordersCountPeriodDisplayTranslations: Record<OrdersCountPeriod, string> = {
-  thisWeek: 'שבוע נוכחי',
-  thisMonth: 'חודש נוכחי',
+  thisWeek: 'מהשבוע הנוכחי',
+  thisMonth: 'מהחודש הנוכחי',
   allTime: 'כל הזמן',
 };
 // This dictionary will hold the shorter names for the dropdown options
