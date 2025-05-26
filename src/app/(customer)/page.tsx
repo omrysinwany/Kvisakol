@@ -1,36 +1,35 @@
 
 'use client';
 
-import { ProductList } from '@/components/customer/product-list'; // Will be removed or CategoryProductRow will use ProductCard directly
 import { getProductsForCatalog } from '@/services/product-service';
 import type { Product } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
-import { useEffect, useState, useMemo } from 'react';
-import { CategoryProductRow } from '@/components/customer/category-product-row'; // New component
+import { useEffect, useState, useMemo, useRef } from 'react';
+import { CategoryProductRow } from '@/components/customer/category-product-row';
+import { Separator } from '@/components/ui/separator'; // Added Separator import
 
-const PRODUCT_ID_TO_MOVE_SECOND_LAST_NK = 'kbio1'; // ID for "כביסכל Bio אלגנס – 2 ליטר"
-const PRODUCT_ID_TO_MOVE_VERY_LAST_NK = 'kbio11';  // ID for "כביסכל Bio רד רוז – 2 ליטר"
+const PRODUCT_ID_TO_MOVE_SECOND_LAST_NK = 'kbio1'; 
+const PRODUCT_ID_TO_MOVE_VERY_LAST_NK = 'kbio11';  
 const TARGET_CATEGORY_FOR_RESORT_NK = 'נוזלי כביסה';
 
-const PRODUCT_ID_TO_MOVE_LAST_PFF = 'kpff1'; // ID for "מבשם רצפות פרוביוטי מאסק פלאוורס"
+const PRODUCT_ID_TO_MOVE_LAST_PFF = 'kpff1'; 
 const TARGET_CATEGORY_FOR_RESORT_PFF = 'פרפלור מבשמי רצפות';
 
-const PRODUCT_ID_TO_MOVE_LAST_MNM = 'kprof7'; // ID for "מסיר כתמים לפני כביסה"
+const PRODUCT_ID_TO_MOVE_LAST_MNM = 'kprof7'; 
 const TARGET_CATEGORY_FOR_RESORT_MNM = 'מוצרי ניקוי מקצועיים';
 
 const TARGET_CATEGORY_MBSMM = 'מבשמים';
 const ORDERED_PRODUCT_IDS_MBSMM = [
-  'kmb7',  // בייבי 750 מ"ל ביו
-  'kmb14', // מאסק פלאוורס 750 מ"ל
-  'kmb1',  // מבשם אלגנס 750 מ"ל
-  'kmb2',  // סופט קייר 750 מ"ל ביו
-  'kmb6',  // ספא 750 מ"ל
-  'kmb3',  // פרידום 750 מ"ל
-  'kmb11', // רוז 750 מ"ל
+  'kmb7',  
+  'kmb14', 
+  'kmb1',  
+  'kmb2',  
+  'kmb6',  
+  'kmb3',  
+  'kmb11', 
 ];
 
-// Products to show first when "All" (no category selected, no search)
 const PRIORITY_ALL_FILTER_IDS = ['pkg5', 'pkg1', 'kbio2', 'kbio3'];
 
 
@@ -39,6 +38,7 @@ export default function CatalogPage() {
   const [categorizedProducts, setCategorizedProducts] = useState<{ categoryName: string; products: Product[] }[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const scrollTargetRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -56,7 +56,7 @@ export default function CatalogPage() {
   }, []);
 
   useEffect(() => {
-    if (isLoading && allProducts.length === 0) return; // Don't process if still loading initial products or if allProducts is empty
+    if (isLoading && allProducts.length === 0) return; 
 
     let activeProducts = allProducts.filter(p => p.isActive);
 
@@ -68,29 +68,22 @@ export default function CatalogPage() {
       );
     }
 
-    // Group products by category
     const grouped: Record<string, Product[]> = {};
     for (const product of activeProducts) {
-      const category = product.category || 'מוצרים ללא קטגוריה'; // Default category for uncategorized products
+      const category = product.category || 'מוצרים ללא קטגוריה'; 
       if (!grouped[category]) {
         grouped[category] = [];
       }
       grouped[category].push(product);
     }
     
-    // Sort category names alphabetically (Hebrew)
-    const sortedCategoryNames = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'he'));
+    let sortedCategoryNames = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'he'));
     
     const finalCategorizedProducts: { categoryName: string; products: Product[] }[] = [];
 
     for (const categoryName of sortedCategoryNames) {
-      // Products within grouped[categoryName] are already sorted by name from getProductsForCatalog
-      // If search was applied, they should retain relative order or be re-sorted if necessary.
-      // For simplicity, we rely on the initial sort and filtering preserving relative order.
-      // If more complex search reordering happens, explicit sort by name here would be needed.
       let productsInCategory = [...grouped[categoryName]];
 
-      // Apply special sorting rules
       if (categoryName === TARGET_CATEGORY_FOR_RESORT_NK) {
         let productSecondLast: Product | null = null;
         let productVeryLast: Product | null = null;
@@ -134,13 +127,46 @@ export default function CatalogPage() {
       }
     }
     
-    setCategorizedProducts(finalCategorizedProducts);
+    // If no search term, apply priority sorting for "All" view
+    if (!searchTerm) {
+      const priorityProducts: { categoryName: string; products: Product[] }[] = [];
+      const nonPriorityProducts: { categoryName: string; products: Product[] }[] = [];
+
+      finalCategorizedProducts.forEach(catGroup => {
+        const priorityInGroup = catGroup.products.filter(p => PRIORITY_ALL_FILTER_IDS.includes(p.id));
+        const nonPriorityInGroup = catGroup.products.filter(p => !PRIORITY_ALL_FILTER_IDS.includes(p.id));
+
+        // This logic needs refinement if we want to "pull out" priority products to the very top
+        // For now, we keep them within their categories but reorder categories based on priority products.
+        // A simpler approach for "All" view would be to have one flat list and sort it.
+        // Given the current structure of CategoryProductRow, we will sort the categories themselves.
+        
+        // For simplicity with the current row-based structure, this complex priority sort is hard.
+        // The previous PRIORITY_ALL_FILTER_IDS logic was for a flat list.
+        // We will stick to alphabetical category sort for now, and special in-category sorts.
+        // TODO: Revisit "All" view priority if a flat list is desired.
+      });
+       setCategorizedProducts(finalCategorizedProducts);
+
+    } else {
+      setCategorizedProducts(finalCategorizedProducts);
+    }
+
 
   }, [allProducts, searchTerm, isLoading]);
 
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
+     if (scrollTargetRef.current && (event.target.value !== '')) {
+      const headerOffset = 70; // Approximate height of a sticky header
+      const elementPosition = scrollTargetRef.current.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.scrollY - headerOffset;
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
+    }
   };
   
   if (isLoading && allProducts.length === 0) { 
@@ -160,9 +186,9 @@ export default function CatalogPage() {
         </p>
       </header>
       
-      <div className="mb-8"> 
-        <div className="flex flex-col sm:flex-row gap-4 items-center mb-6"> 
-          <div className="relative flex-grow w-full sm:w-auto">
+      <div ref={scrollTargetRef} className="mb-8 sticky top-16 bg-background/90 backdrop-blur-sm z-40 py-4 -mx-4 px-4 shadow-sm"> 
+        <div className="flex flex-col sm:flex-row gap-4 items-center mb-0"> 
+          <div className="relative flex-grow w-full">
             <Input 
               type="search" 
               placeholder="חפש מוצרים..." 
@@ -175,10 +201,15 @@ export default function CatalogPage() {
         </div>
       </div>
 
-      <div>
+      <div className="space-y-6">
         {categorizedProducts.length > 0 ? (
-           categorizedProducts.map(({ categoryName, products }) => (
-             <CategoryProductRow key={categoryName} categoryName={categoryName} products={products} />
+           categorizedProducts.map(({ categoryName, products }, index) => (
+             <div key={categoryName}>
+               <CategoryProductRow categoryName={categoryName} products={products} />
+               {index < categorizedProducts.length - 1 && (
+                 <Separator className="my-10" /> // Add separator between categories
+               )}
+             </div>
            ))
         ): (
           <p className="text-center text-muted-foreground py-8">
