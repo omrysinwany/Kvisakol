@@ -12,9 +12,9 @@ interface CategoryFilterProps {
 
 export function CategoryFilter({ categories, selectedCategory, onSelectCategory }: CategoryFilterProps) {
   return (
-    <div className="mb-8 w-full"> {/* Outer container */}
-      <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"> {/* Scrolling container */}
-        <div className="inline-flex whitespace-nowrap gap-2 py-2 px-1"> {/* Content container for buttons */}
+    <div className="mb-8 w-full overflow-x-hidden"> {/* Outer container: prevents page scroll */}
+      <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"> {/* Scrolling viewport: takes full width of parent, enables its own scroll */}
+        <div className="inline-flex whitespace-nowrap gap-2 py-2 px-1"> {/* Content: items stay in one line, can overflow parent */}
           <Button
             variant={selectedCategory === null ? 'default' : 'outline'}
             onClick={() => onSelectCategory(null)}
