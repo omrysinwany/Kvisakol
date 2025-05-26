@@ -10,7 +10,7 @@ import type { CustomerSummary } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Download } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { subDays, isWithinInterval, startOfDay, endOfDay, isBefore } from 'date-fns';
 
@@ -42,6 +42,9 @@ const totalOrdersFilterTranslations: Record<TotalOrdersFilter, string> = {
   '5+': '5+ הזמנות',
 };
 
+// Define the order of options for the Total Orders filter
+const totalOrdersFilterOptionsOrder: TotalOrdersFilter[] = ['all', '1', '2-4', '5+'];
+
 
 // Helper function to determine customer display status
 const getCustomerDisplayStatus = (customer: CustomerSummary): CustomerStatusFilter => {
@@ -50,13 +53,13 @@ const getCustomerDisplayStatus = (customer: CustomerSummary): CustomerStatusFilt
   const isNewCustomer = customer.totalOrders === 1;
   // Ensure lastOrderDate is valid before comparison
   const customerLastOrderDate = customer.lastOrderDate ? new Date(customer.lastOrderDate) : new Date(0); // Treat undefined as very old date
-  const isInactive = isBefore(customerLastOrderDate, ninetyDaysAgo);
+  const isActuallyInactive = isBefore(customerLastOrderDate, ninetyDaysAgo);
 
-  if (customer.totalOrders >= 5 && !isInactive) return 'vip';
+  if (customer.totalOrders >= 5 && !isActuallyInactive) return 'vip';
   if (isNewCustomer) return 'new';
-  if (isInactive) return 'inactive'; // This will catch customers who are not new but are inactive
-  if (customer.totalOrders > 1 && !isInactive) return 'returning'; // Not new, not VIP, not inactive = returning
-  return 'all'; // Fallback, though ideally all customers should fit a status
+  if (isActuallyInactive) return 'inactive'; 
+  if (customer.totalOrders > 1 && !isActuallyInactive) return 'returning'; 
+  return 'all'; 
 };
 
 
@@ -104,11 +107,11 @@ export default function AdminCustomersPage() {
         if (!customer.lastOrderDate) return false;
         const customerLastOrderDate = new Date(customer.lastOrderDate);
         if (lastOrderFilter === 'last7days') {
-          const sevenDaysAgo = startOfDay(subDays(now, 6)); // last 7 days including today
+          const sevenDaysAgo = startOfDay(subDays(now, 6)); 
           return isWithinInterval(customerLastOrderDate, { start: sevenDaysAgo, end: now });
         }
         if (lastOrderFilter === 'last30days') {
-          const thirtyDaysAgo = startOfDay(subDays(now, 29)); // last 30 days including today
+          const thirtyDaysAgo = startOfDay(subDays(now, 29)); 
           return isWithinInterval(customerLastOrderDate, { start: thirtyDaysAgo, end: now });
         }
         if (lastOrderFilter === 'over90days') {
@@ -134,8 +137,7 @@ export default function AdminCustomersPage() {
         return true;
       });
     }
-
-    // Sort by name after filtering
+    
     customersToFilter.sort((a, b) => a.name.localeCompare(b.name, 'he'));
     
     return customersToFilter;
@@ -192,7 +194,6 @@ export default function AdminCustomersPage() {
                 סקירה של כל הלקוחות שביצעו הזמנות במערכת.
               </CardDescription>
             </div>
-           {/* Removed CSV export button from here */}
           </div>
            
           <div className="pt-3 space-y-2">
@@ -247,9 +248,9 @@ export default function AdminCustomersPage() {
                     {totalOrdersFilter === 'all' ? 'הזמנות' : <SelectValue />}
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.entries(totalOrdersFilterTranslations).map(([key, value]) => (
+                    {totalOrdersFilterOptionsOrder.map((key) => (
                       <SelectItem key={key} value={key} className="text-xs">
-                        {value}
+                        {totalOrdersFilterTranslations[key]}
                       </SelectItem>
                     ))}
                   </SelectContent>
