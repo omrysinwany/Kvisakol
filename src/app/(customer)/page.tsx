@@ -32,7 +32,7 @@ const ORDERED_PRODUCT_IDS_MBSMM = [
   'kmb11', // רוז 750 מ"ל
 ];
 
-const PRIORITY_LAUNDRY_IDS = ['kbio1', 'kbio2', 'kbio3', 'kbio4'];
+const PRIORITY_LAUNDRY_IDS = ['kbio2', 'kbio3', 'kbio4', 'kbio5'];
 
 
 export default function CatalogPage() {
@@ -162,7 +162,7 @@ export default function CatalogPage() {
   useEffect(() => {
     if (allProducts.length > 0 && filteredProducts.length === 0 && selectedCategory === null && searchTerm === '') {
         // This block ensures that initial "All" view sorting is applied when products first load
-        const priorityLaundryIds = ['kbio1', 'kbio2', 'kbio3', 'kbio4'];
+        const priorityLaundryIds = ['kbio2', 'kbio3', 'kbio4', 'kbio5']; // Updated this list
         let initialProcessedProducts = [...allProducts];
         const prioritizedItems: Product[] = [];
         const otherItems: Product[] = [];
@@ -273,3 +273,4 @@ export default function CatalogPage() {
     </div>
   );
 }
+
