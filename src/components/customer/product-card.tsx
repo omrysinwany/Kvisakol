@@ -5,7 +5,7 @@ import Image from 'next/image';
 import type { Product } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ShoppingCartIcon, PlusCircle, MinusCircle, InfoIcon } from 'lucide-react'; // Added InfoIcon
+import { ShoppingCartIcon, PlusCircle, MinusCircle, InfoIcon } from 'lucide-react';
 import { useCart } from '@/contexts/cart-context';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
@@ -19,7 +19,7 @@ import {
   DialogTitle,
   DialogFooter,
   DialogClose,
-  DialogTrigger, // Added DialogTrigger
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { cn } from '@/lib/utils';
 
@@ -59,7 +59,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
     if (!isNaN(newQuantity) && newQuantity > 0) {
       updateQuantity(product.id, newQuantity);
     } else if (value === '' || newQuantity === 0) {
-      updateQuantity(product.id, 0);
+      updateQuantity(product.id, 0); // This will remove the item if quantity is 0 or less
     }
   };
 
@@ -67,10 +67,12 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
     if (isAdminGalleryView || isAdminPreview) return;
     const currentCartQty = getItemQuantity(product.id);
     if (inputValue === '' || isNaN(parseInt(inputValue, 10)) || parseInt(inputValue, 10) <= 0) {
+      // If input is cleared or invalid, and item was in cart, reset to its last valid quantity
+      // If not in cart, input becomes "0"
       if (currentCartQty > 0) {
         setInputValue(currentCartQty.toString());
       } else {
-        setInputValue("0");
+        setInputValue("0"); 
       }
     }
   };
@@ -85,7 +87,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
   const handleDecreaseQuantity = () => {
     if (isAdminGalleryView || isAdminPreview) return;
     const newQuantity = quantityInCart - 1;
-    updateQuantity(product.id, newQuantity);
+    updateQuantity(product.id, newQuantity); // updateQuantity handles removal if newQuantity <= 0
     setInputValue(newQuantity > 0 ? newQuantity.toString() : "0");
   };
 
@@ -93,10 +95,21 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
     return `₪${price.toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
-  const openDialog = () => {
-    if (isAdminGalleryView) return; // In admin gallery, clicking the card (Link) navigates to edit
+  const openDialog = (e: React.MouseEvent) => {
+    // Prevent dialog from opening if the click is on cart controls
+    const target = e.target as HTMLElement;
+    if (target.closest('button') || target.closest('input[type="number"]')) {
+      return;
+    }
+    if (isAdminGalleryView) return; 
     setIsDialogOpen(true);
   }
+  
+  const handleCardClick = (e: React.MouseEvent) => {
+    if (isAdminGalleryView) return; // Handled by Link in ProductGrid
+    openDialog(e);
+  }
+
 
   if (isAdminGalleryView) {
     // Admin Gallery View: Simplified card, no Dialog, no cart controls.
@@ -119,7 +132,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
             />
             <Badge
               className={cn(
-                "absolute top-2 left-2 z-10 text-xs px-1.5 py-0.5", // RTL left-2 is top-right
+                "absolute top-2 left-2 z-10 text-xs px-1.5 py-0.5", 
                 product.isActive ? "bg-green-500 text-white" : "bg-red-500 text-white"
               )}
             >
@@ -132,7 +145,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
             {product.name}
           </CardTitle>
         </CardContent>
-        <CardFooter className="p-1 min-h-[2.25rem]" /> {/* Minimal footer */}
+        <CardFooter className="p-0" /> {/* Footer takes no space */}
       </Card>
     );
   }
@@ -143,7 +156,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
       <Card className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg h-full">
         <CardHeader
           className="p-0 relative cursor-pointer"
-          onClick={openDialog}
+          onClick={handleCardClick}
         >
           <div className="aspect-square relative w-full">
             <Image
@@ -161,7 +174,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
             {product.category && (
               <Badge
                 variant="secondary"
-                className="absolute top-2 left-2 z-10 text-xs"
+                className="absolute top-2 left-2 z-10 text-xs px-1.5 py-0.5"
               >
                 {product.category}
               </Badge>
@@ -170,7 +183,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
         </CardHeader>
         <CardContent
           className="p-3 pb-1 flex-1 cursor-pointer"
-          onClick={openDialog}
+          onClick={handleCardClick}
         >
           <CardTitle className="text-sm h-10 leading-tight overflow-hidden text-center line-clamp-2">
             {product.name}
@@ -178,12 +191,13 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
         </CardContent>
         <CardFooter
           className={cn(
-            "p-3 flex mt-auto",
-            isAdminPreview ? "justify-center items-center" : "flex-col sm:flex-row justify-between items-center gap-1"
+            "p-3 flex mt-auto items-center", 
+            isAdminPreview ? "justify-center" : "flex-col sm:flex-row justify-between gap-1"
           )}
           onClick={(e) => {
-            if (!isAdminPreview) {
-              e.stopPropagation();
+            // Prevent card click from triggering if footer elements are clicked
+            if (e.target !== e.currentTarget) {
+                 e.stopPropagation();
             }
           }}
         >
@@ -191,7 +205,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
             <p className="text-sm font-semibold text-foreground">{formatPrice(product.price)}</p>
             {!isAdminPreview && (
               <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-primary" onClick={(e) => e.stopPropagation()}>
+                <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-primary">
                   <InfoIcon className="h-4 w-4" />
                 </Button>
               </DialogTrigger>
@@ -270,3 +284,4 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
     </Dialog>
   );
 }
+
