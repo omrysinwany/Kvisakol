@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
-import { Printer, CheckCircle, XCircle, Hourglass, Phone, MapPin, FileText, ClipboardCheck, Save } from 'lucide-react';
+import { Printer, CheckCircle, XCircle, Hourglass, Phone, MapPin, FileText, ClipboardCheck, Save, Edit2, PlusCircle } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuPortal
 } from '@/components/ui/dropdown-menu';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface OrderDetailViewProps {
   order: Order;
@@ -50,13 +50,26 @@ const statusIcons: Record<Order['status'], React.ElementType> = {
 export function OrderDetailView({ order, onUpdateStatus, onSaveAgentNotes }: OrderDetailViewProps) {
   const formatPrice = (price: number) => `₪${price.toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const StatusIcon = statusIcons[order.status];
+  
   const [currentAgentNotes, setCurrentAgentNotes] = useState(order.agentNotes || '');
   const [isSavingNotes, setIsSavingNotes] = useState(false);
+  const [isEditingAgentNotes, setIsEditingAgentNotes] = useState(false);
 
-  const handleSaveNotes = async () => {
+  useEffect(() => {
+    setCurrentAgentNotes(order.agentNotes || '');
+    setIsEditingAgentNotes(false); // Reset edit mode when order prop changes (e.g., after save)
+  }, [order]);
+
+  const handleSaveNotesInternal = async () => {
     setIsSavingNotes(true);
     await onSaveAgentNotes(order.id, currentAgentNotes);
     setIsSavingNotes(false);
+    // setIsEditingAgentNotes(false); // This will be handled by the useEffect when 'order' prop updates
+  };
+
+  const handleCancelEditNotes = () => {
+    setCurrentAgentNotes(order.agentNotes || '');
+    setIsEditingAgentNotes(false);
   };
 
   return (
@@ -132,19 +145,48 @@ export function OrderDetailView({ order, onUpdateStatus, onSaveAgentNotes }: Ord
             </div>
           </div>
 
-          <div className="mb-6">
-            <h3 className="text-base font-semibold mb-1.5">הערות סוכן (פנימי)</h3>
-            <Textarea
-              placeholder="הוסף הערות פנימיות לגבי ההזמנה..."
-              value={currentAgentNotes}
-              onChange={(e) => setCurrentAgentNotes(e.target.value)}
-              rows={2}
-              className="bg-background text-sm"
-            />
-            <Button onClick={handleSaveNotes} size="xs" className="mt-1.5" disabled={isSavingNotes}>
-              <Save className="ml-1.5 h-3.5 w-3.5" />
-              {isSavingNotes ? 'שומר...' : 'שמור הערות'}
-            </Button>
+          <div className="mb-4">
+            {isEditingAgentNotes ? (
+              <>
+                <h4 className="text-sm font-medium mb-1.5">ערוך הערות סוכן (פנימי)</h4>
+                <Textarea
+                  placeholder="הוסף הערות פנימיות לגבי ההזמנה..."
+                  value={currentAgentNotes}
+                  onChange={(e) => setCurrentAgentNotes(e.target.value)}
+                  rows={3}
+                  className="bg-background text-sm"
+                />
+                <div className="flex items-center gap-2 mt-1.5">
+                  <Button onClick={handleSaveNotesInternal} size="xs" disabled={isSavingNotes}>
+                    <Save className="ml-1.5 h-3.5 w-3.5" />
+                    {isSavingNotes ? 'שומר...' : 'שמור הערות'}
+                  </Button>
+                  <Button variant="outline" size="xs" onClick={handleCancelEditNotes} disabled={isSavingNotes}>
+                    ביטול
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                {(order.agentNotes && order.agentNotes.trim() !== '') ? (
+                  <div>
+                    <div className="flex justify-between items-center mb-0.5">
+                        <h4 className="text-sm font-medium text-muted-foreground">הערות סוכן:</h4>
+                        <Button variant="ghost" size="xs" onClick={() => setIsEditingAgentNotes(true)} className="text-xs h-6 px-1.5">
+                            <Edit2 className="h-3 w-3 ml-1" />
+                            ערוך
+                        </Button>
+                    </div>
+                    <p className="text-sm bg-muted/30 p-2 rounded-md whitespace-pre-wrap min-h-[40px]">{order.agentNotes}</p>
+                  </div>
+                ) : (
+                  <Button variant="outline" size="xs" onClick={() => { setCurrentAgentNotes(''); setIsEditingAgentNotes(true);}} className="text-xs">
+                    <PlusCircle className="h-3.5 w-3.5 ml-1"/>
+                    הוסף הערות סוכן
+                  </Button>
+                )}
+              </>
+            )}
           </div>
 
 
