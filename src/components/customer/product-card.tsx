@@ -19,6 +19,7 @@ import {
   DialogTitle,
   DialogFooter,
   DialogClose,
+  DialogTrigger, // Added missing import
 } from "@/components/ui/dialog";
 import { cn } from '@/lib/utils';
 
@@ -93,7 +94,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
   }
   
   const openDialog = (e?: React.MouseEvent) => {
-    if (isAdminGalleryView) return;
+    if (isAdminGalleryView || isAdminPreview) return; // In admin gallery/preview, dialog is not used this way
     if (e) e.stopPropagation();
     setIsDialogOpen(true);
   };
@@ -103,11 +104,10 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
     if (target.closest('button') || target.closest('input[type="number"]')) {
       return;
     }
-    if (!isAdminGalleryView) {
-      openDialog(e);
+    if (!isAdminGalleryView && !isAdminPreview) {
+        openDialog(e);
     }
   };
-
 
   if (isAdminGalleryView) {
     return (
@@ -136,7 +136,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
             </Badge>
           </div>
         </CardHeader>
-        <CardContent className="p-3 pb-2 flex-1 flex flex-col justify-center">
+        <CardContent className="p-3 flex-1 flex flex-col justify-center">
           <CardTitle className="text-sm leading-normal text-center line-clamp-2 text-[hsl(var(--ring))]">
             {product.name}
           </CardTitle>
@@ -145,6 +145,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
       </Card>
     );
   }
+
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -194,7 +195,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
           </div>
         </CardHeader>
         <CardContent
-          className="p-3 flex-1 pb-2"
+          className="p-3 pb-2 flex-1"
           onClick={(e) => {
              if (!isAdminPreview && !isAdminGalleryView) handleCardContentClick(e);
           }}
@@ -211,10 +212,10 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
         <CardFooter
           className={cn(
             "p-3 flex mt-auto items-center", 
-            isAdminPreview ? "justify-center" : "flex-col sm:flex-row justify-between gap-1"
+            isAdminPreview || isAdminGalleryView ? "justify-center w-full" : "flex-col sm:flex-row justify-between gap-1"
           )}
           onClick={(e) => {
-            if (!isAdminPreview && !isAdminGalleryView && e.target !== e.currentTarget && !targetIsDialogTrigger(e.target as HTMLElement) ) { 
+            if (!isAdminPreview && !isAdminGalleryView && e.target !== e.currentTarget) { 
                  e.stopPropagation();
             }
           }}
@@ -224,7 +225,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
           </div>
 
           {(!isAdminPreview && !isAdminGalleryView) && (
-            <div className='flex items-center'> {/* Removed min-h-[36px] */}
+            <div className='flex items-center'>
               {quantityInCart === 0 ? (
                 <Button onClick={(e) => { e.stopPropagation(); handleAddToCart(); }} className="w-full sm:w-auto" size="sm">
                   <ShoppingCartIcon className="ml-1.5 h-4 w-4" />
@@ -299,14 +300,3 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
   );
 }
 
-function targetIsDialogTrigger(target: HTMLElement | null): boolean {
-  while (target) {
-    if (target.getAttribute && target.getAttribute('data-radix-dialog-trigger') !== null) {
-      return true;
-    }
-    target = target.parentElement;
-  }
-  return false;
-}
-
-    
