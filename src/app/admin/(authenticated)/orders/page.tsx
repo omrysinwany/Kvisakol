@@ -227,7 +227,7 @@ export default function AdminOrdersPage() {
           
           <div className="pt-3 space-y-2">
             {/* Row 1: Phone Search and Status Filter */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 items-end">
+            <div className="grid grid-cols-2 gap-2 items-end">
               <div className="relative">
                 <UserSearch className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -257,7 +257,7 @@ export default function AdminOrdersPage() {
             </div>
 
             {/* Row 2: Date Filters */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 items-end">
+            <div className="grid grid-cols-2 gap-2 items-end">
               <Popover>
                   <PopoverTrigger asChild>
                       <Button
@@ -357,6 +357,4 @@ export default function AdminOrdersPage() {
     </>
   );
 }
-    
-
     
