@@ -59,7 +59,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
     if (!isNaN(newQuantity) && newQuantity > 0) {
       updateQuantity(product.id, newQuantity);
     } else if (value === '' || newQuantity === 0) {
-      updateQuantity(product.id, 0); // This will remove the item if quantity is 0 or less
+      updateQuantity(product.id, 0); 
     }
   };
 
@@ -67,8 +67,6 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
     if (isAdminGalleryView || isAdminPreview) return;
     const currentCartQty = getItemQuantity(product.id);
     if (inputValue === '' || isNaN(parseInt(inputValue, 10)) || parseInt(inputValue, 10) <= 0) {
-      // If input is cleared or invalid, and item was in cart, reset to its last valid quantity
-      // If not in cart, input becomes "0"
       if (currentCartQty > 0) {
         setInputValue(currentCartQty.toString());
       } else {
@@ -87,33 +85,24 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
   const handleDecreaseQuantity = () => {
     if (isAdminGalleryView || isAdminPreview) return;
     const newQuantity = quantityInCart - 1;
-    updateQuantity(product.id, newQuantity); // updateQuantity handles removal if newQuantity <= 0
+    updateQuantity(product.id, newQuantity); 
     setInputValue(newQuantity > 0 ? newQuantity.toString() : "0");
   };
 
   const formatPrice = (price: number) => {
     return `₪${price.toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
-
-  const openDialog = (e: React.MouseEvent) => {
-    // Prevent dialog from opening if the click is on cart controls
-    const target = e.target as HTMLElement;
-    if (target.closest('button') || target.closest('input[type="number"]')) {
-      return;
-    }
-    if (isAdminGalleryView) return; 
-    setIsDialogOpen(true);
-  }
   
   const handleCardClick = (e: React.MouseEvent) => {
-    if (isAdminGalleryView) return; // Handled by Link in ProductGrid
-    openDialog(e);
+    if (isAdminGalleryView) return; 
+    const target = e.target as HTMLElement;
+    if (target.closest('button') || target.closest('input[type="number"]') || target.closest('[data-dialog-trigger]') ) {
+      return;
+    }
+    setIsDialogOpen(true);
   }
 
-
   if (isAdminGalleryView) {
-    // Admin Gallery View: Simplified card, no Dialog, no cart controls.
-    // The parent Link in ProductGrid handles navigation to edit.
     return (
       <Card className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg h-full">
         <CardHeader className="p-0 relative">
@@ -145,18 +134,19 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
             {product.name}
           </CardTitle>
         </CardContent>
-        <CardFooter className="p-0" /> {/* Footer takes no space */}
+        <CardFooter className="p-0" /> 
       </Card>
     );
   }
 
-  // Customer View or Admin Catalog Preview View
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <Card className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg h-full">
+      <Card 
+        className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg h-full"
+        onClick={handleCardClick}
+      >
         <CardHeader
           className="p-0 relative cursor-pointer"
-          onClick={handleCardClick}
         >
           <div className="aspect-square relative w-full">
             <Image
@@ -182,10 +172,9 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
           </div>
         </CardHeader>
         <CardContent
-          className="p-3 pb-1 flex-1 cursor-pointer"
-          onClick={handleCardClick}
+          className="p-3 flex-1 cursor-pointer pb-1" 
         >
-          <CardTitle className="text-sm h-10 leading-tight overflow-hidden text-center line-clamp-2">
+          <CardTitle className="text-sm h-10 leading-tight text-center line-clamp-2 text-primary">
             {product.name}
           </CardTitle>
         </CardContent>
@@ -195,16 +184,15 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
             isAdminPreview ? "justify-center" : "flex-col sm:flex-row justify-between gap-1"
           )}
           onClick={(e) => {
-            // Prevent card click from triggering if footer elements are clicked
             if (e.target !== e.currentTarget) {
                  e.stopPropagation();
             }
           }}
         >
           <div className={cn("flex items-center", isAdminPreview ? "justify-center w-full" : "gap-1")}>
-            <p className="text-sm font-semibold text-foreground">{formatPrice(product.price)}</p>
+            <p className="text-sm text-foreground font-semibold">{formatPrice(product.price)}</p>
             {!isAdminPreview && (
-              <DialogTrigger asChild>
+              <DialogTrigger asChild data-dialog-trigger>
                 <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-primary">
                   <InfoIcon className="h-4 w-4" />
                 </Button>
@@ -284,4 +272,3 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
     </Dialog>
   );
 }
-
