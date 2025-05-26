@@ -17,7 +17,7 @@ import { ProductGrid } from '@/components/admin/product-grid';
 import { cn } from '@/lib/utils';
 import { CartProvider } from '@/contexts/cart-context';
 
-const ITEMS_PER_PAGE = 15;
+const ITEMS_PER_PAGE = 14; // Changed from 15 to 14
 const ALL_CATEGORIES_VALUE = "all"; 
 
 export default function AdminProductsPage() {
@@ -28,7 +28,7 @@ export default function AdminProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>(ALL_CATEGORIES_VALUE); 
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid'); // Changed default to 'grid'
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid'); 
   
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
@@ -178,7 +178,7 @@ export default function AdminProductsPage() {
               </Button>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-2 pt-2">
+           <div className="grid grid-cols-2 gap-2 pt-2">
             <div className="relative">
               <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
