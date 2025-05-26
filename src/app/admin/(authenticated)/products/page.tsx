@@ -150,23 +150,23 @@ export default function AdminProductsPage() {
                 נהל את כל המוצרים בקטלוג שלך.
               </CardDescription>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-              <div className="relative flex-grow sm:flex-grow-0">
+            <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 items-center w-full">
+              <div className="relative"> {/* Search Input Container */}
                 <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="search"
                   placeholder="חיפוש מוצר..."
-                  className="pl-10 rtl:pr-10 w-full sm:w-[200px] lg:w-[250px]"
+                  className="pl-10 rtl:pr-10 w-full"
                   value={searchTerm}
                   onChange={handleSearchChange}
                 />
               </div>
               <Select value={selectedCategory} onValueChange={handleCategoryChange}>
-                <SelectTrigger className="w-full sm:w-[180px] lg:w-[200px]">
+                <SelectTrigger className="w-full sm:w-auto min-w-[180px]">
                   <SelectValue placeholder="סינון לפי קטגוריה" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={ALL_CATEGORIES_VALUE}>כל הקטגוריות</SelectItem> {/* Use constant value */}
+                  <SelectItem value={ALL_CATEGORIES_VALUE}>כל הקטגוריות</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category} value={category}>
                       {category}
