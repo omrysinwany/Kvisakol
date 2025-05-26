@@ -180,13 +180,8 @@ export default function AdminDashboardPage() {
 
   return (
     <>
-      <div className="flex items-center justify-between space-y-2 mb-6">
+      <div className="flex items-center justify-center space-y-2 mb-6">
         <h1 className="text-3xl font-bold tracking-tight">לוח בקרה</h1>
-        <div className="flex items-center space-x-2">
-          <Button asChild size="sm">
-            <Link href="/admin/products/new">הוסף מוצר חדש</Link>
-          </Button>
-        </div>
       </div>
       
       <div className="grid grid-cols-2 gap-6">
@@ -306,7 +301,7 @@ export default function AdminDashboardPage() {
         <Card className="col-span-2">
           <CardHeader className="pb-3">
             <div className="flex flex-row items-center justify-between gap-2">
-              <CardTitle className="text-xl font-semibold"> 
+              <CardTitle className="text-2xl font-semibold"> 
                 הכנסות בתקופה הנבחרת
               </CardTitle>
               <DropdownMenu dir="rtl">
