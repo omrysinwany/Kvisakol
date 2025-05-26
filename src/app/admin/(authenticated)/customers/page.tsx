@@ -159,7 +159,7 @@ export default function AdminCustomersPage() {
       </div>
 
       <Card className="shadow-lg">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-3"> {/* Adjusted padding */}
           <div className="flex flex-row items-center justify-between space-x-2 rtl:space-x-reverse">
             <div>
               <CardTitle className="text-xl">רשימת לקוחות ({filteredCustomers.length})</CardTitle>
@@ -171,7 +171,7 @@ export default function AdminCustomersPage() {
            
           <div className="pt-3 space-y-2">
             {/* Row 1: Search and Status Filter */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+            <div className="grid grid-cols-2 gap-3 items-end"> {/* Changed from sm:grid-cols-2 */}
               <div className="relative">
                 <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -200,7 +200,7 @@ export default function AdminCustomersPage() {
             </div>
 
             {/* Row 2: Last Order Date and Placeholder for new filter */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+            <div className="grid grid-cols-2 gap-3 items-end"> {/* Changed from sm:grid-cols-2 */}
               <div>
                 <Select value={lastOrderFilter} onValueChange={handleLastOrderFilterChange}>
                   <SelectTrigger id="last-order-filter" className="h-9 w-full px-3 text-xs">
