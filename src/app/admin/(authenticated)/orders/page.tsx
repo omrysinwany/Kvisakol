@@ -225,12 +225,13 @@ export default function AdminOrdersPage() {
             </Button>
           </div>
           
-          <div className="pt-3 space-y-2"> {/* Reduced space-y from 3 to 2 */}
+          <div className="pt-3 space-y-2">
             {/* Row 1: Phone Search and Status Filter */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 items-end">
               <div className="relative">
                 <UserSearch className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
+                  id="order-customer-phone-search"
                   type="tel"
                   placeholder="טלפון לקוח..."
                   value={customerPhoneInput}
@@ -356,4 +357,6 @@ export default function AdminOrdersPage() {
     </>
   );
 }
+    
+
     
