@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { getProductById } from "@/services/product-service"; // getProductById is used for popular products
+import { getProductById } from "@/services/product-service";
 import { getOrdersForAdmin, getTopCustomers, getRecentOrders } from "@/services/order-service";
-import type { Order, CustomerSummary } from "@/lib/types"; // Product type removed as totalProducts is removed
+import type { Order, CustomerSummary } from "@/lib/types";
 import { Package, ClipboardCheck, Eye, Users, CalendarDays, CalendarCheck, CalendarIcon, X, Hourglass, ChevronDown, ListOrdered, Trophy, ListChecks } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -41,8 +41,6 @@ const statusColorsForDashboard: Record<Order['status'], string> = {
 };
 
 interface DashboardSummary {
-  // totalProducts: number; // Removed
-  // totalOrders: number; // Removed
   newOrdersUnviewed: number;
   receivedOrders: number;
   latestOrders: Order[];
@@ -85,7 +83,6 @@ export default function AdminDashboardPage() {
       setIsLoading(true);
       try {
         const [ordersData, topCustomersData, recentOrdersData] = await Promise.all([
-          // getAllProductsForAdmin(), // Removed as totalProducts is no longer needed
           getOrdersForAdmin(),
           getTopCustomers(3),
           getRecentOrders(7) 
@@ -94,8 +91,6 @@ export default function AdminDashboardPage() {
         setAllOrders(ordersData);
         setTopCustomers(topCustomersData);
 
-        // const totalProducts = productsData.filter(p => p.isActive).length; // Removed
-        // const totalOrders = ordersData.length; // Removed
         const newOrdersUnviewedCount = ordersData.filter(o => o.status === 'new').length;
         const receivedOrdersCount = ordersData.filter(o => o.status === 'received').length;
         
@@ -109,8 +104,6 @@ export default function AdminDashboardPage() {
         const latestOrders = ordersData.slice(0, 5);
 
         setSummary({
-          // totalProducts, // Removed
-          // totalOrders, // Removed
           newOrdersUnviewed: newOrdersUnviewedCount,
           receivedOrders: receivedOrdersCount,
           latestOrders,
@@ -233,12 +226,12 @@ export default function AdminDashboardPage() {
         <Link href="/admin/orders?status=new" className="block hover:shadow-lg transition-shadow rounded-lg">
           <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">הזמנות חדשות (טרם נצפו)</CardTitle>
+              <CardTitle className="text-sm font-medium">הזמנות חדשות</CardTitle>
               <Hourglass className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{summary.newOrdersUnviewed}</div>
-              {/* <p className="text-xs text-muted-foreground">מתוך {summary.totalOrders} הזמנות בסה"כ</p> Removed totalOrders */}
+              <p className="text-xs text-muted-foreground">(טרם נצפו)</p>
             </CardContent>
           </Card>
         </Link>
@@ -246,7 +239,7 @@ export default function AdminDashboardPage() {
         <Link href="/admin/orders?status=received" className="block hover:shadow-lg transition-shadow rounded-lg">
           <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">הזמנות שהתקבלו (נצפו)</CardTitle>
+              <CardTitle className="text-sm font-medium">הזמנות שהתקבלו</CardTitle>
               <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -282,38 +275,6 @@ export default function AdminDashboardPage() {
           </Card>
         </Link>
         
-        {/* Removed Total Products Card */}
-        {/* 
-        <Link href="/admin/products" className="block hover:shadow-lg transition-shadow rounded-lg">
-          <Card className="h-full">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">מוצרים פעילים</CardTitle>
-              <Package className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{summary.totalProducts}</div>
-              <p className="text-xs text-muted-foreground">זמינים בקטלוג</p>
-            </CardContent>
-          </Card>
-        </Link> 
-        */}
-
-        {/* Removed Total Orders Card */}
-        {/*
-        <Link href="/admin/orders" className="block hover:shadow-lg transition-shadow rounded-lg">
-          <Card className="h-full">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">סה"כ הזמנות</CardTitle>
-              <Eye className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{summary.totalOrders}</div>
-              <p className="text-xs text-muted-foreground">הזמנות במערכת</p>
-            </CardContent>
-          </Card>
-        </Link>
-        */}
-
         <Card className="col-span-2"> 
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><ListOrdered className="h-5 w-5 text-primary"/>הזמנות אחרונות</CardTitle>
@@ -479,4 +440,3 @@ export default function AdminDashboardPage() {
     </>
   );
 }
-
