@@ -4,6 +4,7 @@
 
 import type { Product } from '@/lib/types';
 import { ProductCard } from '@/components/customer/product-card'; // Reusing customer product card
+import Link from 'next/link';
 
 interface ProductGridProps {
   products: Product[];
@@ -15,9 +16,11 @@ export function ProductGrid({ products }: ProductGridProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-3 gap-4">
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} isAdminPreview={true} />
+        <Link key={product.id} href={`/admin/products/edit/${product.id}`} className="block">
+          <ProductCard product={product} isAdminPreview={true} />
+        </Link>
       ))}
     </div>
   );
