@@ -63,13 +63,11 @@ const revenuePeriodTranslations: Record<RevenuePeriod, string> = {
 
 type OrdersCountPeriod = 'thisWeek' | 'thisMonth' | 'allTime';
 
-// This dictionary will hold the full display names for the text below the count
 const ordersCountPeriodDisplayTranslations: Record<OrdersCountPeriod, string> = {
   thisWeek: 'מהשבוע הנוכחי',
   thisMonth: 'מהחודש הנוכחי',
   allTime: 'כל הזמן',
 };
-// This dictionary will hold the shorter names for the dropdown options
 const ordersCountPeriodDropdownOptions: Record<OrdersCountPeriod, string> = {
   thisWeek: 'שבוע',
   thisMonth: 'חודש',
@@ -103,7 +101,7 @@ export default function AdminDashboardPage() {
         const [ordersData, topCustomersData, recentOrdersData, newCustomersCount] = await Promise.all([
           getOrdersForAdmin(),
           getTopCustomers(3),
-          getRecentOrders(7), // For popular products from last 7 days
+          getRecentOrders(7), 
           getNewCustomersThisMonthCount(),
         ]);
         
@@ -160,7 +158,6 @@ export default function AdminDashboardPage() {
     fetchDashboardData();
   }, [toast]);
 
-  // Effect for calculating filtered revenue
   useEffect(() => {
     if (!allOrders.length) { 
         setFilteredRevenue(0);
@@ -194,13 +191,11 @@ export default function AdminDashboardPage() {
             } else if (customRevenueEndDate) {
                  relevantOrders = relevantOrders.filter(o => new Date(o.orderTimestamp) <= endOfDay(customRevenueEndDate));
             } else {
-                 // If custom is selected but no dates, show 0 or allTime based on preference. Let's show 0.
                  relevantOrders = []; 
             }
             break;
         case 'allTime':
         default:
-            // No date filtering needed for 'allTime'
             break;
     }
     const newFilteredRevenue = relevantOrders.reduce((sum, order) => sum + order.totalAmount, 0);
@@ -208,13 +203,12 @@ export default function AdminDashboardPage() {
 
   }, [allOrders, selectedRevenuePeriod, customRevenueStartDate, customRevenueEndDate]);
 
-  // Effect for calculating filtered orders count
   useEffect(() => {
     if (!allOrders.length) {
       setFilteredOrdersCount(0);
       return;
     }
-    let ordersForCount = [...allOrders]; // Count all orders regardless of status for this metric
+    let ordersForCount = [...allOrders]; 
     const now = new Date();
 
     switch (selectedOrdersCountPeriod) {
@@ -230,7 +224,6 @@ export default function AdminDashboardPage() {
         break;
       case 'allTime':
       default:
-        // No date filtering needed for 'allTime'
         break;
     }
     setFilteredOrdersCount(ordersForCount.length);
@@ -244,8 +237,6 @@ export default function AdminDashboardPage() {
   const handleClearCustomDates = () => {
     setCustomRevenueStartDate(undefined);
     setCustomRevenueEndDate(undefined);
-    // Optionally, you might want to revert to a default period like 'thisMonth'
-    // setSelectedRevenuePeriod('thisMonth'); 
   };
 
   if (isLoading) {
@@ -396,29 +387,31 @@ export default function AdminDashboardPage() {
         <Card className="col-span-2">
           <CardHeader className="pb-3">
             <div className="flex flex-row items-center justify-between gap-2">
-              <CardTitle className="text-2xl font-semibold flex items-center gap-2">
-                <DollarSign className="h-6 w-6 text-primary"/>
-                הכנסות בתקופה הנבחרת
-              </CardTitle>
-              <DropdownMenu dir="rtl">
+                <CardTitle className="text-2xl font-semibold flex items-center gap-2">
+                    <DollarSign className="h-6 w-6 text-primary"/>
+                    הכנסות בתקופה הנבחרת
+                </CardTitle>
+            </div>
+            <div className="flex justify-end mt-1">
+                <DropdownMenu dir="rtl">
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="justify-between min-w-[130px] text-xs">
+                    <Button variant="outline" size="sm" className="justify-between min-w-[130px] text-xs">
                     {revenuePeriodTranslations[selectedRevenuePeriod]}
                     <ChevronDown className="h-3.5 w-3.5 opacity-75 mr-1" />
-                  </Button>
+                    </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuLabel className="text-xs">בחר תקופה</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuRadioGroup value={selectedRevenuePeriod} onValueChange={(value) => setSelectedRevenuePeriod(value as RevenuePeriod)}>
+                    <DropdownMenuLabel className="text-xs">בחר תקופה</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuRadioGroup value={selectedRevenuePeriod} onValueChange={(value) => setSelectedRevenuePeriod(value as RevenuePeriod)}>
                     <DropdownMenuRadioItem value="thisMonth" className="text-xs">{revenuePeriodTranslations.thisMonth}</DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="thisWeek" className="text-xs">{revenuePeriodTranslations.thisWeek}</DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="today" className="text-xs">{revenuePeriodTranslations.today}</DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="allTime" className="text-xs">{revenuePeriodTranslations.allTime}</DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="custom" className="text-xs">{revenuePeriodTranslations.custom}</DropdownMenuRadioItem>
-                  </DropdownMenuRadioGroup>
+                    </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
-              </DropdownMenu>
+                </DropdownMenu>
             </div>
           </CardHeader>
           <CardContent>
