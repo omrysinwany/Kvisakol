@@ -11,8 +11,10 @@ import { ProductTable } from '@/components/admin/product-table';
 import { AdminPaginationControls } from '@/components/admin/admin-pagination-controls';
 import { getAllProductsForAdmin, deleteProductService, toggleProductActiveStatusService } from '@/services/product-service';
 import type { Product } from '@/lib/types';
-import { PlusCircle, Search } from 'lucide-react';
+import { PlusCircle, Search, List, LayoutGrid } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { ProductGrid } from '@/components/admin/product-grid'; // New import
+import { cn } from '@/lib/utils';
 
 const ITEMS_PER_PAGE = 15;
 const ALL_CATEGORIES_VALUE = "all"; 
@@ -25,6 +27,7 @@ export default function AdminProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>(ALL_CATEGORIES_VALUE); 
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list'); // New state for view mode
   
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
@@ -143,11 +146,33 @@ export default function AdminProductsPage() {
 
       <Card className="shadow-lg">
         <CardHeader>
-          <div>
-            <CardTitle className="text-xl">רשימת מוצרים</CardTitle>
-            <CardDescription>
-              נהל את כל המוצרים בקטלוג שלך.
-            </CardDescription>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle className="text-xl">רשימת מוצרים</CardTitle>
+              <CardDescription>
+                נהל את כל המוצרים בקטלוג שלך.
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setViewMode('list')}
+                className={cn(viewMode === 'list' && 'text-primary bg-accent')}
+                aria-label="תצוגת רשימה"
+              >
+                <List className="h-5 w-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setViewMode('grid')}
+                className={cn(viewMode === 'grid' && 'text-primary bg-accent')}
+                aria-label="תצוגת גלריה"
+              >
+                <LayoutGrid className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
           {/* Filters part */}
           <div className="grid grid-cols-2 gap-2 pt-2">
@@ -181,7 +206,11 @@ export default function AdminProductsPage() {
         <CardContent>
           {paginatedProducts.length > 0 ? (
             <>
-              <ProductTable products={paginatedProducts} onDeleteProduct={handleDeleteProduct} onToggleActive={handleToggleActive} />
+              {viewMode === 'list' ? (
+                <ProductTable products={paginatedProducts} onDeleteProduct={handleDeleteProduct} onToggleActive={handleToggleActive} />
+              ) : (
+                <ProductGrid products={paginatedProducts} />
+              )}
               {totalPages > 1 && (
                 <AdminPaginationControls
                   currentPage={currentPage}
@@ -207,3 +236,4 @@ export default function AdminProductsPage() {
     </>
   );
 }
+    
