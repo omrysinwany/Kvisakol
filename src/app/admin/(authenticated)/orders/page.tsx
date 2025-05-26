@@ -20,7 +20,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 
-type StatusFilterValue = Order['status'] | 'all' | 'received'; 
+type StatusFilterValue = Order['status'] | 'all'; 
 
 const ITEMS_PER_PAGE = 10;
 
@@ -95,7 +95,7 @@ export default function AdminOrdersPage() {
         setStartDate(startOfDay(sevenDaysAgo));
         setEndDate(endOfDay(today));
       }
-    } else if (!phoneFromUrl && !statusFromUrl) { // Clear dates if no other filters are active from URL
+    } else if (!phoneFromUrl && !statusFromUrl) { 
         setStartDate(undefined);
         setEndDate(undefined);
     }
@@ -225,7 +225,7 @@ export default function AdminOrdersPage() {
             </Button>
           </div>
           
-          <div className="pt-3 space-y-3">
+          <div className="pt-3 space-y-2"> {/* Reduced space-y from 3 to 2 */}
             {/* Row 1: Phone Search and Status Filter */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 items-end">
               <div className="relative">
@@ -357,4 +357,3 @@ export default function AdminOrdersPage() {
   );
 }
     
-
