@@ -8,7 +8,7 @@ import { AdminPaginationControls } from '@/components/admin/admin-pagination-con
 import { getOrdersForAdmin, updateOrderStatusService } from '@/services/order-service';
 import type { Order } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, X, UserSearch, Download } from 'lucide-react';
+import { CalendarIcon, X, UserSearch } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -25,7 +25,7 @@ type StatusFilterValue = Order['status'] | 'all';
 const ITEMS_PER_PAGE = 10;
 
 const statusTranslationsForFilter: Record<StatusFilterValue, string> = {
-  all: 'סינון לפי סטטוס',
+  all: 'כל הסטטוסים',
   new: 'חדשה',
   received: 'התקבלה',
   completed: 'הושלמה',
@@ -212,7 +212,6 @@ export default function AdminOrdersPage() {
                 נהל את כל ההזמנות שהתקבלו
               </CardDescription>
             </div>
-            {/* Removed CSV export button from here */}
           </div>
           
           <div className="pt-3 space-y-2">
@@ -231,9 +230,15 @@ export default function AdminOrdersPage() {
                 />
               </div>
               <div>
-                <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value as StatusFilterValue); setCurrentPage(1); }}>
+                <Select value={statusFilter} onValueChange={(value) => { 
+                    setStatusFilter(value as StatusFilterValue); 
+                    setCurrentPage(1);
+                    const newParams = new URLSearchParams(searchParams.toString());
+                    if (value === 'all') newParams.delete('status'); else newParams.set('status', value);
+                    router.replace(`/admin/orders?${newParams.toString()}`);
+                }}>
                   <SelectTrigger className="h-9 w-full px-3 text-xs">
-                    <SelectValue placeholder="סינון לפי סטטוס" />
+                    {statusFilter === 'all' ? 'סטטוס' : <SelectValue />}
                   </SelectTrigger>
                   <SelectContent>
                     {availableStatuses.map((statusKey) => (

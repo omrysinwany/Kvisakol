@@ -21,14 +21,14 @@ type CustomerStatusFilter = 'all' | 'new' | 'vip' | 'inactive' | 'returning';
 type TotalOrdersFilter = 'all' | '1' | '2-4' | '5+';
 
 const lastOrderDateFilterTranslations: Record<LastOrderDateFilter, string> = {
-  all: 'סינון לפי הזמנה אחרונה',
+  all: 'כל הזמנים',
   last7days: 'ב-7 ימים אחרונים',
   last30days: 'ב-30 ימים אחרונים',
   over90days: 'מעל 90 יום',
 };
 
 const customerStatusFilterTranslations: Record<CustomerStatusFilter, string> = {
-  all: 'סינון לפי סטטוס לקוח',
+  all: 'כל הסטטוסים',
   new: 'חדשים',
   vip: 'VIP',
   inactive: 'לא פעילים',
@@ -36,7 +36,7 @@ const customerStatusFilterTranslations: Record<CustomerStatusFilter, string> = {
 };
 
 const totalOrdersFilterTranslations: Record<TotalOrdersFilter, string> = {
-  all: 'סינון לפי סהכ הזמנות',
+  all: 'כל הכמויות',
   '1': 'הזמנה 1',
   '2-4': '2-4 הזמנות',
   '5+': '5+ הזמנות',
@@ -185,14 +185,14 @@ export default function AdminCustomersPage() {
 
       <Card className="shadow-lg">
         <CardHeader className="pb-3">
-          <div className="flex flex-row items-center justify-between space-x-2 rtl:space-x-reverse">
+           <div className="flex flex-row items-center justify-between space-x-2 rtl:space-x-reverse">
             <div>
               <CardTitle className="text-xl">רשימת לקוחות ({filteredCustomers.length})</CardTitle>
               <CardDescription>
                 סקירה של כל הלקוחות שביצעו הזמנות במערכת.
               </CardDescription>
             </div>
-            {/* Removed CSV export button from here */}
+           {/* Removed CSV export button from here */}
           </div>
            
           <div className="pt-3 space-y-2">
@@ -212,7 +212,7 @@ export default function AdminCustomersPage() {
               <div>
                 <Select value={customerStatusFilter} onValueChange={handleCustomerStatusFilterChange}>
                   <SelectTrigger id="customer-status-filter" className="h-9 w-full px-3 text-xs">
-                    <SelectValue placeholder="סינון לפי סטטוס לקוח" />
+                    {customerStatusFilter === 'all' ? 'סטטוס' : <SelectValue />}
                   </SelectTrigger>
                   <SelectContent>
                     {Object.entries(customerStatusFilterTranslations).map(([key, value]) => (
@@ -230,7 +230,7 @@ export default function AdminCustomersPage() {
               <div>
                 <Select value={lastOrderFilter} onValueChange={handleLastOrderFilterChange}>
                   <SelectTrigger id="last-order-filter" className="h-9 w-full px-3 text-xs">
-                    <SelectValue placeholder="סינון לפי הזמנה אחרונה" />
+                     {lastOrderFilter === 'all' ? 'תאריך' : <SelectValue />}
                   </SelectTrigger>
                   <SelectContent>
                     {Object.entries(lastOrderDateFilterTranslations).map(([key, value]) => (
@@ -244,7 +244,7 @@ export default function AdminCustomersPage() {
               <div>
                 <Select value={totalOrdersFilter} onValueChange={handleTotalOrdersFilterChange}>
                   <SelectTrigger id="total-orders-filter" className="h-9 w-full px-3 text-xs">
-                    <SelectValue placeholder="סינון לפי סהכ הזמנות" />
+                    {totalOrdersFilter === 'all' ? 'הזמנות' : <SelectValue />}
                   </SelectTrigger>
                   <SelectContent>
                     {Object.entries(totalOrdersFilterTranslations).map(([key, value]) => (
