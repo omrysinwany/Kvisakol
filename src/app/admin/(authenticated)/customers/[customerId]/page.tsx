@@ -10,13 +10,13 @@ import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { CustomerDetailView } from '@/components/admin/customer-detail-view';
-import { updateOrderStatusService } from '@/services/order-service'; 
+import { updateOrderStatusService } from '@/services/order-service';
 
 export default function AdminCustomerDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  const customerId = params.customerId as string; 
+  const customerId = params.customerId as string;
 
   const [customer, setCustomer] = useState<CustomerSummary | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -31,8 +31,8 @@ export default function AdminCustomerDetailPage() {
       const fetchCustomerData = async () => {
         setIsLoading(true);
         setError(null);
-        setCustomer(null); // Reset customer state
-        setOrders([]); // Reset orders state
+        setCustomer(null);
+        setOrders([]);
         try {
           console.log(`AdminCustomerDetailPage: Attempting to fetch customer summary for ID (phone): ${customerId} from 'customers' collection.`);
           const customerSummaryData = await getCustomerSummaryById(customerId);
@@ -41,25 +41,28 @@ export default function AdminCustomerDetailPage() {
           if (customerSummaryData) {
             setCustomer(customerSummaryData);
             
-            // Directly use customerId (which is the phone number from URL) to fetch orders
-            const phoneToQueryOrders = customerId; 
-            console.log(`AdminCustomerDetailPage: Phone number to query orders (directly from customerId): >>${phoneToQueryOrders}<< (Type: ${typeof phoneToQueryOrders})`);
+            // Use the phone from the fetched customer summary to query orders, ensuring consistency
+            const phoneToQueryOrders = customerSummaryData.phone;
+            console.log(`AdminCustomerDetailPage: Customer summary found. Phone from summary: ${phoneToQueryOrders}. ID to query orders with (original customerId from URL): ${customerId}`);
 
             if (!phoneToQueryOrders) {
-                console.error("AdminCustomerDetailPage: customerId (phone) is missing or empty. Cannot fetch orders.");
-                setError("שגיאה: מזהה לקוח (טלפון) חסר ולא ניתן לשלוף הזמנות.");
+                console.error("AdminCustomerDetailPage: Phone number from customer summary is missing or empty. Cannot fetch orders.");
+                setError("שגיאה: מספר טלפון חסר בפרטי הלקוח ולא ניתן לשלוף הזמנות.");
                 setOrders([]);
             } else {
                 console.log(`AdminCustomerDetailPage: Attempting to fetch orders for customer phone: >>${phoneToQueryOrders}<< from 'orders' collection.`);
                 const customerOrders = await getOrdersByCustomerPhone(phoneToQueryOrders);
                 console.log(`AdminCustomerDetailPage: Fetched ${customerOrders.length} orders for customer phone ${phoneToQueryOrders}. Order IDs: [${customerOrders.map(o => o.id).join(', ')}]`);
+                if (customerOrders.length > 0) {
+                  console.log('AdminCustomerDetailPage: Details of fetched orders:', customerOrders.map(o => ({id: o.id, name: o.customerName, phoneInOrder: o.customerPhone})));
+                }
                 setOrders(customerOrders.sort((a, b) => new Date(b.orderTimestamp).getTime() - new Date(a.orderTimestamp).getTime()));
             }
           } else {
             setError(`הלקוח המבוקש עם מזהה (טלפון) ${customerId} לא נמצא במערכת הלקוחות (בקולקציית 'customers'). ייתכן שלא ביצע הזמנות עדיין או שהמזהה לא תקין.`);
             console.warn(`AdminCustomerDetailPage: No customer document found for ID ${customerId} in 'customers' collection.`);
-            setCustomer(null); 
-            setOrders([]); 
+            setCustomer(null);
+            setOrders([]);
           }
         } catch (err) {
           console.error("AdminCustomerDetailPage: Failed to fetch customer data:", err);
@@ -94,9 +97,8 @@ export default function AdminCustomerDetailPage() {
           description: `הסטטוס של הזמנה ${orderId.substring(orderId.length - 6)} שונה ל: ${statusTranslationsToast[newStatus]}.`,
         });
         
-        // If status changed to completed or cancelled, refresh customer summary for totalSpent etc.
         if (newStatus === 'completed' || newStatus === 'cancelled') {
-            if (customer) { 
+            if (customer) {
                 console.log(`AdminCustomerDetailPage: Order ${orderId} status changed to ${newStatus}. Refreshing customer summary for customer ID ${customer.id}.`);
                 const updatedCustomerSummary = await getCustomerSummaryById(customer.id);
                 if (updatedCustomerSummary) {
@@ -135,7 +137,7 @@ export default function AdminCustomerDetailPage() {
     );
   }
 
-  if (!customer) { 
+  if (!customer) {
     return (
         <div className="container mx-auto px-4 py-8">
             <p className="text-center text-lg">לא נמצא לקוח עם המזהה (טלפון) שהתקבל: {customerId}.</p>

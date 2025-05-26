@@ -11,7 +11,7 @@ const orderFromDoc = (docSnap: any): Order => {
   return {
     id: docSnap.id,
     customerName: data.customerName || '',
-    customerPhone: data.customerPhone || '',
+    customerPhone: String(data.customerPhone || '').trim(), // Ensure it's a trimmed string
     customerAddress: data.customerAddress || '',
     customerNotes: data.customerNotes || '',
     items: data.items || [],
@@ -29,7 +29,7 @@ const customerSummaryFromDoc = (docSnap: any): CustomerSummary => {
     return {
       id: docSnap.id, // This is the customer's phone number
       name: data.name || '',
-      phone: data.phone || '', // Should be same as id
+      phone: String(data.phone || '').trim(), // Ensure it's a trimmed string and same as id
       firstOrderDate: data.firstOrderDate instanceof Timestamp ? data.firstOrderDate.toDate() : undefined,
       lastOrderDate: data.lastOrderDate instanceof Timestamp ? data.lastOrderDate.toDate() : new Date(0),
       totalOrders: data.totalOrders || 0,
@@ -85,21 +85,21 @@ export async function createOrderService(orderDetails: {
   const ordersCollectionRef = collection(db, 'orders');
   
   // Use Firestore's auto-generated ID for new orders
-  const newOrderDocRef = doc(ordersCollectionRef);
+  const newOrderDocRef = doc(ordersCollectionRef); // Let Firestore generate ID
   const newOrderId = newOrderDocRef.id;
   console.log(`OrderService: Generated new order ID with Firestore: ${newOrderId}`);
 
   let agentNoteForNameDiscrepancy = "";
-  const customerPhoneTrimmed = (orderDetails.customerPhone || '').trim();
+  const customerPhoneTrimmed = String(orderDetails.customerPhone || '').trim();
 
   const newOrderData: Omit<Order, 'id'> = {
     customerName: orderDetails.customerName,
-    customerPhone: customerPhoneTrimmed,
+    customerPhone: customerPhoneTrimmed, // Use trimmed phone
     customerAddress: orderDetails.customerAddress,
     customerNotes: orderDetails.customerNotes || '',
     items: orderDetails.items,
     totalAmount: orderDetails.totalAmount,
-    orderTimestamp: currentTimestamp.toDate(), // Store as Date object
+    orderTimestamp: currentTimestamp.toDate(),
     status: 'new' as Order['status'],
     isViewedByAgent: false,
     agentNotes: '',
@@ -107,7 +107,7 @@ export async function createOrderService(orderDetails: {
   console.log(`OrderService: Preparing to save new order ${newOrderId}. Customer details: Name='${orderDetails.customerName}', Phone='${customerPhoneTrimmed}'`);
 
   try {
-    const customerDocRef = doc(db, 'customers', customerPhoneTrimmed);
+    const customerDocRef = doc(db, 'customers', customerPhoneTrimmed); // Customer ID is the trimmed phone
     console.log(`OrderService: Attempting transaction for customer document: ${customerPhoneTrimmed}`);
     
     await runTransaction(db, async (transaction) => {
@@ -115,9 +115,9 @@ export async function createOrderService(orderDetails: {
       if (!customerDocSnap.exists()) {
         const newCustomerData = {
           name: orderDetails.customerName,
-          phone: customerPhoneTrimmed,
-          firstOrderDate: currentTimestamp, // Store as Timestamp
-          lastOrderDate: currentTimestamp,  // Store as Timestamp
+          phone: customerPhoneTrimmed, // Use trimmed phone
+          firstOrderDate: currentTimestamp,
+          lastOrderDate: currentTimestamp,
           totalOrders: 1,
           totalSpent: orderDetails.totalAmount,
           latestAddress: orderDetails.customerAddress,
@@ -134,14 +134,14 @@ export async function createOrderService(orderDetails: {
         }
 
         const updatedCustomerData: any = { 
-          lastOrderDate: currentTimestamp, // Store as Timestamp
+          lastOrderDate: currentTimestamp,
           totalOrders: increment(1),
           totalSpent: increment(orderDetails.totalAmount),
           latestAddress: orderDetails.customerAddress,
-          // name: orderDetails.customerName, // Name IS NOT updated, keeping original per previous request
+          // name: orderDetails.customerName, // Name is NOT updated here to keep original
         };
-        if (!existingCustomerData.firstOrderDate) { // Ensure firstOrderDate is set if it was missing
-            updatedCustomerData.firstOrderDate = currentTimestamp; // Store as Timestamp
+        if (!existingCustomerData.firstOrderDate) { // Defensive: set firstOrderDate if somehow missing
+            updatedCustomerData.firstOrderDate = currentTimestamp;
         }
         
         transaction.update(customerDocRef, updatedCustomerData);
@@ -153,15 +153,13 @@ export async function createOrderService(orderDetails: {
         newOrderData.agentNotes = (newOrderData.agentNotes ? newOrderData.agentNotes + "\n\n" : "") + agentNoteForNameDiscrepancy;
     }
     
-    await setDoc(newOrderDocRef, newOrderData); // newOrderData already has orderTimestamp as Date
+    await setDoc(newOrderDocRef, newOrderData);
     console.log("OrderService: Order created with ID: ", newOrderId, "and data:", newOrderData);
     console.log(`OrderService: New order saved to Firestore. Customer phone in order: ${newOrderData.customerPhone}`);
 
-    // Convert newOrderData back to Order type for return
     const createdOrder: Order = {
         id: newOrderId,
         ...newOrderData,
-        orderTimestamp: newOrderData.orderTimestamp, // Already a Date object
     };
     return createdOrder;
 
@@ -257,8 +255,7 @@ export async function getUniqueCustomers(): Promise<CustomerSummary[]> {
   console.log("OrderService: Fetching unique customers from 'customers' collection in Firestore.");
   try {
     const customersCollectionRef = collection(db, 'customers');
-    // Sort by name for consistent display in the customer list
-    const q = query(customersCollectionRef, orderBy('name', 'asc')); 
+    const q = query(customersCollectionRef, orderBy('name', 'asc'));
     const querySnapshot = await getDocs(q);
     const customers = querySnapshot.docs.map(docSnap => customerSummaryFromDoc(docSnap));
     console.log(`OrderService: Fetched ${customers.length} unique customers from 'customers' collection.`);
@@ -271,7 +268,7 @@ export async function getUniqueCustomers(): Promise<CustomerSummary[]> {
 
 
 export async function getOrdersByCustomerPhone(phone: string): Promise<Order[]> {
-  const cleanedPhone = String(phone || '').trim(); // Ensure it's a string and trimmed
+  const cleanedPhone = String(phone || '').trim();
   console.log(`OrderService: getOrdersByCustomerPhone: Received phone to query for orders: >>${cleanedPhone}<< (Type: ${typeof cleanedPhone})`);
   
   if (!cleanedPhone) {
@@ -282,15 +279,12 @@ export async function getOrdersByCustomerPhone(phone: string): Promise<Order[]> 
     const ordersCollectionRef = collection(db, 'orders');
     const q = query(
       ordersCollectionRef,
-      where('customerPhone', '==', cleanedPhone), // Use cleanedPhone
+      where('customerPhone', '==', cleanedPhone),
       orderBy('orderTimestamp', 'desc')
     );
     const querySnapshot = await getDocs(q);
     const orders = querySnapshot.docs.map(docSnap => orderFromDoc(docSnap));
-    console.log(`OrderService: Found ${orders.length} orders for phone ${cleanedPhone}. Order IDs: [${orders.map(o => o.id).join(', ')}]`);
-    if (orders.length > 0) {
-      console.log('OrderService: Details of fetched orders:', orders.map(o => ({id: o.id, name: o.customerName, phoneInOrder: o.customerPhone})));
-    }
+    console.log(`OrderService: Found ${orders.length} orders for phone ${cleanedPhone}. Orders Data (first 3):`, orders.slice(0,3).map(o => ({id: o.id, customerName: o.customerName, customerPhoneInOrder: o.customerPhone })));
     return orders;
   } catch (error) {
     console.error(`OrderService: Error fetching orders for customer phone ${cleanedPhone}:`, error);
