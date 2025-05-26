@@ -4,16 +4,69 @@
 import type { CustomerSummary } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { format, isBefore, subDays, startOfDay } from 'date-fns';
+import { format, isBefore, subDays, startOfDay, endOfDay } from 'date-fns';
 import { he } from 'date-fns/locale';
-import { UserCheck, UserX, Star, Repeat, UserCircle } from 'lucide-react'; // Added Star, Repeat
+import { UserCheck, UserX, Star, Repeat } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Button } from '../ui/button';
-import Link from 'next/link';
 
 interface CustomerTableProps {
   customers: CustomerSummary[];
 }
+
+type CustomerDisplayStatusKey = 'vip' | 'new' | 'inactive' | 'returning' | null;
+
+interface CustomerDisplayStatus {
+  key: CustomerDisplayStatusKey;
+  label: string;
+  icon: React.ElementType;
+  badgeClass: string;
+}
+
+const getCustomerDisplayBadge = (customer: CustomerSummary): CustomerDisplayStatus | null => {
+  const now = endOfDay(new Date());
+  const ninetyDaysAgo = subDays(now, 90);
+  const isActuallyNew = customer.totalOrders === 1;
+  const customerLastOrderDate = customer.lastOrderDate ? new Date(customer.lastOrderDate) : new Date(0); // Handle undefined lastOrderDate
+  const isActuallyInactive = isBefore(customerLastOrderDate, ninetyDaysAgo);
+
+  if (customer.totalOrders >= 5 && !isActuallyInactive) {
+    return { 
+      key: 'vip', 
+      label: 'VIP', 
+      icon: Star, 
+      badgeClass: 'border-yellow-500 text-yellow-600 bg-yellow-500/10' 
+    };
+  }
+  if (isActuallyNew) {
+    return { 
+      key: 'new', 
+      label: 'חדש', 
+      icon: UserCheck, 
+      badgeClass: 'border-green-500 text-green-600 bg-green-500/10' 
+    };
+  }
+  // An inactive customer takes precedence over "returning" if they meet the criteria for inactive
+  // And they are not new (new status takes precedence)
+  if (isActuallyInactive) { // No need to check !isActuallyNew here because 'new' is checked first
+    return { 
+      key: 'inactive', 
+      label: 'לא פעיל', 
+      icon: UserX, 
+      badgeClass: 'border-amber-500 text-amber-600 bg-amber-500/10' 
+    };
+  }
+  // If not VIP, not new, and not inactive, then they must be returning if totalOrders > 1
+  if (customer.totalOrders > 1) { 
+    return { 
+      key: 'returning', 
+      label: 'חוזר', 
+      icon: Repeat, 
+      badgeClass: 'border-sky-500 text-sky-600 bg-sky-500/10' 
+    };
+  }
+  return null; // No specific status badge
+};
+
 
 export function CustomerTable({ customers }: CustomerTableProps) {
   const router = useRouter();
@@ -36,44 +89,7 @@ export function CustomerTable({ customers }: CustomerTableProps) {
       </TableHeader>
       <TableBody>
         {customers.map((customer) => {
-          const isNewCustomer = customer.totalOrders === 1;
-          const ninetyDaysAgo = startOfDay(subDays(new Date(), 90));
-          const isInactiveCustomer = isBefore(new Date(customer.lastOrderDate), ninetyDaysAgo);
-          const isVipCustomer = customer.totalOrders >= 5 && !isInactiveCustomer;
-          const isReturningCustomer = customer.totalOrders > 1 && !isInactiveCustomer && !isVipCustomer && !isNewCustomer;
-
-          let statusBadge = <span className="text-muted-foreground">-</span>;
-          if (isVipCustomer) {
-            statusBadge = (
-              <Badge variant="outline" className="border-yellow-500 text-yellow-600 text-[10px] px-1.5 py-0.5 bg-yellow-500/10">
-                <Star className="h-3 w-3 ml-0.5" />
-                VIP
-              </Badge>
-            );
-          } else if (isNewCustomer) {
-            statusBadge = (
-              <Badge variant="outline" className="border-green-500 text-green-600 text-[10px] px-1.5 py-0.5 bg-green-500/10">
-                <UserCheck className="h-3 w-3 ml-0.5" />
-                חדש
-              </Badge>
-            );
-          } else if (isInactiveCustomer) {
-            statusBadge = (
-              <Badge variant="outline" className="border-amber-500 text-amber-600 text-[10px] px-1.5 py-0.5 bg-amber-500/10">
-                <UserX className="h-3 w-3 ml-0.5" />
-                לא פעיל
-              </Badge>
-            );
-          } else if (isReturningCustomer) {
-            statusBadge = (
-              <Badge variant="outline" className="border-sky-500 text-sky-600 text-[10px] px-1.5 py-0.5 bg-sky-500/10">
-                <Repeat className="h-3 w-3 ml-0.5" />
-                חוזר
-              </Badge>
-            );
-          }
-
-
+          const displayStatus = getCustomerDisplayBadge(customer);
           return (
             <TableRow 
               key={customer.id} 
@@ -84,9 +100,14 @@ export function CustomerTable({ customers }: CustomerTableProps) {
                 {customer.name}
               </TableCell>
               <TableCell>
-                <div className="flex items-center gap-1">
-                 {statusBadge}
-                </div>
+                {displayStatus ? (
+                  <Badge variant="outline" className={`text-[10px] px-1.5 py-0.5 ${displayStatus.badgeClass}`}>
+                    <displayStatus.icon className="h-3 w-3 ml-0.5" />
+                    {displayStatus.label}
+                  </Badge>
+                ) : (
+                  <span className="text-muted-foreground">-</span>
+                )}
               </TableCell>
               <TableCell>{customer.phone}</TableCell>
               <TableCell className="hidden md:table-cell">{customer.latestAddress || '-'}</TableCell>
@@ -101,3 +122,4 @@ export function CustomerTable({ customers }: CustomerTableProps) {
     </Table>
   );
 }
+

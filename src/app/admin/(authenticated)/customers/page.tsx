@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CustomerTable } from '@/components/admin/customer-table';
 import { AdminPaginationControls } from '@/components/admin/admin-pagination-controls';
-import { getUniqueCustomers } from '@/services/order-service'; // Updated to getUniqueCustomers
+import { getUniqueCustomers } from '@/services/order-service';
 import type { CustomerSummary } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
@@ -17,19 +17,44 @@ import { subDays, isWithinInterval, startOfDay, endOfDay, isBefore } from 'date-
 const ITEMS_PER_PAGE = 15;
 
 type LastOrderDateFilter = 'all' | 'last7days' | 'last30days' | 'over90days';
+type CustomerStatusFilter = 'all' | 'new' | 'vip' | 'inactive' | 'returning';
 
 const lastOrderDateFilterTranslations: Record<LastOrderDateFilter, string> = {
   all: 'כל התקופות',
   last7days: 'ב-7 ימים אחרונים',
   last30days: 'ב-30 ימים אחרונים',
-  over90days: 'מעל 90 יום (לא פעיל)',
+  over90days: 'מעל 90 יום',
 };
+
+const customerStatusFilterTranslations: Record<CustomerStatusFilter, string> = {
+  all: 'כל הסטטוסים',
+  new: 'חדשים',
+  vip: 'VIP',
+  inactive: 'לא פעילים',
+  returning: 'חוזרים',
+};
+
+const getCustomerDisplayStatus = (customer: CustomerSummary): CustomerStatusFilter => {
+  const now = endOfDay(new Date());
+  const ninetyDaysAgo = subDays(now, 90);
+  const isNewCustomer = customer.totalOrders === 1;
+  const customerLastOrderDate = new Date(customer.lastOrderDate);
+  const isInactive = isBefore(customerLastOrderDate, ninetyDaysAgo);
+
+  if (customer.totalOrders >= 5 && !isInactive) return 'vip';
+  if (isNewCustomer) return 'new';
+  if (isInactive) return 'inactive';
+  if (customer.totalOrders > 1 && !isInactive) return 'returning';
+  return 'all'; // Should ideally not happen if logic is correct
+};
+
 
 export default function AdminCustomersPage() {
   const [allCustomers, setAllCustomers] = useState<CustomerSummary[]>([]);
   const [filteredCustomers, setFilteredCustomers] = useState<CustomerSummary[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [lastOrderFilter, setLastOrderFilter] = useState<LastOrderDateFilter>('all');
+  const [customerStatusFilter, setCustomerStatusFilter] = useState<CustomerStatusFilter>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
@@ -38,7 +63,7 @@ export default function AdminCustomersPage() {
     const fetchCustomers = async () => {
       setIsLoading(true);
       try {
-        const fetchedCustomers = await getUniqueCustomers(); // Using the new service function
+        const fetchedCustomers = await getUniqueCustomers();
         setAllCustomers(fetchedCustomers);
         setFilteredCustomers(fetchedCustomers);
       } catch (error) {
@@ -65,7 +90,7 @@ export default function AdminCustomersPage() {
 
     if (lastOrderFilter !== 'all') {
       customersToFilter = customersToFilter.filter(customer => {
-        if (!customer.lastOrderDate) return false; // Handle cases where lastOrderDate might be undefined
+        if (!customer.lastOrderDate) return false;
         const customerLastOrderDate = new Date(customer.lastOrderDate);
         if (lastOrderFilter === 'last7days') {
           const sevenDaysAgo = startOfDay(subDays(now, 6));
@@ -83,9 +108,15 @@ export default function AdminCustomersPage() {
       });
     }
 
+    if (customerStatusFilter !== 'all') {
+      customersToFilter = customersToFilter.filter(customer => {
+        return getCustomerDisplayStatus(customer) === customerStatusFilter;
+      });
+    }
+
     setFilteredCustomers(customersToFilter);
     setCurrentPage(1);
-  }, [searchTerm, lastOrderFilter, allCustomers]);
+  }, [searchTerm, lastOrderFilter, customerStatusFilter, allCustomers]);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -93,6 +124,10 @@ export default function AdminCustomersPage() {
 
   const handleLastOrderFilterChange = (value: LastOrderDateFilter) => {
     setLastOrderFilter(value);
+  };
+
+  const handleCustomerStatusFilterChange = (value: CustomerStatusFilter) => {
+    setCustomerStatusFilter(value);
   };
 
   const totalPages = Math.ceil(filteredCustomers.length / ITEMS_PER_PAGE);
@@ -124,8 +159,8 @@ export default function AdminCustomersPage() {
       </div>
       
       <div className="mb-4 p-3 border rounded-lg bg-muted/30 shadow-sm">
-        <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-end">
-          <div className="relative">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+          <div className="relative sm:col-span-1">
             <label htmlFor="customer-search" className="text-xs font-medium text-muted-foreground block mb-1.5">חיפוש</label>
             <div className="relative">
               <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -139,14 +174,29 @@ export default function AdminCustomersPage() {
               />
             </div>
           </div>
-          <div className="w-full sm:w-auto">
+          <div className="w-full sm:col-span-1">
             <label htmlFor="last-order-filter" className="text-xs font-medium text-muted-foreground block mb-1.5">הזמנה אחרונה</label>
             <Select value={lastOrderFilter} onValueChange={handleLastOrderFilterChange}>
-              <SelectTrigger id="last-order-filter" className="h-9 w-full sm:w-auto min-w-[180px] px-3 text-xs">
+              <SelectTrigger id="last-order-filter" className="h-9 w-full min-w-[150px] px-3 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {Object.entries(lastOrderDateFilterTranslations).map(([key, value]) => (
+                  <SelectItem key={key} value={key} className="text-xs">
+                    {value}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="w-full sm:col-span-1">
+            <label htmlFor="customer-status-filter" className="text-xs font-medium text-muted-foreground block mb-1.5">סטטוס לקוח</label>
+            <Select value={customerStatusFilter} onValueChange={handleCustomerStatusFilterChange}>
+              <SelectTrigger id="customer-status-filter" className="h-9 w-full min-w-[150px] px-3 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(customerStatusFilterTranslations).map(([key, value]) => (
                   <SelectItem key={key} value={key} className="text-xs">
                     {value}
                   </SelectItem>
