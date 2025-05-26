@@ -7,7 +7,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { getProductById } from "@/services/product-service";
 import { getOrdersForAdmin, getTopCustomers, getRecentOrders, getNewCustomersThisMonthCount } from "@/services/order-service";
 import type { Order, CustomerSummary } from "@/lib/types";
-import { Package, ClipboardCheck, Eye, Users, CalendarDays, CalendarCheck, CalendarIcon, X, Hourglass, ChevronDown, ListOrdered, Trophy, ListChecks, UserPlus } from "lucide-react";
+import { Package, ClipboardCheck, Eye, Users, CalendarDays, CalendarCheck, CalendarIcon, X, Hourglass, ChevronDown, ListOrdered, Trophy, ListChecks, UserPlus, DollarSign } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -266,8 +266,7 @@ export default function AdminDashboardPage() {
         <Link href="/admin/orders?status=new" className="block hover:shadow-lg transition-shadow rounded-lg">
           <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">הזמנות חדשות</CardTitle>
-              <Hourglass className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium flex items-center gap-1.5"><Hourglass className="h-4 w-4 text-muted-foreground" />הזמנות חדשות</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{summary.newOrdersUnviewed}</div>
@@ -279,8 +278,7 @@ export default function AdminDashboardPage() {
         <Link href="/admin/orders?status=received" className="block hover:shadow-lg transition-shadow rounded-lg">
           <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">הזמנות שהתקבלו</CardTitle>
-              <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium flex items-center gap-1.5"><ClipboardCheck className="h-4 w-4 text-muted-foreground" />הזמנות שהתקבלו</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{summary.receivedOrders}</div>
@@ -291,7 +289,7 @@ export default function AdminDashboardPage() {
 
         <Card className="h-full">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">סה"כ הזמנות</CardTitle>
+            <CardTitle className="text-sm font-medium flex items-center gap-1.5"><ListOrdered className="h-4 w-4 text-muted-foreground" />סה"כ הזמנות</CardTitle>
              <DropdownMenu dir="rtl">
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="xs" className="text-xs h-6 px-1.5 -mr-1.5">
@@ -318,8 +316,7 @@ export default function AdminDashboardPage() {
         
         <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">לקוחות חדשים החודש</CardTitle>
-              <UserPlus className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium flex items-center gap-1.5"><UserPlus className="h-4 w-4 text-muted-foreground" />לקוחות חדשים החודש</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{newCustomersThisMonth}</div>
@@ -399,7 +396,8 @@ export default function AdminDashboardPage() {
         <Card className="col-span-2">
           <CardHeader className="pb-3">
             <div className="flex flex-row items-center justify-between gap-2">
-              <CardTitle className="text-2xl font-semibold"> 
+              <CardTitle className="text-2xl font-semibold flex items-center gap-2">
+                <DollarSign className="h-6 w-6 text-primary"/>
                 הכנסות בתקופה הנבחרת
               </CardTitle>
               <DropdownMenu dir="rtl">
