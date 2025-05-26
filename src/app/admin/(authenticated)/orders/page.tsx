@@ -8,7 +8,7 @@ import { AdminPaginationControls } from '@/components/admin/admin-pagination-con
 import { getOrdersForAdmin, updateOrderStatusService } from '@/services/order-service';
 import type { Order } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, X, UserSearch } from 'lucide-react';
+import { CalendarIcon, X, UserSearch, ClipboardList } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -17,7 +17,6 @@ import { format, startOfDay, endOfDay, subDays } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { cn } from "@/lib/utils";
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 
 type StatusFilterValue = Order['status'] | 'all'; 
@@ -207,7 +206,10 @@ export default function AdminOrdersPage() {
         <CardHeader className="pb-3">
           <div className="flex flex-row items-center justify-between gap-2">
             <div>
-              <CardTitle className="text-xl">רשימת הזמנות ({filteredOrders.length})</CardTitle>
+              <CardTitle className="text-xl flex items-center gap-2">
+                <ClipboardList className="h-5 w-5 text-primary" />
+                רשימת הזמנות ({filteredOrders.length})
+              </CardTitle>
               <CardDescription>
                  נהל את כל ההזמנות שהתקבלו
               </CardDescription>
@@ -312,10 +314,10 @@ export default function AdminOrdersPage() {
                     </Button>
                 )}
                  {customerPhoneFilter && (
-                    <Badge variant="secondary" className="text-xs py-1 px-2">
-                      <UserSearch className="h-3.5 w-3.5 ml-1" />
-                      מציג הזמנות עבור לקוח: {customerPhoneFilter}
-                    </Badge>
+                    <div className="text-xs text-muted-foreground py-1 px-1.5 rounded-md bg-muted/50 flex items-center">
+                      <UserSearch className="h-3.5 w-3.5 ml-1 text-primary" />
+                      <span>הזמנות עבור: {customerPhoneFilter}</span>
+                    </div>
                   )}
                  {(customerPhoneFilter || (customerPhoneInput && customerPhoneInput !== customerPhoneFilter) ) && (
                      <Button variant="outline" size="xs" onClick={handleClearCustomerFilter} className="h-auto py-0.5 px-1.5 text-xs">
