@@ -63,8 +63,8 @@ const revenuePeriodTranslations: Record<RevenuePeriod, string> = {
 
 type OrdersCountPeriod = 'thisWeek' | 'thisMonth' | 'allTime';
 const ordersCountPeriodTranslations: Record<OrdersCountPeriod, string> = {
-  thisWeek: 'השבוע הנוכחי',
-  thisMonth: 'החודש הנוכחי',
+  thisWeek: 'שבוע',
+  thisMonth: 'חודש',
   allTime: 'כל הזמן',
 };
 
@@ -287,7 +287,7 @@ export default function AdminDashboardPage() {
              <DropdownMenu dir="rtl">
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="xs" className="text-xs h-6 px-1.5 -mr-1.5">
-                    בחר תקופה
+                    בחר
                     <ChevronDown className="h-3 w-3 opacity-75 mr-0.5" />
                   </Button>
                 </DropdownMenuTrigger>
