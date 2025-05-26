@@ -69,13 +69,16 @@ export default function AdminProductsPage() {
   const handleDeleteProduct = async (productId: string, productName: string) => {
      if (window.confirm(`האם אתה בטוח שברצונך למחוק את המוצר "${productName}"?`)) {
         try {
-            await deleteProductService(productId);
-            setAllProducts(prevProducts => prevProducts.filter(p => p.id !== productId));
-            toast({
-                title: "מוצר נמחק",
-                description: `המוצר "${productName}" נמחק בהצלחה.`,
-            });
-            
+            const success = await deleteProductService(productId);
+            if (success) {
+                setAllProducts(prevProducts => prevProducts.filter(p => p.id !== productId));
+                toast({
+                    title: "מוצר נמחק",
+                    description: `המוצר "${productName}" נמחק בהצלחה.`,
+                });
+            } else {
+                 toast({ variant: "destructive", title: "שגיאה", description: "אירעה תקלה במחיקת המוצר."});
+            }
         } catch (error) {
             console.error("Failed to delete product:", error);
             toast({ variant: "destructive", title: "שגיאה", description: "אירעה תקלה במחיקת המוצר."});
@@ -139,16 +142,16 @@ export default function AdminProductsPage() {
       </div>
 
       <Card className="shadow-lg">
-        <CardHeader> {/* Default is flex flex-col space-y-1.5 p-6 */}
-          <div> {/* Title and Description part */}
+        <CardHeader>
+          <div>
             <CardTitle className="text-xl">רשימת מוצרים</CardTitle>
             <CardDescription>
               נהל את כל המוצרים בקטלוג שלך.
             </CardDescription>
           </div>
           {/* Filters part */}
-          <div className="flex flex-row items-center gap-2 pt-2">
-            <div className="relative flex-grow"> {/* Search container */}
+          <div className="grid grid-cols-2 gap-2 pt-2">
+            <div className="relative"> {/* Search container */}
               <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="search"
@@ -158,7 +161,7 @@ export default function AdminProductsPage() {
                 onChange={handleSearchChange}
               />
             </div>
-            <div className="w-auto"> {/* Select container */}
+            <div className="w-full"> {/* Select container */}
               <Select value={selectedCategory} onValueChange={handleCategoryChange}>
                 <SelectTrigger className="w-full h-9 text-xs px-3">
                   <SelectValue placeholder="סינון לפי קטגוריה" />
