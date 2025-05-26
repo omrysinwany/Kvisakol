@@ -159,8 +159,8 @@ export default function AdminCustomersPage() {
       </div>
       
       <div className="mb-4 p-3 border rounded-lg bg-muted/30 shadow-sm">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
-          <div className="relative sm:col-span-1">
+        <div className="grid grid-cols-3 gap-3 items-end">
+          <div className="relative col-span-1">
             <label htmlFor="customer-search" className="text-xs font-medium text-muted-foreground block mb-1.5">חיפוש</label>
             <div className="relative">
               <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -174,10 +174,10 @@ export default function AdminCustomersPage() {
               />
             </div>
           </div>
-          <div className="w-full sm:col-span-1">
+          <div className="col-span-1">
             <label htmlFor="last-order-filter" className="text-xs font-medium text-muted-foreground block mb-1.5">הזמנה אחרונה</label>
             <Select value={lastOrderFilter} onValueChange={handleLastOrderFilterChange}>
-              <SelectTrigger id="last-order-filter" className="h-9 w-full min-w-[150px] px-3 text-xs">
+              <SelectTrigger id="last-order-filter" className="h-9 w-full px-3 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -189,10 +189,10 @@ export default function AdminCustomersPage() {
               </SelectContent>
             </Select>
           </div>
-          <div className="w-full sm:col-span-1">
+          <div className="col-span-1">
             <label htmlFor="customer-status-filter" className="text-xs font-medium text-muted-foreground block mb-1.5">סטטוס לקוח</label>
             <Select value={customerStatusFilter} onValueChange={handleCustomerStatusFilterChange}>
-              <SelectTrigger id="customer-status-filter" className="h-9 w-full min-w-[150px] px-3 text-xs">
+              <SelectTrigger id="customer-status-filter" className="h-9 w-full px-3 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
