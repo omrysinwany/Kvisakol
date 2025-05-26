@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, Package, ShoppingBasket, Users, Settings, LayoutList } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingBasket, Users, Settings } from 'lucide-react'; // Removed LayoutList
 import type { LucideIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -22,7 +22,7 @@ const baseNavItems: NavItem[] = [
   { href: '/admin/orders', label: 'ניהול הזמנות', icon: ShoppingBasket },
   { href: '/admin/customers', label: 'ניהול לקוחות', icon: Users },
   { href: '/admin/products', label: 'ניהול מוצרים', icon: Package },
-  { href: '/admin/catalog-preview', label: 'קטלוג', icon: LayoutList }, 
+  // { href: '/admin/catalog-preview', label: 'קטלוג', icon: LayoutList }, // Removed catalog preview link
   // { href: '/admin/settings', label: 'הגדרות', icon: Settings }, // Example for future extension
 ];
 
@@ -53,7 +53,7 @@ export function AdminSidebarNav({
   if (isLoading) {
     return (
       <nav className={cn("flex flex-col gap-1 p-4", isMobile ? "" : "lg:gap-2 lg:p-4")}>
-        {[...Array(baseNavItems.length)].map((_, i) => (
+        {[...Array(baseNavItems.filter(item => !item.isSuperAdminOnly || (item.isSuperAdminOnly && isSuperAdmin)).length)].map((_, i) => (
           <div key={i} className="h-8 bg-muted rounded-md animate-pulse"></div>
         ))}
       </nav>
@@ -76,6 +76,7 @@ export function AdminSidebarNav({
             (pathname === '/admin/catalog-preview' && item.href === '/admin/catalog-preview') 
             ? 'bg-accent text-primary font-semibold' : '',
             (pathname.startsWith('/admin') && item.href === '/') ? '' : (pathname === item.href ? 'bg-accent text-primary font-semibold' : ''),
+            (pathname.startsWith(item.href) && item.href !== '/admin/dashboard' && item.href !== '/' ) ? 'bg-accent text-primary font-semibold' : (pathname === item.href ? 'bg-accent text-primary font-semibold' : ''),
             isMobile ? 'text-base' : 'text-sm'
           )}
           target={item.target} 
@@ -88,4 +89,3 @@ export function AdminSidebarNav({
     </nav>
   );
 }
-
