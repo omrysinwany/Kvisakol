@@ -62,7 +62,14 @@ const revenuePeriodTranslations: Record<RevenuePeriod, string> = {
 };
 
 type OrdersCountPeriod = 'thisWeek' | 'thisMonth' | 'allTime';
-const ordersCountPeriodTranslations: Record<OrdersCountPeriod, string> = {
+// This dictionary will hold the full display names for the text below the count
+const ordersCountPeriodDisplayTranslations: Record<OrdersCountPeriod, string> = {
+  thisWeek: 'בשבוע הנוכחי',
+  thisMonth: 'בחודש הנוכחי',
+  allTime: 'כל הזמן',
+};
+// This dictionary will hold the shorter names for the dropdown options
+const ordersCountPeriodDropdownOptions: Record<OrdersCountPeriod, string> = {
   thisWeek: 'שבוע',
   thisMonth: 'חודש',
   allTime: 'כל הזמן',
@@ -293,9 +300,9 @@ export default function AdminDashboardPage() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuRadioGroup value={selectedOrdersCountPeriod} onValueChange={(value) => setSelectedOrdersCountPeriod(value as OrdersCountPeriod)}>
-                    <DropdownMenuRadioItem value="thisWeek" className="text-xs">{ordersCountPeriodTranslations.thisWeek}</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="thisMonth" className="text-xs">{ordersCountPeriodTranslations.thisMonth}</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="allTime" className="text-xs">{ordersCountPeriodTranslations.allTime}</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="thisWeek" className="text-xs">{ordersCountPeriodDropdownOptions.thisWeek}</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="thisMonth" className="text-xs">{ordersCountPeriodDropdownOptions.thisMonth}</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="allTime" className="text-xs">{ordersCountPeriodDropdownOptions.allTime}</DropdownMenuRadioItem>
                   </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -303,7 +310,7 @@ export default function AdminDashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">{filteredOrdersCount}</div>
             <p className="text-xs text-muted-foreground">
-              בתקופה: {ordersCountPeriodTranslations[selectedOrdersCountPeriod]}
+              בתקופה: {ordersCountPeriodDisplayTranslations[selectedOrdersCountPeriod]}
             </p>
           </CardContent>
         </Card>
