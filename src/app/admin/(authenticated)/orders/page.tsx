@@ -18,6 +18,7 @@ import { he } from 'date-fns/locale';
 import { cn } from "@/lib/utils";
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input'; // Make sure Input is imported
 
 type StatusFilterValue = Order['status'] | 'all';
 
@@ -210,7 +211,7 @@ export default function AdminOrdersPage() {
 
       <Card className="shadow-lg">
         <CardHeader>
-          <div className="flex flex-row items-center justify-between space-x-2">
+          <div className="flex flex-row items-center justify-between space-x-2 rtl:space-x-reverse">
             <div>
               <CardTitle className="text-xl">רשימת הזמנות ({filteredOrders.length})</CardTitle>
               <CardDescription>
@@ -223,8 +224,25 @@ export default function AdminOrdersPage() {
             </Button>
           </div>
           {/* Filters Area */}
-          <div className="pt-3"> {/* Added padding-top */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 items-end">
+          <div className="pt-3 space-y-3">
+            {/* Customer Phone Filter Input - Full Width */}
+            <div className="relative w-full">
+                <UserSearch className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                type="tel"
+                placeholder="טלפון לקוח..."
+                value={customerPhoneInput}
+                onChange={handleCustomerPhoneInputChange}
+                onKeyPress={(e) => e.key === 'Enter' && handleApplyCustomerPhoneFilter()}
+                className={cn(
+                    "h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                    "pl-10 rtl:pr-10"
+                )}
+                />
+            </div>
+
+            {/* Status Filter and Date Filters - In a row */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end">
               {/* Status Filter */}
               <div className="w-full">
                 <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value as StatusFilterValue); setCurrentPage(1); }}>
@@ -240,21 +258,7 @@ export default function AdminOrdersPage() {
                   </SelectContent>
                 </Select>
               </div>
-              {/* Customer Phone Filter Input */}
-              <div className="relative w-full">
-                 <UserSearch className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="tel"
-                  placeholder="טלפון לקוח..."
-                  value={customerPhoneInput}
-                  onChange={handleCustomerPhoneInputChange}
-                  onKeyPress={(e) => e.key === 'Enter' && handleApplyCustomerPhoneFilter()}
-                  className={cn(
-                    "flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-                    "pl-10 rtl:pr-10"
-                  )}
-                />
-              </div>
+              
               {/* Date Filters */}
               <div className="w-full">
                 <Popover>
@@ -309,6 +313,7 @@ export default function AdminOrdersPage() {
                 </Popover>
               </div>
             </div>
+            {/* Clear buttons and badges */}
             <div className="flex items-center gap-2 mt-2">
                 {(startDate || endDate) && (
                     <Button variant="ghost" onClick={() => {handleClearDates(); setCurrentPage(1);}} size="icon" className="h-8 w-8 shrink-0">
@@ -357,6 +362,4 @@ export default function AdminOrdersPage() {
     </>
   );
 }
-    
-
     
