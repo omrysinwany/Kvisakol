@@ -20,7 +20,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 
-type StatusFilterValue = Order['status'] | 'all' | 'received'; // Added 'received'
+type StatusFilterValue = Order['status'] | 'all' | 'received'; 
 
 const ITEMS_PER_PAGE = 10;
 
@@ -95,6 +95,9 @@ export default function AdminOrdersPage() {
         setStartDate(startOfDay(sevenDaysAgo));
         setEndDate(endOfDay(today));
       }
+    } else if (!phoneFromUrl && !statusFromUrl) { // Clear dates if no other filters are active from URL
+        setStartDate(undefined);
+        setEndDate(undefined);
     }
     setCurrentPage(1);
   }, [searchParams, initialStatusFilter, initialCustomerPhoneFilter, initialPeriodFilter]);
@@ -168,17 +171,18 @@ export default function AdminOrdersPage() {
   };
 
   const handleApplyCustomerPhoneFilter = () => {
-    setCustomerPhoneFilter(customerPhoneInput.trim() || null);
+    const trimmedPhone = customerPhoneInput.trim();
+    setCustomerPhoneFilter(trimmedPhone || null);
     setCurrentPage(1);
     const newParams = new URLSearchParams(searchParams.toString());
-    if (customerPhoneInput.trim()) {
-      newParams.set('customerPhone', customerPhoneInput.trim());
+    if (trimmedPhone) {
+      newParams.set('customerPhone', trimmedPhone);
     } else {
       newParams.delete('customerPhone');
     }
     router.replace(`/admin/orders?${newParams.toString()}`);
   };
-
+  
   const handleClearCustomerFilter = () => {
     setCustomerPhoneFilter(null);
     setCustomerPhoneInput('');
@@ -220,28 +224,22 @@ export default function AdminOrdersPage() {
                 ייצא CSV
             </Button>
           </div>
-          {/* Filters Area */}
+          
           <div className="pt-3 space-y-3">
-            {/* Customer Phone Filter Input - Full Width */}
-            <div className="relative w-full">
+            {/* Row 1: Phone Search and Status Filter */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 items-end">
+              <div className="relative">
                 <UserSearch className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                type="tel"
-                placeholder="טלפון לקוח..."
-                value={customerPhoneInput}
-                onChange={handleCustomerPhoneInputChange}
-                onKeyPress={(e) => e.key === 'Enter' && handleApplyCustomerPhoneFilter()}
-                className={cn(
-                    "h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-                    "pl-10 rtl:pr-10"
-                )}
+                  type="tel"
+                  placeholder="טלפון לקוח..."
+                  value={customerPhoneInput}
+                  onChange={handleCustomerPhoneInputChange}
+                  onKeyPress={(e) => { if (e.key === 'Enter') handleApplyCustomerPhoneFilter(); }}
+                  className="h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-10 rtl:pr-10"
                 />
-            </div>
-
-            {/* Status Filter and Date Filters - In a row */}
-             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 items-end">
-              {/* Status Filter */}
-              <div className="w-full sm:col-span-1">
+              </div>
+              <div>
                 <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value as StatusFilterValue); setCurrentPage(1); }}>
                   <SelectTrigger className="h-9 w-full px-3 text-xs">
                     <SelectValue placeholder="סינון לפי סטטוס" />
@@ -255,61 +253,62 @@ export default function AdminOrdersPage() {
                   </SelectContent>
                 </Select>
               </div>
-              
-              {/* Date Filters Container */}
-              <div className="w-full sm:col-span-1 grid grid-cols-2 gap-2">
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button
-                        variant={"outline"}
-                        size="sm"
-                        className={cn(
-                            "h-9 w-full px-2 text-xs justify-start text-left font-normal",
-                            !startDate && "text-muted-foreground"
-                        )}
-                        >
-                        <CalendarIcon className="mr-1 h-3.5 w-3.5" />
-                        {startDate ? format(startDate, "d/M/yy", { locale: he }) : <span className="text-xs">מתאריך</span>}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                        <Calendar
-                        mode="single"
-                        selected={startDate}
-                        onSelect={(date) => {setStartDate(date); setCurrentPage(1);}}
-                        initialFocus
-                        disabled={(date) => endDate ? date > endDate : false}
-                        />
-                    </PopoverContent>
-                </Popover>
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button
-                        variant={"outline"}
-                        size="sm"
-                        className={cn(
-                            "h-9 w-full px-2 text-xs justify-start text-left font-normal",
-                            !endDate && "text-muted-foreground"
-                        )}
-                        >
-                        <CalendarIcon className="mr-1 h-3.5 w-3.5" />
-                        {endDate ? format(endDate, "d/M/yy", { locale: he }) : <span className="text-xs">עד תאריך</span>}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                        <Calendar
-                        mode="single"
-                        selected={endDate}
-                        onSelect={(date) => {setEndDate(date); setCurrentPage(1);}}
-                        disabled={(date) => startDate && date < startDate}
-                        initialFocus
-                        />
-                    </PopoverContent>
-                </Popover>
-              </div>
             </div>
+
+            {/* Row 2: Date Filters */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 items-end">
+              <Popover>
+                  <PopoverTrigger asChild>
+                      <Button
+                      variant={"outline"}
+                      size="sm"
+                      className={cn(
+                          "h-9 w-full px-2 text-xs justify-start text-left font-normal",
+                          !startDate && "text-muted-foreground"
+                      )}
+                      >
+                      <CalendarIcon className="mr-1 h-3.5 w-3.5" />
+                      {startDate ? format(startDate, "d/M/yy", { locale: he }) : <span className="text-xs">מתאריך</span>}
+                      </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                      <Calendar
+                      mode="single"
+                      selected={startDate}
+                      onSelect={(date) => {setStartDate(date); setCurrentPage(1);}}
+                      initialFocus
+                      disabled={(date) => endDate ? date > endDate : false}
+                      />
+                  </PopoverContent>
+              </Popover>
+              <Popover>
+                  <PopoverTrigger asChild>
+                      <Button
+                      variant={"outline"}
+                      size="sm"
+                      className={cn(
+                          "h-9 w-full px-2 text-xs justify-start text-left font-normal",
+                          !endDate && "text-muted-foreground"
+                      )}
+                      >
+                      <CalendarIcon className="mr-1 h-3.5 w-3.5" />
+                      {endDate ? format(endDate, "d/M/yy", { locale: he }) : <span className="text-xs">עד תאריך</span>}
+                      </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                      <Calendar
+                      mode="single"
+                      selected={endDate}
+                      onSelect={(date) => {setEndDate(date); setCurrentPage(1);}}
+                      disabled={(date) => startDate && date < startDate}
+                      initialFocus
+                      />
+                  </PopoverContent>
+              </Popover>
+            </div>
+            
             {/* Clear buttons and badges */}
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center gap-2 mt-1 flex-wrap">
                 {(startDate || endDate) && (
                     <Button variant="ghost" onClick={() => {handleClearDates(); setCurrentPage(1);}} size="icon" className="h-8 w-8 shrink-0">
                         <X className="h-3.5 w-3.5" />
@@ -322,7 +321,7 @@ export default function AdminOrdersPage() {
                       מציג הזמנות עבור לקוח: {customerPhoneFilter}
                     </Badge>
                   )}
-                 {(customerPhoneFilter || customerPhoneInput) && (
+                 {(customerPhoneFilter || (customerPhoneInput && customerPhoneInput !== customerPhoneFilter) ) && (
                      <Button variant="outline" size="xs" onClick={handleClearCustomerFilter} className="h-auto py-0.5 px-1.5 text-xs">
                         <X className="h-3 w-3 ml-0.5" />
                         נקה סינון לקוח
@@ -358,3 +357,4 @@ export default function AdminOrdersPage() {
   );
 }
     
+
