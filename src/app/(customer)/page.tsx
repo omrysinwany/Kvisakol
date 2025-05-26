@@ -10,7 +10,7 @@ import { useEffect, useState, useMemo, useRef } from 'react';
 import { CategoryFilter } from '@/components/customer/category-filter';
 import { PaginationControls } from '@/components/customer/pagination-controls';
 
-const ITEMS_PER_PAGE = 12; // Changed from 10 to 12
+const ITEMS_PER_PAGE = 12;
 const PRODUCT_ID_TO_MOVE_SECOND_LAST_NK = 'kbio1'; // ID for "כביסכל Bio אלגנס – 2 ליטר"
 const PRODUCT_ID_TO_MOVE_VERY_LAST_NK = 'kbio11';  // ID for "כביסכל Bio רד רוז – 2 ליטר"
 const TARGET_CATEGORY_FOR_RESORT_NK = 'נוזלי כביסה';
@@ -32,6 +32,8 @@ const ORDERED_PRODUCT_IDS_MBSMM = [
   'kmb11', // רוז 750 מ"ל
 ];
 
+const PRIORITY_LAUNDRY_IDS = ['kbio1', 'kbio2', 'kbio3', 'kbio4'];
+
 
 export default function CatalogPage() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -48,7 +50,7 @@ export default function CatalogPage() {
       try {
         const products = await getProductsForCatalog(); 
         setAllProducts(products);
-        setFilteredProducts(products.sort((a, b) => a.name.localeCompare(b.name, 'he'))); 
+        // Initial set of filteredProducts will be handled by the other useEffect
       } catch (error) {
         console.error("Failed to fetch products:", error);
       } finally {
@@ -60,91 +62,88 @@ export default function CatalogPage() {
 
   const categories = useMemo(() => {
     const uniqueCategories = new Set(allProducts.map(p => p.category).filter(Boolean) as string[]);
-    return Array.from(uniqueCategories).sort();
+    return Array.from(uniqueCategories).sort((a, b) => a.localeCompare(b, 'he'));
   }, [allProducts]);
 
   useEffect(() => {
-    let productsToFilter = [...allProducts].sort((a,b) => a.name.localeCompare(b.name, 'he'));
+    let processedProducts = [...allProducts];
 
-    if (selectedCategory) {
-      productsToFilter = productsToFilter.filter(p => p.category === selectedCategory);
-    }
+    if (selectedCategory === null && searchTerm === '') {
+        // Special sorting for "All" view: prioritize specific laundry liquids
+        const prioritizedItems: Product[] = [];
+        const otherItems: Product[] = [];
 
-    if (searchTerm) {
-      productsToFilter = productsToFilter.filter(p =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (p.description && p.description.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-    }
-    
-    if (selectedCategory === TARGET_CATEGORY_FOR_RESORT_NK) {
-      let productSecondLast: Product | null = null;
-      let productVeryLast: Product | null = null;
-      
-      const remainingProducts = productsToFilter.filter(p => {
-        if (p.id === PRODUCT_ID_TO_MOVE_SECOND_LAST_NK) {
-          productSecondLast = p;
-          return false;
-        }
-        if (p.id === PRODUCT_ID_TO_MOVE_VERY_LAST_NK) {
-          productVeryLast = p;
-          return false;
-        }
-        return true;
-      });
-      
-      productsToFilter = [...remainingProducts];
-      if (productSecondLast) {
-        productsToFilter.push(productSecondLast);
-      }
-      if (productVeryLast) {
-        productsToFilter.push(productVeryLast);
-      }
-    } else if (selectedCategory === TARGET_CATEGORY_FOR_RESORT_PFF) {
-      let productToMoveLast: Product | null = null;
-      const remainingProducts = productsToFilter.filter(p => {
-        if (p.id === PRODUCT_ID_TO_MOVE_LAST_PFF) {
-          productToMoveLast = p;
-          return false;
-        }
-        return true;
-      });
-      productsToFilter = [...remainingProducts];
-      if (productToMoveLast) {
-        productsToFilter.push(productToMoveLast);
-      }
-    } else if (selectedCategory === TARGET_CATEGORY_MBSMM) {
-      productsToFilter.sort((a, b) => {
-        const indexA = ORDERED_PRODUCT_IDS_MBSMM.indexOf(a.id);
-        const indexB = ORDERED_PRODUCT_IDS_MBSMM.indexOf(b.id);
+        processedProducts.forEach(p => {
+            if (PRIORITY_LAUNDRY_IDS.includes(p.id)) {
+                prioritizedItems.push(p);
+            } else {
+                otherItems.push(p);
+            }
+        });
 
-        if (indexA !== -1 && indexB !== -1) { 
-          return indexA - indexB;
+        // Sort prioritized items according to the order in PRIORITY_LAUNDRY_IDS
+        prioritizedItems.sort((a, b) => PRIORITY_LAUNDRY_IDS.indexOf(a.id) - PRIORITY_LAUNDRY_IDS.indexOf(b.id));
+        
+        // Sort other items alphabetically
+        otherItems.sort((a,b) => a.name.localeCompare(b.name, 'he'));
+
+        processedProducts = [...prioritizedItems, ...otherItems];
+    } else {
+        // Default sort for filtered views or views with search term
+        processedProducts.sort((a,b) => a.name.localeCompare(b.name, 'he'));
+
+        if (selectedCategory) {
+            processedProducts = processedProducts.filter(p => p.category === selectedCategory);
         }
-        if (indexA !== -1) { 
-          return -1;
+
+        if (searchTerm) {
+            processedProducts = processedProducts.filter(p =>
+                p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (p.description && p.description.toLowerCase().includes(searchTerm.toLowerCase()))
+            );
         }
-        if (indexB !== -1) { 
-          return 1;
+        
+        // Apply existing special category-specific re-sorting for *filtered* views
+        if (selectedCategory === TARGET_CATEGORY_FOR_RESORT_NK) {
+            let productSecondLast: Product | null = null;
+            let productVeryLast: Product | null = null;
+            const remainingProducts = processedProducts.filter(p => {
+                if (p.id === PRODUCT_ID_TO_MOVE_SECOND_LAST_NK) { productSecondLast = p; return false; }
+                if (p.id === PRODUCT_ID_TO_MOVE_VERY_LAST_NK) { productVeryLast = p; return false; }
+                return true;
+            });
+            processedProducts = [...remainingProducts];
+            if (productSecondLast) processedProducts.push(productSecondLast);
+            if (productVeryLast) processedProducts.push(productVeryLast);
+        } else if (selectedCategory === TARGET_CATEGORY_FOR_RESORT_PFF) {
+            let productToMoveLast: Product | null = null;
+            const remainingProducts = processedProducts.filter(p => {
+                if (p.id === PRODUCT_ID_TO_MOVE_LAST_PFF) { productToMoveLast = p; return false; }
+                return true;
+            });
+            processedProducts = [...remainingProducts];
+            if (productToMoveLast) processedProducts.push(productToMoveLast);
+        } else if (selectedCategory === TARGET_CATEGORY_MBSMM) {
+            processedProducts.sort((a, b) => {
+                const indexA = ORDERED_PRODUCT_IDS_MBSMM.indexOf(a.id);
+                const indexB = ORDERED_PRODUCT_IDS_MBSMM.indexOf(b.id);
+                if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+                if (indexA !== -1) return -1;
+                if (indexB !== -1) return 1;
+                return a.name.localeCompare(b.name, 'he');
+            });
+        } else if (selectedCategory === TARGET_CATEGORY_FOR_RESORT_MNM) {
+            let productToMoveLast: Product | null = null;
+            const remainingProducts = processedProducts.filter(p => {
+                if (p.id === PRODUCT_ID_TO_MOVE_LAST_MNM) { productToMoveLast = p; return false; }
+                return true;
+            });
+            processedProducts = [...remainingProducts];
+            if (productToMoveLast) processedProducts.push(productToMoveLast);
         }
-        return a.name.localeCompare(b.name, 'he');
-      });
-    } else if (selectedCategory === TARGET_CATEGORY_FOR_RESORT_MNM) {
-      let productToMoveLast: Product | null = null;
-      const remainingProducts = productsToFilter.filter(p => {
-        if (p.id === PRODUCT_ID_TO_MOVE_LAST_MNM) {
-          productToMoveLast = p;
-          return false;
-        }
-        return true;
-      });
-      productsToFilter = [...remainingProducts];
-      if (productToMoveLast) {
-        productsToFilter.push(productToMoveLast);
-      }
     }
     
-    setFilteredProducts(productsToFilter);
+    setFilteredProducts(processedProducts);
     setCurrentPage(1); 
 
     if (scrollTargetRef.current && !isLoading && (selectedCategory !== null || searchTerm !== '')) {
@@ -158,6 +157,33 @@ export default function CatalogPage() {
     }
 
   }, [selectedCategory, searchTerm, allProducts, isLoading]);
+
+  // useEffect to set initial filteredProducts once allProducts are loaded
+  useEffect(() => {
+    if (allProducts.length > 0 && filteredProducts.length === 0 && selectedCategory === null && searchTerm === '') {
+        // This block ensures that initial "All" view sorting is applied when products first load
+        const priorityLaundryIds = ['kbio1', 'kbio2', 'kbio3', 'kbio4'];
+        let initialProcessedProducts = [...allProducts];
+        const prioritizedItems: Product[] = [];
+        const otherItems: Product[] = [];
+
+        initialProcessedProducts.forEach(p => {
+            if (priorityLaundryIds.includes(p.id)) {
+                prioritizedItems.push(p);
+            } else {
+                otherItems.push(p);
+            }
+        });
+        prioritizedItems.sort((a, b) => priorityLaundryIds.indexOf(a.id) - priorityLaundryIds.indexOf(b.id));
+        otherItems.sort((a,b) => a.name.localeCompare(b.name, 'he'));
+        initialProcessedProducts = [...prioritizedItems, ...otherItems];
+        setFilteredProducts(initialProcessedProducts);
+    } else if (allProducts.length > 0 && selectedCategory === null && searchTerm === '' && filteredProducts.length === 0) {
+      // Fallback for initial load if the above doesn't trigger due to timing
+      setFilteredProducts([...allProducts].sort((a,b) => a.name.localeCompare(b.name, 'he')));
+    }
+  }, [allProducts, selectedCategory, searchTerm, filteredProducts.length]);
+
 
   const handleSelectCategory = (category: string | null) => {
     setSelectedCategory(category);
@@ -240,7 +266,7 @@ export default function CatalogPage() {
            </>
         ): (
           <p className="text-center text-muted-foreground py-8">
-            לא נמצאו מוצרים התואמים את בחירתך.
+            {isLoading ? 'טוען מוצרים...' : 'לא נמצאו מוצרים התואמים את בחירתך.'}
           </p>
         )}
       </div>
