@@ -62,10 +62,11 @@ const revenuePeriodTranslations: Record<RevenuePeriod, string> = {
 };
 
 type OrdersCountPeriod = 'thisWeek' | 'thisMonth' | 'allTime';
+
 // This dictionary will hold the full display names for the text below the count
 const ordersCountPeriodDisplayTranslations: Record<OrdersCountPeriod, string> = {
-  thisWeek: 'בשבוע הנוכחי',
-  thisMonth: 'בחודש הנוכחי',
+  thisWeek: 'שבוע נוכחי',
+  thisMonth: 'חודש נוכחי',
   allTime: 'כל הזמן',
 };
 // This dictionary will hold the shorter names for the dropdown options
@@ -310,7 +311,7 @@ export default function AdminDashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">{filteredOrdersCount}</div>
             <p className="text-xs text-muted-foreground">
-              בתקופה: {ordersCountPeriodDisplayTranslations[selectedOrdersCountPeriod]}
+              {ordersCountPeriodDisplayTranslations[selectedOrdersCountPeriod]}
             </p>
           </CardContent>
         </Card>
