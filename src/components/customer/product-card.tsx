@@ -95,21 +95,19 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
   
   const openDialog = (e?: React.MouseEvent) => {
     if (isAdminPreview || isAdminGalleryView) return;
-    if (e) e.stopPropagation(); // Prevent card click if it's also a trigger
+    if (e) e.stopPropagation();
     setIsDialogOpen(true);
   };
   
   const handleCardContentClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
-    // Check if the click is on the title or image area specifically, and not on buttons inside the footer
     if (target.closest('button') || target.closest('input[type="number"]')) {
-      return; // Don't open dialog if click is on interactive elements
+      return;
     }
     if (!isAdminPreview && !isAdminGalleryView) {
       openDialog(e);
     }
   };
-
 
   if (isAdminGalleryView) {
     return (
@@ -173,7 +171,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
                 e.currentTarget.src = '/images/products/placeholder.jpg';
               }}
             />
-            {product.category && (
+            {product.category && !isAdminGalleryView && (
               <Badge
                 variant="secondary"
                 className="absolute top-2 left-2 z-10 text-xs px-1.5 py-0.5"
@@ -181,17 +179,27 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
                 {product.category}
               </Badge>
             )}
+             {isAdminGalleryView && (
+                <Badge
+                className={cn(
+                    "absolute top-2 left-2 z-10 text-xs px-1.5 py-0.5", 
+                    product.isActive ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                )}
+                >
+                {product.isActive ? "פעיל" : "לא פעיל"}
+                </Badge>
+            )}
           </div>
         </CardHeader>
         <CardContent
-          className="p-3 pb-1 flex-1" // Changed pb-2 to pb-1
+          className="p-3 pb-1 flex-1"
           onClick={(e) => {
              if (!isAdminPreview && !isAdminGalleryView) handleCardContentClick(e);
           }}
         >
           <CardTitle 
             className={cn(
-              "text-sm leading-normal text-center line-clamp-2 text-primary",
+              "text-sm leading-normal text-center line-clamp-2 text-[hsl(var(--ring))]",
               (!isAdminPreview && !isAdminGalleryView) && "cursor-pointer"
             )}
             onClick={(e) => {
@@ -203,9 +211,8 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
         </CardContent>
         <CardFooter
           className={cn(
-            "pt-1 px-3 pb-2 flex mt-auto items-center", // Changed p-3 to pt-1 px-3 pb-2
-            isAdminPreview ? "justify-center w-full" : "flex-col sm:flex-row justify-between gap-1",
-            isAdminGalleryView && "justify-center w-full"
+            "pt-1 px-3 pb-2 flex mt-auto items-center",
+            (isAdminPreview || isAdminGalleryView) ? "justify-center w-full" : "flex-col sm:flex-row justify-between gap-1"
           )}
           onClick={(e) => {
             if (!isAdminPreview && !isAdminGalleryView && e.target !== e.currentTarget) { 
@@ -213,7 +220,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
             }
           }}
         >
-          <div className={cn("flex items-center", isAdminPreview || isAdminGalleryView ? "justify-center w-full" : "gap-1")}>
+          <div className={cn("flex items-center", (isAdminPreview || isAdminGalleryView) ? "justify-center w-full" : "gap-1")}>
             <p className="text-sm text-foreground font-semibold">{formatPrice(product.price)}</p>
           </div>
 
@@ -250,7 +257,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
       {(!isAdminPreview && !isAdminGalleryView) && (
         <DialogContent className="sm:max-w-[525px]">
           <DialogHeader>
-            <DialogTitle className="text-2xl">{product.name}</DialogTitle>
+            <DialogTitle className="text-2xl text-[hsl(var(--ring))]">{product.name}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="relative aspect-square w-full max-w-xs mx-auto">
