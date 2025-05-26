@@ -219,7 +219,7 @@ export default function AdminOrdersPage() {
           
           <div className="pt-3 space-y-2">
             {/* Row 1: Phone Search and Status Filter */}
-            <div className="grid grid-cols-2 gap-2 items-end">
+            <div className="grid grid-cols-2 gap-2 items-end"> {/* Changed from sm:grid-cols-2 */}
               <div className="relative">
                 <UserSearch className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -228,7 +228,8 @@ export default function AdminOrdersPage() {
                   value={customerPhoneInput}
                   onChange={handleCustomerPhoneInputChange}
                   onKeyPress={(e) => { if (e.key === 'Enter') handleApplyCustomerPhoneFilter(); }}
-                  className="h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-10 rtl:pr-10 placeholder:text-right"
+                  placeholder="חיפוש"
+                  className="h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-10 rtl:pr-10 placeholder:text-right text-right"
                 />
               </div>
               <div>
@@ -254,7 +255,7 @@ export default function AdminOrdersPage() {
             </div>
 
             {/* Row 2: Date Filters */}
-            <div className="grid grid-cols-2 gap-2 items-end">
+            <div className="grid grid-cols-2 gap-2 items-end"> {/* Changed from sm:grid-cols-2 */}
               <Popover>
                   <PopoverTrigger asChild>
                       <Button
