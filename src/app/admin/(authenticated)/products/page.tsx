@@ -15,14 +15,14 @@ import { PlusCircle, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const ITEMS_PER_PAGE = 15;
-const ALL_CATEGORIES_VALUE = "all"; // Define a constant for "all categories"
+const ALL_CATEGORIES_VALUE = "all"; 
 
 export default function AdminProductsPage() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   
-  const [selectedCategory, setSelectedCategory] = useState<string>(ALL_CATEGORIES_VALUE); // Default to "all"
+  const [selectedCategory, setSelectedCategory] = useState<string>(ALL_CATEGORIES_VALUE); 
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   
@@ -35,8 +35,7 @@ export default function AdminProductsPage() {
       try {
         const fetchedProducts = await getAllProductsForAdmin();
         setAllProducts(fetchedProducts);
-        // Extract unique categories
-        const uniqueCategories = Array.from(new Set(fetchedProducts.map(p => p.category).filter(Boolean) as string[])).sort();
+        const uniqueCategories = Array.from(new Set(fetchedProducts.map(p => p.category).filter(Boolean) as string[])).sort((a,b) => a.localeCompare(b, 'he'));
         setCategories(uniqueCategories);
       } catch (error) {
         console.error("Failed to fetch products for admin:", error);
@@ -51,7 +50,7 @@ export default function AdminProductsPage() {
   useEffect(() => {
     let productsToFilter = allProducts;
 
-    if (selectedCategory && selectedCategory !== ALL_CATEGORIES_VALUE) { // Check against "all"
+    if (selectedCategory && selectedCategory !== ALL_CATEGORIES_VALUE) { 
       productsToFilter = productsToFilter.filter(p => p.category === selectedCategory);
     }
 
@@ -64,22 +63,19 @@ export default function AdminProductsPage() {
     }
     
     setFilteredProducts(productsToFilter);
-    setCurrentPage(1); // Reset to first page on filter change
+    setCurrentPage(1); 
   }, [selectedCategory, searchTerm, allProducts]);
 
   const handleDeleteProduct = async (productId: string, productName: string) => {
      if (window.confirm(`האם אתה בטוח שברצונך למחוק את המוצר "${productName}"?`)) {
         try {
-            const success = await deleteProductService(productId);
-            if (success) {
-                setAllProducts(prevProducts => prevProducts.filter(p => p.id !== productId));
-                toast({
-                    title: "מוצר נמחק",
-                    description: `המוצר "${productName}" נמחק בהצלחה.`,
-                });
-            } else {
-                 toast({ variant: "destructive", title: "שגיאה", description: "לא ניתן היה למחוק את המוצר."});
-            }
+            await deleteProductService(productId);
+            setAllProducts(prevProducts => prevProducts.filter(p => p.id !== productId));
+            toast({
+                title: "מוצר נמחק",
+                description: `המוצר "${productName}" נמחק בהצלחה.`,
+            });
+            
         } catch (error) {
             console.error("Failed to delete product:", error);
             toast({ variant: "destructive", title: "שגיאה", description: "אירעה תקלה במחיקת המוצר."});
@@ -117,6 +113,7 @@ export default function AdminProductsPage() {
   
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
@@ -142,33 +139,34 @@ export default function AdminProductsPage() {
       </div>
 
       <Card className="shadow-lg">
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div>
-              <CardTitle className="text-xl">רשימת מוצרים</CardTitle>
-              <CardDescription>
-                נהל את כל המוצרים בקטלוג שלך.
-              </CardDescription>
+        <CardHeader> {/* Default is flex flex-col space-y-1.5 p-6 */}
+          <div> {/* Title and Description part */}
+            <CardTitle className="text-xl">רשימת מוצרים</CardTitle>
+            <CardDescription>
+              נהל את כל המוצרים בקטלוג שלך.
+            </CardDescription>
+          </div>
+          {/* Filters part */}
+          <div className="flex flex-row flex-wrap items-center gap-2 pt-2">
+            <div className="relative flex-grow min-w-[160px] sm:min-w-[200px]"> {/* Search container */}
+              <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="חיפוש מוצר..."
+                className="pl-10 rtl:pr-10 w-full h-9 text-xs"
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 items-center w-full">
-              <div className="relative"> {/* Search Input Container */}
-                <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="חיפוש מוצר..."
-                  className="pl-10 rtl:pr-10 w-full"
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                />
-              </div>
+            <div className="min-w-[160px] sm:min-w-[180px]"> {/* Select container */}
               <Select value={selectedCategory} onValueChange={handleCategoryChange}>
-                <SelectTrigger className="w-full sm:w-auto min-w-[180px]">
+                <SelectTrigger className="w-full h-9 text-xs px-3">
                   <SelectValue placeholder="סינון לפי קטגוריה" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={ALL_CATEGORIES_VALUE}>כל הקטגוריות</SelectItem>
+                  <SelectItem value={ALL_CATEGORIES_VALUE} className="text-xs">כל הקטגוריות</SelectItem>
                   {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
+                    <SelectItem key={category} value={category} className="text-xs">
                       {category}
                     </SelectItem>
                   ))}
