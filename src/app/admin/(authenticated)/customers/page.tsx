@@ -18,21 +18,30 @@ const ITEMS_PER_PAGE = 15;
 
 type LastOrderDateFilter = 'all' | 'last7days' | 'last30days' | 'over90days';
 type CustomerStatusFilter = 'all' | 'new' | 'vip' | 'inactive' | 'returning';
+type TotalOrdersFilter = 'all' | '1' | '2-4' | '5+';
 
 const lastOrderDateFilterTranslations: Record<LastOrderDateFilter, string> = {
-  all: 'כל התקופות',
+  all: 'הזמנה אחרונה: הכל',
   last7days: 'ב-7 ימים אחרונים',
   last30days: 'ב-30 ימים אחרונים',
   over90days: 'מעל 90 יום',
 };
 
 const customerStatusFilterTranslations: Record<CustomerStatusFilter, string> = {
-  all: 'כל הסטטוסים',
+  all: 'סטטוס לקוח: הכל',
   new: 'חדשים',
   vip: 'VIP',
   inactive: 'לא פעילים',
   returning: 'חוזרים',
 };
+
+const totalOrdersFilterTranslations: Record<TotalOrdersFilter, string> = {
+  all: 'סה"כ הזמנות: הכל',
+  '1': 'הזמנה 1',
+  '2-4': '2-4 הזמנות',
+  '5+': '5+ הזמנות',
+};
+
 
 // Helper function to determine customer display status
 const getCustomerDisplayStatus = (customer: CustomerSummary): CustomerStatusFilter => {
@@ -58,6 +67,7 @@ export default function AdminCustomersPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [lastOrderFilter, setLastOrderFilter] = useState<LastOrderDateFilter>('all');
   const [customerStatusFilter, setCustomerStatusFilter] = useState<CustomerStatusFilter>('all');
+  const [totalOrdersFilter, setTotalOrdersFilter] = useState<TotalOrdersFilter>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
 
@@ -115,11 +125,21 @@ export default function AdminCustomersPage() {
       });
     }
 
+    if (totalOrdersFilter !== 'all') {
+      customersToFilter = customersToFilter.filter(customer => {
+        const total = customer.totalOrders;
+        if (totalOrdersFilter === '1') return total === 1;
+        if (totalOrdersFilter === '2-4') return total >= 2 && total <= 4;
+        if (totalOrdersFilter === '5+') return total >= 5;
+        return true;
+      });
+    }
+
     // Sort by name after filtering
     customersToFilter.sort((a, b) => a.name.localeCompare(b.name, 'he'));
     
     return customersToFilter;
-  }, [searchTerm, lastOrderFilter, customerStatusFilter, allCustomers]);
+  }, [searchTerm, lastOrderFilter, customerStatusFilter, totalOrdersFilter, allCustomers]);
 
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -134,6 +154,11 @@ export default function AdminCustomersPage() {
 
   const handleCustomerStatusFilterChange = (value: CustomerStatusFilter) => {
     setCustomerStatusFilter(value);
+    setCurrentPage(1);
+  };
+
+  const handleTotalOrdersFilterChange = (value: TotalOrdersFilter) => {
+    setTotalOrdersFilter(value);
     setCurrentPage(1);
   };
 
@@ -159,7 +184,7 @@ export default function AdminCustomersPage() {
       </div>
 
       <Card className="shadow-lg">
-      <CardHeader className="pb-3"> {/* Adjusted padding */}
+      <CardHeader className="pb-3">
           <div className="flex flex-row items-center justify-between space-x-2 rtl:space-x-reverse">
             <div>
               <CardTitle className="text-xl">רשימת לקוחות ({filteredCustomers.length})</CardTitle>
@@ -171,7 +196,7 @@ export default function AdminCustomersPage() {
            
           <div className="pt-3 space-y-2">
             {/* Row 1: Search and Status Filter */}
-            <div className="grid grid-cols-2 gap-3 items-end"> {/* Changed from sm:grid-cols-2 */}
+            <div className="grid grid-cols-2 gap-3 items-end">
               <div className="relative">
                 <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -199,8 +224,8 @@ export default function AdminCustomersPage() {
               </div>
             </div>
 
-            {/* Row 2: Last Order Date and Placeholder for new filter */}
-            <div className="grid grid-cols-2 gap-3 items-end"> {/* Changed from sm:grid-cols-2 */}
+            {/* Row 2: Last Order Date and Total Orders Filter */}
+            <div className="grid grid-cols-2 gap-3 items-end">
               <div>
                 <Select value={lastOrderFilter} onValueChange={handleLastOrderFilterChange}>
                   <SelectTrigger id="last-order-filter" className="h-9 w-full px-3 text-xs">
@@ -216,12 +241,16 @@ export default function AdminCustomersPage() {
                 </Select>
               </div>
               <div>
-                <Select disabled> {/* Placeholder for a new filter */}
-                  <SelectTrigger id="new-future-filter" className="h-9 w-full px-3 text-xs text-muted-foreground">
-                    <SelectValue placeholder="פילטר נוסף (בקרוב)" />
+                <Select value={totalOrdersFilter} onValueChange={handleTotalOrdersFilterChange}>
+                  <SelectTrigger id="total-orders-filter" className="h-9 w-full px-3 text-xs">
+                    <SelectValue placeholder="סינון לפי סהכ הזמנות" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="placeholder" className="text-xs">אפשרות א'</SelectItem>
+                    {Object.entries(totalOrdersFilterTranslations).map(([key, value]) => (
+                      <SelectItem key={key} value={key} className="text-xs">
+                        {value}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
