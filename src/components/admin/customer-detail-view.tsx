@@ -99,7 +99,6 @@ export function CustomerDetailView({ customer, onSaveGeneralNotes, onSaveCustome
           <CardDescription className="flex items-center gap-1.5 text-sm pt-1">
              <Phone className="w-3.5 h-3.5 text-muted-foreground"/> 
              <a href={`tel:${customer.phone}`} className="text-primary hover:underline">{customer.phone}</a>
-             {/* <span className="text-muted-foreground text-xs">(מספר טלפון אינו ניתן לעריכה)</span> Removed this line */}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -119,7 +118,7 @@ export function CustomerDetailView({ customer, onSaveGeneralNotes, onSaveCustome
               </div>
             </div>
              <div>
-              <div className="text-muted-foreground text-xs font-medium mb-0.5">סה"כ הזמנות (לא מבוטלות)</div>
+              <div className="text-muted-foreground text-xs font-medium mb-0.5">סה"כ הזמנות</div>
               <div className="flex items-center gap-1.5">
                 <ShoppingBag className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                 <p>{customer.totalOrders}</p>
@@ -166,3 +165,4 @@ export function CustomerDetailView({ customer, onSaveGeneralNotes, onSaveCustome
     </div>
   );
 }
+
