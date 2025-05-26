@@ -3,18 +3,18 @@
 
 import type { CustomerSummary, Order } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { OrderTable } from '@/components/admin/order-table';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
-import { Phone, MapPin, CalendarDays, ShoppingBag, Hash, UserCircle } from 'lucide-react';
+import { Phone, MapPin, CalendarDays, ShoppingBag, Hash, UserCircle, ListOrdered } from 'lucide-react';
 
 interface CustomerDetailViewProps {
   customer: CustomerSummary;
-  orders: Order[];
-  onUpdateOrderStatus: (orderId: string, newStatus: Order['status']) => void;
+  // orders prop is removed as we will link to the orders page
 }
 
-export function CustomerDetailView({ customer, orders, onUpdateOrderStatus }: CustomerDetailViewProps) {
+export function CustomerDetailView({ customer }: CustomerDetailViewProps) {
   const formatPrice = (price: number) => `₪${price.toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   return (
@@ -43,7 +43,7 @@ export function CustomerDetailView({ customer, orders, onUpdateOrderStatus }: Cu
               <div className="text-muted-foreground text-xs font-medium mb-0.5">הזמנה אחרונה</div>
                <div className="flex items-center gap-1.5">
                 <CalendarDays className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                <p>{format(new Date(customer.lastOrderDate), 'dd/MM/yyyy', { locale: he })}</p>
+                <p>{customer.lastOrderDate ? format(new Date(customer.lastOrderDate), 'dd/MM/yyyy', { locale: he }) : 'לא זמין'}</p>
               </div>
             </div>
              <div>
@@ -55,17 +55,17 @@ export function CustomerDetailView({ customer, orders, onUpdateOrderStatus }: Cu
             </div>
           </div>
 
-          <h3 className="text-lg font-semibold mb-2 flex items-center gap-1.5">
-            <Hash className="w-4 h-4 text-primary"/>
-            היסטוריית הזמנות של {customer.name} ({orders.length})
+          <h3 className="text-lg font-semibold mb-3 flex items-center gap-1.5">
+            <ListOrdered className="w-4 h-4 text-primary"/>
+            היסטוריית הזמנות
           </h3>
-          {orders.length > 0 ? (
-            <OrderTable orders={orders} onUpdateStatus={onUpdateOrderStatus} />
-          ) : (
-            <p className="text-muted-foreground text-center py-4">לא נמצאו הזמנות עבור לקוח זה.</p>
-          )}
+          <Button asChild variant="outline">
+            <Link href={`/admin/orders?customerPhone=${customer.phone}`}>
+              צפה בכל ההזמנות של {customer.name}
+            </Link>
+          </Button>
         </CardContent>
-         <CardFooter className="flex justify-end items-center bg-muted/30 p-3 rounded-b-md">
+         <CardFooter className="flex justify-end items-center bg-muted/30 p-3 rounded-b-md mt-6">
             <div className="text-sm">
               <span>סך כל ההוצאות של הלקוח: </span>
               <span className="font-semibold text-primary">{formatPrice(customer.totalSpent)}</span>
