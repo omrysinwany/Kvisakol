@@ -17,7 +17,7 @@ export function CategoryProductRow({ categoryName, products }: CategoryProductRo
 
   return (
     <section className="mb-10">
-      <h2 className="text-2xl font-semibold mb-3 text-foreground">{categoryName}</h2>
+      <h2 className="text-2xl font-semibold mb-4 text-primary text-center">{categoryName}</h2>
       <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent pb-2">
         <div className="inline-flex whitespace-nowrap gap-4 py-2 px-1">
           {products.map((product) => (
