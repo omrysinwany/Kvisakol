@@ -147,8 +147,8 @@ export default function AdminProductsPage() {
             </CardDescription>
           </div>
           {/* Filters part */}
-          <div className="flex flex-row flex-wrap items-center gap-2 pt-2">
-            <div className="relative flex-grow min-w-[160px] sm:min-w-[200px]"> {/* Search container */}
+          <div className="flex flex-row items-center gap-2 pt-2">
+            <div className="relative flex-grow"> {/* Search container */}
               <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="search"
@@ -158,7 +158,7 @@ export default function AdminProductsPage() {
                 onChange={handleSearchChange}
               />
             </div>
-            <div className="min-w-[160px] sm:min-w-[180px]"> {/* Select container */}
+            <div className="w-auto"> {/* Select container */}
               <Select value={selectedCategory} onValueChange={handleCategoryChange}>
                 <SelectTrigger className="w-full h-9 text-xs px-3">
                   <SelectValue placeholder="סינון לפי קטגוריה" />
