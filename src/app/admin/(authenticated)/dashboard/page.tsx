@@ -5,11 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { getProductById } from "@/services/product-service";
-import { getOrdersForAdmin, getTopCustomers, getRecentOrders } from "@/services/order-service";
+import { getOrdersForAdmin, getTopCustomers, getRecentOrders, getNewCustomersThisMonthCount } from "@/services/order-service";
 import type { Order, CustomerSummary } from "@/lib/types";
-import { Package, ClipboardCheck, Eye, Users, CalendarDays, CalendarCheck, CalendarIcon, X, Hourglass, ChevronDown, ListOrdered, Trophy, ListChecks } from "lucide-react";
+import { Package, ClipboardCheck, Eye, Users, CalendarDays, CalendarCheck, CalendarIcon, X, Hourglass, ChevronDown, ListOrdered, Trophy, ListChecks, UserPlus } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { format, isToday, isWithinInterval, startOfWeek, endOfWeek, subDays, startOfMonth, endOfMonth, startOfDay, endOfDay } from 'date-fns';
@@ -44,8 +44,6 @@ interface DashboardSummary {
   newOrdersUnviewed: number;
   receivedOrders: number;
   latestOrders: Order[];
-  ordersToday: number;
-  ordersThisWeek: number;
 }
 
 interface PopularProduct {
@@ -63,6 +61,14 @@ const revenuePeriodTranslations: Record<RevenuePeriod, string> = {
   custom: 'מותאם אישית',
 };
 
+type OrdersCountPeriod = 'thisWeek' | 'thisMonth' | 'allTime';
+const ordersCountPeriodTranslations: Record<OrdersCountPeriod, string> = {
+  thisWeek: 'שבוע אחרון',
+  thisMonth: 'חודש אחרון',
+  allTime: 'כל הזמן',
+};
+
+
 export default function AdminDashboardPage() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [allOrders, setAllOrders] = useState<Order[]>([]);
@@ -76,42 +82,38 @@ export default function AdminDashboardPage() {
 
   const [topCustomers, setTopCustomers] = useState<CustomerSummary[] | null>(null);
   const [popularProducts, setPopularProducts] = useState<PopularProduct[] | null>(null);
+  const [newCustomersThisMonth, setNewCustomersThisMonth] = useState<number>(0);
+
+  const [selectedOrdersCountPeriod, setSelectedOrdersCountPeriod] = useState<OrdersCountPeriod>('thisWeek');
+  const [filteredOrdersCount, setFilteredOrdersCount] = useState<number>(0);
 
 
   useEffect(() => {
     async function fetchDashboardData() {
       setIsLoading(true);
       try {
-        const [ordersData, topCustomersData, recentOrdersData] = await Promise.all([
+        const [ordersData, topCustomersData, recentOrdersData, newCustomersCount] = await Promise.all([
           getOrdersForAdmin(),
           getTopCustomers(3),
-          getRecentOrders(7) 
+          getRecentOrders(7),
+          getNewCustomersThisMonthCount(),
         ]);
         
         setAllOrders(ordersData);
         setTopCustomers(topCustomersData);
+        setNewCustomersThisMonth(newCustomersCount);
 
         const newOrdersUnviewedCount = ordersData.filter(o => o.status === 'new').length;
         const receivedOrdersCount = ordersData.filter(o => o.status === 'received').length;
-        
-        const ordersTodayCount = ordersData.filter(o => isToday(new Date(o.orderTimestamp))).length;
-        const sevenDaysAgo = subDays(new Date(), 6); 
-        const today = new Date();
-        const ordersThisWeekCount = ordersData.filter(o => 
-            isWithinInterval(new Date(o.orderTimestamp), { start: startOfDay(sevenDaysAgo), end: endOfDay(today) })
-        ).length;
-        
+                
         const latestOrders = ordersData.slice(0, 5);
 
         setSummary({
           newOrdersUnviewed: newOrdersUnviewedCount,
           receivedOrders: receivedOrdersCount,
           latestOrders,
-          ordersToday: ordersTodayCount,
-          ordersThisWeek: ordersThisWeekCount,
         });
 
-        // Process popular products
         if (recentOrdersData.length > 0) {
           const productCounts: Record<string, number> = {};
           recentOrdersData.forEach(order => {
@@ -122,7 +124,7 @@ export default function AdminDashboardPage() {
 
           const sortedProductIds = Object.entries(productCounts)
             .sort(([, aCount], [, bCount]) => bCount - aCount)
-            .slice(0, 3) // Get top 3
+            .slice(0, 3)
             .map(([productId]) => productId);
 
           const popularProductsDetails = await Promise.all(
@@ -140,7 +142,6 @@ export default function AdminDashboardPage() {
           setPopularProducts([]);
         }
 
-
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
         toast({ variant: "destructive", title: "שגיאה", description: "לא ניתן היה לטעון את נתוני לוח הבקרה." });
@@ -151,6 +152,7 @@ export default function AdminDashboardPage() {
     fetchDashboardData();
   }, [toast]);
 
+  // Effect for calculating filtered revenue
   useEffect(() => {
     if (!allOrders.length) { 
         setFilteredRevenue(0);
@@ -190,13 +192,41 @@ export default function AdminDashboardPage() {
             break;
         case 'allTime':
         default:
-            // No date filtering needed for 'allTime'
             break;
     }
     const newFilteredRevenue = relevantOrders.reduce((sum, order) => sum + order.totalAmount, 0);
     setFilteredRevenue(newFilteredRevenue);
 
-}, [allOrders, selectedRevenuePeriod, customRevenueStartDate, customRevenueEndDate]);
+  }, [allOrders, selectedRevenuePeriod, customRevenueStartDate, customRevenueEndDate]);
+
+  // Effect for calculating filtered orders count
+  useEffect(() => {
+    if (!allOrders.length) {
+      setFilteredOrdersCount(0);
+      return;
+    }
+    let ordersForCount = [...allOrders]; // Count all orders regardless of status for this metric
+    const now = new Date();
+
+    switch (selectedOrdersCountPeriod) {
+      case 'thisWeek':
+        const lastSevenDaysStart = startOfDay(subDays(now, 6));
+        ordersForCount = ordersForCount.filter(o =>
+          isWithinInterval(new Date(o.orderTimestamp), { start: lastSevenDaysStart, end: endOfDay(now) })
+        );
+        break;
+      case 'thisMonth':
+        ordersForCount = ordersForCount.filter(o =>
+          isWithinInterval(new Date(o.orderTimestamp), { start: startOfMonth(now), end: endOfMonth(now) })
+        );
+        break;
+      case 'allTime':
+      default:
+        // No date filtering needed for 'allTime'
+        break;
+    }
+    setFilteredOrdersCount(ordersForCount.length);
+  }, [allOrders, selectedOrdersCountPeriod]);
 
 
   const formatPrice = (price: number) => {
@@ -249,31 +279,43 @@ export default function AdminDashboardPage() {
           </Card>
         </Link>
 
-        <Link href="/admin/orders?period=today" className="block hover:shadow-lg transition-shadow rounded-lg">
-          <Card className="h-full">
+        <Card className="h-full">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">סה"כ הזמנות</CardTitle>
+             <DropdownMenu dir="rtl">
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="xs" className="text-xs h-6 px-1.5 -mr-1.5">
+                    {ordersCountPeriodTranslations[selectedOrdersCountPeriod]}
+                    <ChevronDown className="h-3 w-3 opacity-75 mr-0.5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuRadioGroup value={selectedOrdersCountPeriod} onValueChange={(value) => setSelectedOrdersCountPeriod(value as OrdersCountPeriod)}>
+                    <DropdownMenuRadioItem value="thisWeek" className="text-xs">שבוע אחרון</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="thisMonth" className="text-xs">חודש אחרון</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="allTime" className="text-xs">כל הזמן</DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{filteredOrdersCount}</div>
+            <p className="text-xs text-muted-foreground">
+              בתקופה: {ordersCountPeriodTranslations[selectedOrdersCountPeriod]}
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">הזמנות מהיום</CardTitle>
-              <CalendarCheck className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">לקוחות חדשים החודש</CardTitle>
+              <UserPlus className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{summary.ordersToday}</div>
-              <p className="text-xs text-muted-foreground">התקבלו היום</p>
+              <div className="text-2xl font-bold">{newCustomersThisMonth}</div>
+              <p className="text-xs text-muted-foreground">הצטרפו החודש</p>
             </CardContent>
           </Card>
-        </Link>
-
-        <Link href="/admin/orders?period=thisWeek" className="block hover:shadow-lg transition-shadow rounded-lg">
-          <Card className="h-full">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">הזמנות מהשבוע</CardTitle>
-              <CalendarDays className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{summary.ordersThisWeek}</div>
-              <p className="text-xs text-muted-foreground">ב-7 הימים האחרונים</p>
-            </CardContent>
-          </Card>
-        </Link>
         
         <Card className="col-span-2"> 
           <CardHeader>
@@ -440,3 +482,4 @@ export default function AdminDashboardPage() {
     </>
   );
 }
+
