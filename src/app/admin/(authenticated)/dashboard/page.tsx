@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { getAllProductsForAdmin, getProductById } from "@/services/product-service";
+import { getProductById } from "@/services/product-service"; // getProductById is used for popular products
 import { getOrdersForAdmin, getTopCustomers, getRecentOrders } from "@/services/order-service";
-import type { Product, Order, CustomerSummary } from "@/lib/types";
+import type { Order, CustomerSummary } from "@/lib/types"; // Product type removed as totalProducts is removed
 import { Package, ClipboardCheck, Eye, Users, CalendarDays, CalendarCheck, CalendarIcon, X, Hourglass, ChevronDown, ListOrdered, Trophy, ListChecks } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { format, isToday, isWithinInterval, startOfWeek, endOfWeek, subDays, startOfMonth, endOfMonth, startOfDay, endOfDay } from 'date-fns';
@@ -41,8 +41,8 @@ const statusColorsForDashboard: Record<Order['status'], string> = {
 };
 
 interface DashboardSummary {
-  totalProducts: number;
-  totalOrders: number;
+  // totalProducts: number; // Removed
+  // totalOrders: number; // Removed
   newOrdersUnviewed: number;
   receivedOrders: number;
   latestOrders: Order[];
@@ -84,8 +84,8 @@ export default function AdminDashboardPage() {
     async function fetchDashboardData() {
       setIsLoading(true);
       try {
-        const [productsData, ordersData, topCustomersData, recentOrdersData] = await Promise.all([
-          getAllProductsForAdmin(),
+        const [ordersData, topCustomersData, recentOrdersData] = await Promise.all([
+          // getAllProductsForAdmin(), // Removed as totalProducts is no longer needed
           getOrdersForAdmin(),
           getTopCustomers(3),
           getRecentOrders(7) 
@@ -94,8 +94,8 @@ export default function AdminDashboardPage() {
         setAllOrders(ordersData);
         setTopCustomers(topCustomersData);
 
-        const totalProducts = productsData.filter(p => p.isActive).length;
-        const totalOrders = ordersData.length;
+        // const totalProducts = productsData.filter(p => p.isActive).length; // Removed
+        // const totalOrders = ordersData.length; // Removed
         const newOrdersUnviewedCount = ordersData.filter(o => o.status === 'new').length;
         const receivedOrdersCount = ordersData.filter(o => o.status === 'received').length;
         
@@ -109,8 +109,8 @@ export default function AdminDashboardPage() {
         const latestOrders = ordersData.slice(0, 5);
 
         setSummary({
-          totalProducts,
-          totalOrders,
+          // totalProducts, // Removed
+          // totalOrders, // Removed
           newOrdersUnviewed: newOrdersUnviewedCount,
           receivedOrders: receivedOrdersCount,
           latestOrders,
@@ -229,7 +229,7 @@ export default function AdminDashboardPage() {
         <h1 className="text-3xl font-bold tracking-tight text-primary">לוח בקרה</h1>
       </div>
       
-      <div className="grid grid-cols-2 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-2 gap-6">
         <Link href="/admin/orders?status=new" className="block hover:shadow-lg transition-shadow rounded-lg">
           <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -238,7 +238,7 @@ export default function AdminDashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{summary.newOrdersUnviewed}</div>
-              <p className="text-xs text-muted-foreground">מתוך {summary.totalOrders} הזמנות בסה"כ</p>
+              {/* <p className="text-xs text-muted-foreground">מתוך {summary.totalOrders} הזמנות בסה"כ</p> Removed totalOrders */}
             </CardContent>
           </Card>
         </Link>
@@ -282,6 +282,8 @@ export default function AdminDashboardPage() {
           </Card>
         </Link>
         
+        {/* Removed Total Products Card */}
+        {/* 
         <Link href="/admin/products" className="block hover:shadow-lg transition-shadow rounded-lg">
           <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -293,8 +295,11 @@ export default function AdminDashboardPage() {
               <p className="text-xs text-muted-foreground">זמינים בקטלוג</p>
             </CardContent>
           </Card>
-        </Link>
+        </Link> 
+        */}
 
+        {/* Removed Total Orders Card */}
+        {/*
         <Link href="/admin/orders" className="block hover:shadow-lg transition-shadow rounded-lg">
           <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -307,6 +312,7 @@ export default function AdminDashboardPage() {
             </CardContent>
           </Card>
         </Link>
+        */}
 
         <Card className="col-span-2"> 
           <CardHeader>
@@ -473,3 +479,4 @@ export default function AdminDashboardPage() {
     </>
   );
 }
+
