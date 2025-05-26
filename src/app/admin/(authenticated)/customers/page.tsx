@@ -10,7 +10,7 @@ import type { CustomerSummary } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Users } from 'lucide-react';
+import { UserSearch, Users, X } from 'lucide-react'; // Changed Search to UserSearch
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { subDays, isWithinInterval, startOfDay, endOfDay, isBefore } from 'date-fns';
 
@@ -197,13 +197,14 @@ export default function AdminCustomersPage() {
                 סקירה של כל הלקוחות שביצעו הזמנות במערכת.
               </CardDescription>
             </div>
+             {/* Removed CSV export button */}
           </div>
           
           <div className="pt-3 space-y-2">
             {/* Row 1: Search and Status Filter */}
             <div className="grid grid-cols-2 gap-3 items-end">
               <div className="relative">
-                <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <UserSearch className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /> {/* Changed Search to UserSearch */}
                 <Input
                   id="customer-search"
                   type="search"
