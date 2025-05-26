@@ -93,14 +93,21 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
     return `₪${price.toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
   
-  const handleCardClick = (e: React.MouseEvent) => {
-    if (isAdminGalleryView) return; 
+  const openDialog = (e?: React.MouseEvent) => {
+    if (isAdminGalleryView) return; // Handled by Link in ProductGrid
+    if (e) e.stopPropagation(); // Prevent parent click if any
+    setIsDialogOpen(true);
+  };
+
+  const handleCardContentClick = (e: React.MouseEvent) => {
+    // Prevents opening dialog when interacting with quantity controls or add to cart button
     const target = e.target as HTMLElement;
-    if (target.closest('button') || target.closest('input[type="number"]') || target.closest('[data-dialog-trigger]') ) {
+    if (target.closest('button') || target.closest('input[type="number"]')) {
       return;
     }
-    setIsDialogOpen(true);
-  }
+    openDialog(e);
+  };
+
 
   if (isAdminGalleryView) {
     return (
@@ -130,7 +137,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
           </div>
         </CardHeader>
         <CardContent className="p-3 pb-1 flex-1">
-          <CardTitle className="text-sm h-10 leading-tight overflow-hidden text-center line-clamp-2">
+          <CardTitle className="text-sm h-10 leading-tight text-center line-clamp-2 text-[hsl(var(--ring))]">
             {product.name}
           </CardTitle>
         </CardContent>
@@ -143,10 +150,11 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <Card 
         className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg h-full"
-        onClick={handleCardClick}
+        onClick={handleCardContentClick} // Changed from handleCardClick to handleCardContentClick for whole card click
       >
         <CardHeader
           className="p-0 relative cursor-pointer"
+          onClick={(e) => openDialog(e)}
         >
           <div className="aspect-square relative w-full">
             <Image
@@ -169,12 +177,26 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
                 {product.category}
               </Badge>
             )}
+             {!isAdminPreview && (
+              <DialogTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="absolute top-1 right-1 h-7 w-7 text-muted-foreground hover:text-primary hover:bg-background/70 z-10"
+                  onClick={(e) => { e.stopPropagation(); setIsDialogOpen(true);}} // Ensure dialog opens and stop propagation
+                >
+                  <InfoIcon className="h-4 w-4" />
+                   <span className="sr-only">פרטים נוספים</span>
+                </Button>
+              </DialogTrigger>
+            )}
           </div>
         </CardHeader>
         <CardContent
-          className="p-3 flex-1 cursor-pointer pb-1" 
+          className="p-3 flex-1 cursor-pointer pb-2" // Changed pb-1 to pb-2 for a bit more space
+          onClick={(e) => openDialog(e)}
         >
-          <CardTitle className="text-sm h-10 leading-tight text-center line-clamp-2 text-primary">
+          <CardTitle className="text-sm h-10 leading-tight text-center line-clamp-2 text-primary"> {/* Changed text color */}
             {product.name}
           </CardTitle>
         </CardContent>
@@ -184,43 +206,37 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
             isAdminPreview ? "justify-center" : "flex-col sm:flex-row justify-between gap-1"
           )}
           onClick={(e) => {
-            if (e.target !== e.currentTarget) {
+            if (e.target !== e.currentTarget && !targetIsDialogTrigger(e.target as HTMLElement) ) { // Prevent footer click from opening dialog if not on trigger
                  e.stopPropagation();
             }
           }}
         >
           <div className={cn("flex items-center", isAdminPreview ? "justify-center w-full" : "gap-1")}>
             <p className="text-sm text-foreground font-semibold">{formatPrice(product.price)}</p>
-            {!isAdminPreview && (
-              <DialogTrigger asChild data-dialog-trigger>
-                <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-primary">
-                  <InfoIcon className="h-4 w-4" />
-                </Button>
-              </DialogTrigger>
-            )}
           </div>
 
           {!isAdminPreview && (
             <>
               {quantityInCart === 0 ? (
-                <Button onClick={handleAddToCart} className="w-full sm:w-auto" size="sm">
+                <Button onClick={(e) => { e.stopPropagation(); handleAddToCart(); }} className="w-full sm:w-auto" size="sm">
                   <ShoppingCartIcon className="ml-1.5 h-4 w-4" />
                   הוספה
                 </Button>
               ) : (
                 <div className="flex items-center gap-1">
-                  <Button variant="outline" size="icon" onClick={handleDecreaseQuantity} className="h-7 w-7 rounded-full">
+                  <Button variant="outline" size="icon" onClick={(e) => { e.stopPropagation(); handleDecreaseQuantity(); }} className="h-7 w-7 rounded-full">
                     <MinusCircle className="h-4 w-4" />
                   </Button>
                   <Input
                     type="number"
                     value={inputValue}
-                    onChange={handleQuantityChangeViaInput}
-                    onBlur={handleBlurInput}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) => { e.stopPropagation(); handleQuantityChangeViaInput(e);}}
+                    onBlur={(e) => { e.stopPropagation(); handleBlurInput();}}
                     className="h-7 w-10 text-center px-1 text-sm border-border focus:ring-primary focus:border-primary"
                     min="0"
                   />
-                  <Button variant="outline" size="icon" onClick={handleIncreaseQuantity} className="h-7 w-7 rounded-full">
+                  <Button variant="outline" size="icon" onClick={(e) => { e.stopPropagation(); handleIncreaseQuantity();}} className="h-7 w-7 rounded-full">
                     <PlusCircle className="h-4 w-4" />
                   </Button>
                 </div>
@@ -271,4 +287,15 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
       </DialogContent>
     </Dialog>
   );
+}
+
+// Helper function to check if a target or its parents is a DialogTrigger
+function targetIsDialogTrigger(target: HTMLElement | null): boolean {
+  while (target) {
+    if (target.getAttribute && target.getAttribute('data-radix-dialog-trigger') !== null) {
+      return true;
+    }
+    target = target.parentElement;
+  }
+  return false;
 }
