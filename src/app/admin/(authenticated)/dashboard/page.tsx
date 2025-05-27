@@ -25,7 +25,6 @@ import {
   DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 
-
 const statusTranslationsForDashboard: Record<Order['status'], string> = {
   new: 'חדשה',
   received: 'התקבלה',
@@ -64,13 +63,8 @@ const revenuePeriodTranslations: Record<RevenuePeriod, string> = {
 type OrdersCountPeriod = 'thisWeek' | 'thisMonth' | 'allTime';
 
 const ordersCountPeriodDisplayTranslations: Record<OrdersCountPeriod, string> = {
-  thisWeek: 'מהשבוע הנוכחי',
-  thisMonth: 'מהחודש הנוכחי',
-  allTime: 'כל הזמן',
-};
-const ordersCountPeriodDropdownOptions: Record<OrdersCountPeriod, string> = {
-  thisWeek: 'שבוע',
-  thisMonth: 'חודש',
+  thisWeek: 'השבוע הנוכחי',
+  thisMonth: 'החודש הנוכחי',
   allTime: 'כל הזמן',
 };
 
@@ -92,7 +86,6 @@ export default function AdminDashboardPage() {
 
   const [selectedOrdersCountPeriod, setSelectedOrdersCountPeriod] = useState<OrdersCountPeriod>('thisWeek');
   const [filteredOrdersCount, setFilteredOrdersCount] = useState<number>(0);
-
 
   useEffect(() => {
     async function fetchDashboardData() {
@@ -229,7 +222,6 @@ export default function AdminDashboardPage() {
     setFilteredOrdersCount(ordersForCount.length);
   }, [allOrders, selectedOrdersCountPeriod]);
 
-
   const formatPrice = (price: number) => {
     return `₪${price.toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
@@ -254,66 +246,85 @@ export default function AdminDashboardPage() {
       </div>
       
       <div className="grid grid-cols-2 gap-6">
-        <Link href="/admin/orders?status=new" className="block hover:shadow-lg transition-shadow rounded-lg">
-          <Card className="h-full">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-1.5"><Hourglass className="h-4 w-4 text-muted-foreground" />הזמנות חדשות</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{summary.newOrdersUnviewed}</div>
-              <p className="text-xs text-muted-foreground">(טרם נצפו)</p>
-            </CardContent>
-          </Card>
-        </Link>
+      <Link href="/admin/orders?status=new" className="block hover:shadow-lg transition-shadow rounded-lg">
+      <Card className="h-full text-center">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium flex flex-col items-center gap-1.5">
+            <Hourglass className="h-4 w-4 text-muted-foreground" />
+            הזמנות חדשות !
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{summary.newOrdersUnviewed}</div>
+          <p className="text-xs text-muted-foreground">הזמנות שטרם נפתחו</p>
+        </CardContent>
+      </Card>
+    </Link>
 
-        <Link href="/admin/orders?status=received" className="block hover:shadow-lg transition-shadow rounded-lg">
-          <Card className="h-full">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-1.5"><ClipboardCheck className="h-4 w-4 text-muted-foreground" />הזמנות שהתקבלו</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{summary.receivedOrders}</div>
-              <p className="text-xs text-muted-foreground">ממתינות להמשך טיפול</p>
-            </CardContent>
-          </Card>
-        </Link>
+    <Link href="/admin/orders?status=received" className="block hover:shadow-lg transition-shadow rounded-lg">
+      <Card className="h-full text-center">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium flex flex-col items-center gap-1.5">
+            <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
+            הזמנות שהתקבלו
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{summary.receivedOrders}</div>
+          <p className="text-xs text-muted-foreground">ממתינות להמשך טיפול</p>
+        </CardContent>
+      </Card>
+    </Link>
 
-        <Card className="h-full">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-1.5"><ListOrdered className="h-4 w-4 text-muted-foreground" />סה"כ הזמנות</CardTitle>
-             <DropdownMenu dir="rtl">
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="xs" className="text-xs h-6 px-1.5 -mr-1.5">
-                    בחר
-                    <ChevronDown className="h-3 w-3 opacity-75 mr-0.5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuRadioGroup value={selectedOrdersCountPeriod} onValueChange={(value) => setSelectedOrdersCountPeriod(value as OrdersCountPeriod)}>
-                    <DropdownMenuRadioItem value="thisWeek" className="text-xs">{ordersCountPeriodDropdownOptions.thisWeek}</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="thisMonth" className="text-xs">{ordersCountPeriodDropdownOptions.thisMonth}</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="allTime" className="text-xs">{ordersCountPeriodDropdownOptions.allTime}</DropdownMenuRadioItem>
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{filteredOrdersCount}</div>
-            <p className="text-xs text-muted-foreground">
-              {ordersCountPeriodDisplayTranslations[selectedOrdersCountPeriod]}
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card className="h-full">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-1.5"><UserPlus className="h-4 w-4 text-muted-foreground" />לקוחות חדשים החודש</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{newCustomersThisMonth}</div>
-              <p className="text-xs text-muted-foreground">הצטרפו החודש</p>
-            </CardContent>
-          </Card>
+    <Card className="h-full text-center">
+    <CardHeader className="pb-2">
+      <CardTitle className="text-sm font-medium flex flex-col items-center gap-1.5">
+        <ListOrdered className="h-4 w-4 text-muted-foreground" />
+        סה"כ הזמנות (לתקופה)
+      </CardTitle>
+    </CardHeader>
+
+      <CardContent className="flex flex-col items-center gap-[0.5px]">
+      <div className="text-2xl font-bold">{filteredOrdersCount}</div>
+      <DropdownMenu dir="rtl">
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm" className="h-5 px-1 text-xs text-muted-foreground hover:bg-transparent hover:text-foreground">
+            {ordersCountPeriodDisplayTranslations[selectedOrdersCountPeriod]}
+            <ChevronDown className="h-3 w-3 opacity-75 mr-1" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuRadioGroup
+            value={selectedOrdersCountPeriod}
+            onValueChange={(value) => setSelectedOrdersCountPeriod(value as OrdersCountPeriod)}
+          >
+            <DropdownMenuRadioItem value="thisWeek" className="text-xs">
+              {ordersCountPeriodDisplayTranslations.thisWeek}
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="thisMonth" className="text-xs">
+              {ordersCountPeriodDisplayTranslations.thisMonth}
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="allTime" className="text-xs">
+              {ordersCountPeriodDisplayTranslations.allTime}
+            </DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </CardContent>
+    </Card>
+
+    <Card className="h-full text-center">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium flex flex-col items-center gap-1.5">
+          <UserPlus className="h-4 w-4 text-muted-foreground" />
+          לקוחות חדשים החודש
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{newCustomersThisMonth}</div>
+        <p className="text-xs text-muted-foreground">הצטרפו החודש</p>
+      </CardContent>
+    </Card>
         
         <Card className="col-span-2"> 
           <CardHeader>

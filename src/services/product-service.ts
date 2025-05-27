@@ -1,24 +1,65 @@
-
 'use server';
 
 import type { Product } from '@/lib/types';
-import { 
-  placeholderProducts,
-  addPlaceholderProduct,
-  updatePlaceholderProduct as updateLocalProduct,
-  deletePlaceholderProduct as deleteLocalProduct 
-} from '@/lib/placeholder-data';
+// import {
+//   placeholderProducts, // Removed import for fetching
+//   addPlaceholderProduct,
+//   updatePlaceholderProduct as updateLocalProduct,
+//   deletePlaceholderProduct as deleteLocalProduct
+// } from '@/lib/placeholder-data'; // Keep imports for mutations for now
 
-// Helper function to simulate async behavior
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+import { db } from '@/lib/firebase/config'; // Import the Firestore DB instance
+import { collection, getDocs, query, where, orderBy } from 'firebase/firestore'; // Import Firestore functions
+
+// Helper function to simulate async behavior (can be removed if not needed anymore for actual fetch)
+// const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export async function getProductsForCatalog(): Promise<Product[]> {
-  await delay(100); // Simulate network delay
-  console.log("Fetching active products from placeholder data for catalog.");
-  const activeProducts = placeholderProducts.filter(p => p.isActive).sort((a, b) => a.name.localeCompare(b.name, 'he'));
-  console.log(`Fetched ${activeProducts.length} active products from placeholder data.`);
-  return JSON.parse(JSON.stringify(activeProducts)); // Deep clone to prevent direct mutation issues
+  console.log("Fetching active products from Firestore for catalog.");
+  try {
+    // Create a query to get active products, ordered by name
+    const productsRef = collection(db, 'products');
+    const q = query(productsRef, where('isActive', '==', true), orderBy('name', 'asc')); // Filter by isActive and order by name
+
+    const querySnapshot = await getDocs(q);
+
+    const activeProducts: Product[] = [];
+    querySnapshot.forEach((doc) => {
+      // Map document data to the Product type, including the doc.id
+      const productData = doc.data();
+      activeProducts.push({
+        id: doc.id, // Use document ID as product ID
+        name: productData.name,
+        description: productData.description,
+        price: productData.price,
+        category: productData.category || '', // Handle potential missing category
+        isActive: productData.isActive,
+        imageUrl: productData.imageUrl || '', // Handle potential missing imageUrl
+        dataAiHint: productData.dataAiHint || '', // Handle potential missing dataAiHint
+        // Add other fields if necessary based on your Product type and Firestore data
+      } as Product); // Cast to Product type
+    });
+
+    console.log(`Fetched ${activeProducts.length} active products from Firestore.`);
+    return activeProducts; // Return the fetched and mapped products
+  } catch (error) {
+    console.error("Error fetching products from Firestore:", error);
+    // Re-throw the error so the calling component can catch it
+    throw new Error('Failed to fetch products from Firestore');
+  }
 }
+
+// TODO: The following functions currently use placeholder data and need to be updated to use Firebase Firestore.
+
+import {
+    placeholderProducts,
+    addPlaceholderProduct,
+    updatePlaceholderProduct as updateLocalProduct,
+    deletePlaceholderProduct as deleteLocalProduct
+  } from '@/lib/placeholder-data';
+
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 
 export async function getAllProductsForAdmin(): Promise<Product[]> {
   await delay(100); // Simulate network delay
@@ -62,10 +103,10 @@ export async function updateProductService(productId: string, productData: Parti
   console.log(`Updating product with ID: ${productId} in placeholder data:`, productData);
   const productIndex = placeholderProducts.findIndex(p => p.id === productId);
   if (productIndex !== -1) {
-    const updatedProduct = { 
-      ...placeholderProducts[productIndex], 
+    const updatedProduct = {
+      ...placeholderProducts[productIndex],
       ...productData,
-      price: productData.price !== undefined ? Number(productData.price) : placeholderProducts[productIndex].price 
+      price: productData.price !== undefined ? Number(productData.price) : placeholderProducts[productIndex].price
     };
     updateLocalProduct(updatedProduct);
     console.log("Product updated in placeholder data.");

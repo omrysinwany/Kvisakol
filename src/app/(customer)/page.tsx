@@ -32,6 +32,16 @@ const ORDERED_PRODUCT_IDS_MBSMM = [
 
 const PRIORITY_ALL_FILTER_IDS = ['pkg5', 'pkg1', 'kbio2', 'kbio3'];
 
+// Define a preferred order for categories
+const preferredOrder = [
+  'מבשמים',
+  'נוזלי כביסה',
+  'פרפלור מבשמי רצפות',
+  'נוזלי כלים',
+  'מגבונים',
+  'מפיצי ריח',
+  'מוצרי ניקוי מקצועיים'
+];
 
 export default function CatalogPage() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -68,6 +78,8 @@ export default function CatalogPage() {
       );
     }
 
+    activeProducts = activeProducts.filter(p => p.category !== 'חבילות');
+
     const grouped: Record<string, Product[]> = {};
     for (const product of activeProducts) {
       const category = product.category || 'מוצרים ללא קטגוריה'; 
@@ -77,7 +89,23 @@ export default function CatalogPage() {
       grouped[category].push(product);
     }
     
-    let sortedCategoryNames = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'he'));
+    const allCategoryNames = Object.keys(grouped);
+
+    let sortedCategoryNames = allCategoryNames.sort((a, b) => {
+      const aIndex = preferredOrder.indexOf(a);
+      const bIndex = preferredOrder.indexOf(b);
+
+      if (aIndex > -1 && bIndex > -1) {
+        return aIndex - bIndex;
+      }
+      if (aIndex > -1) {
+        return -1;
+      }
+      if (bIndex > -1) {
+        return 1;
+      }
+      return a.localeCompare(b, 'he');
+    });
     
     const finalCategorizedProducts: { categoryName: string; products: Product[] }[] = [];
 
@@ -153,7 +181,7 @@ export default function CatalogPage() {
     }
 
 
-  }, [allProducts, searchTerm, isLoading]);
+  }, [allProducts, searchTerm, isLoading, preferredOrder]);
 
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {

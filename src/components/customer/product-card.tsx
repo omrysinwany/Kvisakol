@@ -210,49 +210,49 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
           </CardTitle>
         </CardContent>
         <CardFooter
-          className={cn(
-            "pt-1 px-3 pb-2 flex mt-auto items-center",
-            (isAdminPreview || isAdminGalleryView) ? "justify-center w-full" : "flex-col sm:flex-row justify-between gap-1"
-          )}
-          onClick={(e) => {
-            if (!isAdminPreview && !isAdminGalleryView && e.target !== e.currentTarget) { 
-                 e.stopPropagation();
-            }
-          }}
-        >
-          <div className={cn("flex items-center", (isAdminPreview || isAdminGalleryView) ? "justify-center w-full" : "gap-1")}>
-            <p className="text-sm text-foreground font-semibold">{formatPrice(product.price)}</p>
-          </div>
+        className={cn(
+          "pt-1 px-3 pb-2 flex mt-auto items-center",
+          (isAdminPreview || isAdminGalleryView) ? "justify-center w-full" : "flex-col items-center gap-2" // *** השורה הזו שונתה ל-items-center ***
+        )}
+        onClick={(e) => {
+          if (!isAdminPreview && !isAdminGalleryView && e.target !== e.currentTarget) {
+              e.stopPropagation();
+          }
+        }}
+      >
+        <div className={cn("flex items-center", (isAdminPreview || isAdminGalleryView) ? "justify-center w-full" : "gap-1")}> {/* ניתן גם לשנות את ה-gap כאן אם רוצים רווח בתוך שורת המחיר עצמה (אבל המחיר לבד בשורה אז לא רלוונטי) */}
+          <p className="text-sm text-foreground font-semibold">{formatPrice(product.price)}</p>
+        </div>
 
-          {(!isAdminPreview && !isAdminGalleryView) && (
-            <div className='flex items-center'>
-              {quantityInCart === 0 ? (
-                <Button onClick={(e) => { e.stopPropagation(); handleAddToCart(); }} className="w-full sm:w-auto" size="sm">
-                  <ShoppingCartIcon className="ml-1.5 h-4 w-4" />
-                  הוספה
+        {(!isAdminPreview && !isAdminGalleryView) && (
+          <div className='flex items-center'> {/* ה-div הזה עדיין flex items-center כדי ליישר את כפתור/מנגנון הכמות אם יש כמה אלמנטים בשורה זו */}
+            {quantityInCart === 0 ? (
+              <Button onClick={(e) => { e.stopPropagation(); handleAddToCart(); }} className="w-full sm:w-auto" size="sm">
+                <ShoppingCartIcon className="ml-1.5 h-4 w-4" />
+                הוספה
+              </Button>
+            ) : (
+              <div className="flex items-center gap-1">
+                <Button variant="outline" size="icon" onClick={(e) => { e.stopPropagation(); handleDecreaseQuantity(); }} className="h-7 w-7 rounded-full">
+                  <MinusCircle className="h-4 w-4" />
                 </Button>
-              ) : (
-                <div className="flex items-center gap-1">
-                  <Button variant="outline" size="icon" onClick={(e) => { e.stopPropagation(); handleDecreaseQuantity(); }} className="h-7 w-7 rounded-full">
-                    <MinusCircle className="h-4 w-4" />
-                  </Button>
-                  <Input
-                    type="number"
-                    value={inputValue}
-                    onClick={(e) => e.stopPropagation()}
-                    onChange={(e) => { e.stopPropagation(); handleQuantityChangeViaInput(e);}}
-                    onBlur={(e) => { e.stopPropagation(); handleBlurInput();}}
-                    className="h-7 w-10 text-center px-1 text-sm border-input focus:ring-primary focus:border-primary"
-                    min="0"
-                  />
-                  <Button variant="outline" size="icon" onClick={(e) => { e.stopPropagation(); handleIncreaseQuantity();}} className="h-7 w-7 rounded-full">
-                    <PlusCircle className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
-        </CardFooter>
+                <Input
+                  type="number"
+                  value={inputValue}
+                  onClick={(e) => e.stopPropagation()}
+                  onChange={(e) => { e.stopPropagation(); handleQuantityChangeViaInput(e);}}
+                  onBlur={(e) => { e.stopPropagation(); handleBlurInput();}}
+                  className="h-7 w-10 text-center px-1 text-sm border-input focus:ring-primary focus:border-primary"
+                  min="0"
+                />
+                <Button variant="outline" size="icon" onClick={(e) => { e.stopPropagation(); handleIncreaseQuantity();}} className="h-7 w-7 rounded-full">
+                  <PlusCircle className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+      </CardFooter>
       </Card>
       {(!isAdminPreview && !isAdminGalleryView) && (
         <DialogContent className="sm:max-w-[525px]">
