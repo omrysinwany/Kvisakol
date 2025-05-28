@@ -7,7 +7,9 @@ export interface Product {
   imageUrl: string;
   dataAiHint?: string;
   category?: string; 
-  isActive: boolean; 
+  isActive: boolean;
+  unitsPerBox: number; // כמות יחידות בארגז
+  consumerPrice: number; // מחיר לצרכן
 }
 
 export interface CartItem extends Product {

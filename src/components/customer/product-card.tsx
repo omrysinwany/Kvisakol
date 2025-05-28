@@ -171,30 +171,31 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
                 e.currentTarget.src = '/images/products/placeholder.jpg';
               }}
             />
-            {product.category && !isAdminGalleryView && (
+            {product.unitsPerBox > 0 && !isAdminGalleryView && (
               <Badge
                 variant="secondary"
                 className="absolute top-2 left-2 z-10 text-xs px-1.5 py-0.5"
               >
-                {product.category}
+                {product.unitsPerBox} יח'
               </Badge>
             )}
-             {isAdminGalleryView && (
-                <Badge
+            {isAdminGalleryView && (
+              <Badge
                 className={cn(
-                    "absolute top-2 left-2 z-10 text-xs px-1.5 py-0.5", 
-                    product.isActive ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                  "absolute top-2 left-2 z-10 text-xs px-1.5 py-0.5", 
+                  product.isActive ? "bg-green-500 text-white" : "bg-red-500 text-white"
                 )}
-                >
+              >
                 {product.isActive ? "פעיל" : "לא פעיל"}
-                </Badge>
+              </Badge>
             )}
           </div>
         </CardHeader>
+
         <CardContent
           className="p-3 pb-1 flex-1"
           onClick={(e) => {
-             if (!isAdminPreview && !isAdminGalleryView) handleCardContentClick(e);
+            if (!isAdminPreview && !isAdminGalleryView) handleCardContentClick(e);
           }}
         >
           <CardTitle 
@@ -209,56 +210,82 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
             {product.name}
           </CardTitle>
         </CardContent>
-        <CardFooter
-        className={cn(
-          "pt-1 px-3 pb-2 flex mt-auto items-center",
-          (isAdminPreview || isAdminGalleryView) ? "justify-center w-full" : "flex-col items-center gap-2" // *** השורה הזו שונתה ל-items-center ***
-        )}
-        onClick={(e) => {
-          if (!isAdminPreview && !isAdminGalleryView && e.target !== e.currentTarget) {
-              e.stopPropagation();
-          }
-        }}
-      >
-        <div className={cn("flex items-center", (isAdminPreview || isAdminGalleryView) ? "justify-center w-full" : "gap-1")}> {/* ניתן גם לשנות את ה-gap כאן אם רוצים רווח בתוך שורת המחיר עצמה (אבל המחיר לבד בשורה אז לא רלוונטי) */}
-          <p className="text-sm text-foreground font-semibold">{formatPrice(product.price)}</p>
-        </div>
 
-        {(!isAdminPreview && !isAdminGalleryView) && (
-          <div className='flex items-center'> {/* ה-div הזה עדיין flex items-center כדי ליישר את כפתור/מנגנון הכמות אם יש כמה אלמנטים בשורה זו */}
-            {quantityInCart === 0 ? (
-              <Button onClick={(e) => { e.stopPropagation(); handleAddToCart(); }} className="w-full sm:w-auto" size="sm">
-                <ShoppingCartIcon className="ml-1.5 h-4 w-4" />
-                הוספה
-              </Button>
-            ) : (
-              <div className="flex items-center gap-1">
-                <Button variant="outline" size="icon" onClick={(e) => { e.stopPropagation(); handleDecreaseQuantity(); }} className="h-7 w-7 rounded-full">
-                  <MinusCircle className="h-4 w-4" />
-                </Button>
-                <Input
-                  type="number"
-                  value={inputValue}
-                  onClick={(e) => e.stopPropagation()}
-                  onChange={(e) => { e.stopPropagation(); handleQuantityChangeViaInput(e);}}
-                  onBlur={(e) => { e.stopPropagation(); handleBlurInput();}}
-                  className="h-7 w-10 text-center px-1 text-sm border-input focus:ring-primary focus:border-primary"
-                  min="0"
-                />
-                <Button variant="outline" size="icon" onClick={(e) => { e.stopPropagation(); handleIncreaseQuantity();}} className="h-7 w-7 rounded-full">
-                  <PlusCircle className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
+        <CardFooter
+          className={cn(
+            "pt-1 px-3 pb-2 flex flex-col items-center mt-auto",
+            (isAdminPreview || isAdminGalleryView) && "justify-center w-full"
+          )}
+          onClick={(e) => {
+            if (!isAdminPreview && !isAdminGalleryView && e.target !== e.currentTarget) {
+              e.stopPropagation();
+            }
+          }}
+        >
+          {/* עוטפים את שתי שורות המחיר כדי שלא יהיה רווח ביניהן */}
+          <div className="flex flex-col items-center gap-0">
+            <p className="text-sm text-foreground font-semibold">
+              {formatPrice(product.price * (product.unitsPerBox || 1))}
+            </p>
+            <p className="text-xs text-muted-foreground font-normal">
+              ({formatPrice(product.price)} ליחידה)
+            </p>
           </div>
-        )}
-      </CardFooter>
+
+          {(!isAdminPreview && !isAdminGalleryView) && (
+            <div className="flex items-center">
+              {quantityInCart === 0 ? (
+                <Button
+                  onClick={(e) => { e.stopPropagation(); handleAddToCart(); }}
+                  className="w-full sm:w-auto"
+                  size="sm"
+                >
+                  <ShoppingCartIcon className="ml-1.5 h-4 w-4" />
+                  הוספה
+                </Button>
+              ) : (
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={(e) => { e.stopPropagation(); handleDecreaseQuantity(); }}
+                    className="h-7 w-7 rounded-full"
+                  >
+                    <MinusCircle className="h-4 w-4" />
+                  </Button>
+                  <Input
+                    type="number"
+                    value={inputValue}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) => { e.stopPropagation(); handleQuantityChangeViaInput(e); }}
+                    onBlur={(e) => { e.stopPropagation(); handleBlurInput(); }}
+                    className="h-7 w-10 text-center px-1 text-sm border-input focus:ring-primary focus:border-primary"
+                    min="0"
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={(e) => { e.stopPropagation(); handleIncreaseQuantity(); }}
+                    className="h-7 w-7 rounded-full"
+                  >
+                    <PlusCircle className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </CardFooter>
       </Card>
+
       {(!isAdminPreview && !isAdminGalleryView) && (
-        <DialogContent className="sm:max-w-[525px]">
+        <DialogContent className="w-screen max-w-full max-h-screen
+         sm:max-w-[525px] sm:max-h-[80vh] overflow-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl text-[hsl(var(--ring))]">{product.name}</DialogTitle>
+            <DialogTitle className="text-2xl text-[hsl(var(--ring))]">
+              {product.name}
+            </DialogTitle>
           </DialogHeader>
+
           <div className="grid gap-4 py-4">
             <div className="relative aspect-square w-full max-w-xs mx-auto">
               <Image
@@ -269,24 +296,46 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
                 className="object-cover rounded-md"
                 data-ai-hint={product.dataAiHint as string || 'product image'}
                 onError={(e) => {
-                    e.currentTarget.srcset = '/images/products/placeholder.jpg';
-                    e.currentTarget.src = '/images/products/placeholder.jpg';
+                  e.currentTarget.srcset = '/images/products/placeholder.jpg';
+                  e.currentTarget.src = '/images/products/placeholder.jpg';
                 }}
               />
-              {product.category && (
+              {product.unitsPerBox > 0 && !isAdminGalleryView && (
                 <Badge
                   variant="secondary"
                   className="absolute top-2 left-2 z-10 text-xs px-1.5 py-0.5"
                 >
-                  {product.category}
+                  {product.unitsPerBox} יח'
                 </Badge>
               )}
             </div>
-            <p className="text-xl font-semibold">{formatPrice(product.price)}</p>
+
+            <div>
+              <p className="text-xl font-semibold">
+                {formatPrice(product.price * (product.unitsPerBox || 1))}
+              </p>
+              <p className="text-xs text-muted-foreground font-normal">
+                ({formatPrice(product.price)} ליחידה)
+              </p>
+            </div>
+
             <DialogDescription className="text-sm text-muted-foreground whitespace-pre-wrap max-h-[200px] overflow-y-auto">
               {product.description}
             </DialogDescription>
+
+            {/* מחיר מומלץ לצרכן מתחת לתיאור */}
+            {product.consumerPrice != null && (
+              <div className="mt-2 flex items-center gap-1">
+                <p className="text-sm text-muted-foreground font-normal">
+                  מחיר מומלץ לצרכן:
+                </p>
+                <p className="text-sm text-muted-foreground font-normal">
+                  {formatPrice(product.consumerPrice)}
+                </p>
+              </div>
+            )}
           </div>
+
           <DialogFooter>
             <DialogClose asChild>
               <Button type="button" variant="outline">

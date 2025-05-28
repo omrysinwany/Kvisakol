@@ -15,6 +15,9 @@ import { useToast } from '@/hooks/use-toast';
 import { createOrderService } from '@/services/order-service';
 import type { OrderItem } from '@/lib/types';
 import { useEffect, useState } from 'react';
+import { AlertTriangle } from 'lucide-react';
+
+const MINIMUM_ORDER_VALUE = 200;
 
 const orderFormSchema = z.object({
   customerName: z.string().min(2, { message: 'שם חייב להכיל לפחות 2 תווים.' }),
@@ -30,6 +33,7 @@ export function OrderForm() {
   const router = useRouter();
   const { toast } = useToast();
   const [orderSubmitted, setOrderSubmitted] = useState(false);
+  const isBelowMinimumOrder = totalPrice < MINIMUM_ORDER_VALUE;
 
   const form = useForm<OrderFormValues>({
     resolver: zodResolver(orderFormSchema),
@@ -42,13 +46,33 @@ export function OrderForm() {
   });
 
   useEffect(() => {
-    if (!orderSubmitted && typeof window !== 'undefined' && cartItems.length === 0) {
-      router.push('/cart');
+    // Redirect if cart is empty and order not submitted OR if below minimum order value
+    if (typeof window !== 'undefined' && !orderSubmitted) {
+      if (cartItems.length === 0) {
+        console.log('OrderForm: Cart is empty, redirecting to /cart');
+        router.push('/cart');
+      } else if (totalPrice < MINIMUM_ORDER_VALUE) {
+        console.log(`OrderForm: Order total ${totalPrice} is below minimum ${MINIMUM_ORDER_VALUE}, redirecting to /cart`);
+        toast({
+          variant: 'destructive',
+          title: 'סכום הזמנה נמוך מדי',
+          description: `סכום ההזמנה המינימלי הוא ${formatPrice(MINIMUM_ORDER_VALUE)}. אנא חזור לעגלה והוסף פריטים.`,
+        });
+        router.push('/cart');
+      }
     }
-  }, [cartItems, router, orderSubmitted]);
+  }, [cartItems, totalPrice, router, orderSubmitted, toast]);
 
 
   const onSubmit = async (data: OrderFormValues) => {
+    if (isBelowMinimumOrder) {
+      toast({
+        variant: 'destructive',
+        title: 'לא ניתן לשלוח הזמנה',
+        description: `סכום ההזמנה המינימלי הוא ${formatPrice(MINIMUM_ORDER_VALUE)}.`,
+      });
+      return;
+    }
     try {
       const orderItems: OrderItem[] = cartItems.map(item => ({
         productId: item.id,
@@ -70,9 +94,9 @@ export function OrderForm() {
       });
       
       clearCart();
+      setOrderSubmitted(true); 
       console.log('Attempting to redirect to / from OrderForm');
       router.push('/'); 
-      setOrderSubmitted(true); 
 
     } catch (error) {
       console.error('Failed to submit order:', error);
@@ -88,10 +112,12 @@ export function OrderForm() {
     return `₪${price.toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
-  if (!orderSubmitted && cartItems.length === 0 && typeof window !== 'undefined') { 
+  if (!orderSubmitted && (cartItems.length === 0 || isBelowMinimumOrder) && typeof window !== 'undefined') { 
     return (
       <div className="container mx-auto px-4 py-8 text-center">
-        <p className="text-lg text-muted-foreground">העגלה שלך ריקה, מעביר אותך לדף העגלה...</p>
+        <p className="text-lg text-muted-foreground">
+          {cartItems.length === 0 ? "העגלה שלך ריקה. מעביר אותך לדף העגלה..." : `סכום ההזמנה נמוך מ-${formatPrice(MINIMUM_ORDER_VALUE)}. מעביר אותך לדף העגלה...`}
+        </p>
       </div>
     ); 
   }
@@ -158,7 +184,16 @@ export function OrderForm() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" size="lg" className="w-full" disabled={form.formState.isSubmitting || cartItems.length === 0}>
+              {isBelowMinimumOrder && !orderSubmitted && (
+                <div className="mt-3 p-3 bg-destructive/10 border border-destructive/30 rounded-md text-destructive text-sm flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5" />
+                  <div>
+                    <p className="font-semibold">סכום ההזמנה המינימלי הוא {formatPrice(MINIMUM_ORDER_VALUE)}.</p>
+                    <p>לא ניתן להמשיך עם סכום נמוך מזה.</p>
+                  </div>
+                </div>
+              )}
+              <Button type="submit" size="lg" className="w-full" disabled={form.formState.isSubmitting || cartItems.length === 0 || isBelowMinimumOrder}>
                 {form.formState.isSubmitting ? 'שולח הזמנה...' : 'שלח הזמנה לסוכן'}
               </Button>
             </form>
@@ -184,6 +219,11 @@ export function OrderForm() {
             <span>סכום כולל:</span>
             <span className="text-primary">{formatPrice(totalPrice)}</span>
           </div>
+          {isBelowMinimumOrder && (
+             <p className="text-xs text-destructive pt-1">
+                נדרש סכום מינימום של {formatPrice(MINIMUM_ORDER_VALUE)} להזמנה.
+            </p>
+          )}
         </CardContent>
          <CardFooter>
            <p className="text-xs text-muted-foreground">
