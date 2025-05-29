@@ -10,7 +10,7 @@ runConfig:
 # משתני סביבה זמינים גם בזמן Build וגם בזמן ריצה
 env:
   - variable: NEXT_PUBLIC_FIREBASE_API_KEY
-    value: AIzaSyADws99Ain6kJB_fS8nIf-aesK8ZMJmkcU
+    value: FIREBASE_WEB_API_KEY
     availability:
       - BUILD
       - RUNTIME
