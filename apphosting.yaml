@@ -1,49 +1,58 @@
 # הגדרות עבור Cloud Run (לא חובה לשנות בשלב זה)
 runConfig:
   minInstances: 0
-  # תוכל לפתוח את השורות הבאות אם תצטרך יותר משאבים:
-  # maxInstances: 100
-  # concurrency: 80
-  # cpu: 1
-  # memoryMiB: 512
 
 # משתני סביבה זמינים גם בזמן Build וגם בזמן ריצה
 env:
+  # API Key managed as a secret
   - variable: NEXT_PUBLIC_FIREBASE_API_KEY
-    value: FIREBASE_WEB_API_KEY
+    secret: FIREBASE_WEB_API_KEY # Reference the secret name
     availability:
       - BUILD
       - RUNTIME
 
+  # Other NEXT_PUBLIC variables for runtime
   - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
     value: kvisakol-orders.firebaseapp.com
     availability:
-      - BUILD
       - RUNTIME
 
   - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
     value: kvisakol-orders
     availability:
-      - BUILD
       - RUNTIME
 
   - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
     value: kvisakol-orders.firebasestorage.app
     availability:
-      - BUILD
       - RUNTIME
 
   - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
     value: "210347530199"
     availability:
-      - BUILD
       - RUNTIME
 
   - variable: NEXT_PUBLIC_FIREBASE_APP_ID
     value: "1:210347530199:web:0f835fb1d5da0d9e149d92"
     availability:
-      - BUILD
       - RUNTIME
+
+# Build configuration with environment variables
+build:
+  command: npm run build # Or 'yarn build' if you use yarn
+  env:
+    # Explicitly pass NEXT_PUBLIC variables needed during build
+    - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+      value: kvisakol-orders
+    - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+      value: kvisakol-orders.firebaseapp.com
+    - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+      value: kvisakol-orders.firebasestorage.app
+    - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+      value: "210347530199"
+    - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+      value: "1:210347530199:web:0f835fb1d5da0d9e149d92"
+    # Note: API Key is handled via secret, no need to pass it here with value
 
   # אם בעתיד תעבור לשימוש ב-Firebase Admin SDK, תוכל להשתמש ב-secrets:
   # - variable: FIREBASE_PRIVATE_KEY
