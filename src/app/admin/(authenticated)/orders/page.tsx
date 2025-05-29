@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { OrderTable } from '@/components/admin/order-table';
 import { AdminPaginationControls } from '@/components/admin/admin-pagination-controls';
@@ -197,161 +197,164 @@ export default function AdminOrdersPage() {
     return <div className="container mx-auto px-4 py-8"><p>טוען הזמנות...</p></div>;
   }
 
+  // Wrap the main content with Suspense
   return (
     <>
-      <div className="w-full py-4 mb-8 text-center bg-card shadow-sm rounded-lg">
-        <h1 className="text-3xl font-bold tracking-tight text-primary">ניהול הזמנות</h1>
-      </div>
+      <Suspense fallback={<div>טוען...</div>}>
+        <div className="w-full py-4 mb-8 text-center bg-card shadow-sm rounded-lg">
+          <h1 className="text-3xl font-bold tracking-tight text-primary">ניהול הזמנות</h1>
+        </div>
 
-      <Card className="shadow-lg">
-        <CardHeader className="pb-3">
-          <div className="flex flex-row items-center justify-between gap-2">
-            <div>
-              <CardTitle className="text-xl flex items-center gap-2">
-                <ClipboardList className="h-5 w-5 text-primary" />
-                רשימת הזמנות ({filteredOrders.length})
-              </CardTitle>
-              <CardDescription>
-                 נהל את כל ההזמנות שהתקבלו
-              </CardDescription>
-            </div>
-          </div>
-          
-          <div className="pt-3 space-y-2">
-            {/* Row 1: Phone Search and Status Filter */}
-            <div className="grid grid-cols-2 gap-2 items-end"> {/* Changed from sm:grid-cols-2 */}
-              <div className="relative">
-                <UserSearch className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="order-customer-phone-search"
-                  type="tel"
-                  value={customerPhoneInput}
-                  onChange={handleCustomerPhoneInputChange}
-                  onKeyPress={(e) => { if (e.key === 'Enter') handleApplyCustomerPhoneFilter(); }}
-                  placeholder="חיפוש"
-                  className="h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-10 rtl:pr-10 placeholder:text-right text-right"
-                />
-              </div>
+        <Card className="shadow-lg">
+          <CardHeader className="pb-3">
+            <div className="flex flex-row items-center justify-between gap-2">
               <div>
-                <Select value={statusFilter} onValueChange={(value) => { 
-                    setStatusFilter(value as StatusFilterValue); 
-                    setCurrentPage(1);
-                    const newParams = new URLSearchParams(searchParams.toString());
-                    if (value === 'all') newParams.delete('status'); else newParams.set('status', value);
-                    router.replace(`/admin/orders?${newParams.toString()}`);
-                }}>
-                  <SelectTrigger className="h-9 w-full px-3 text-xs">
-                    {statusFilter === 'all' ? 'סטטוס' : <SelectValue />}
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableStatuses.map((statusKey) => (
-                      <SelectItem key={statusKey} value={statusKey} className="text-xs">
-                        {statusTranslationsForFilter[statusKey as StatusFilterValue]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <ClipboardList className="h-5 w-5 text-primary" />
+                  רשימת הזמנות ({filteredOrders.length})
+                </CardTitle>
+                <CardDescription>
+                   נהל את כל ההזמנות שהתקבלו
+                </CardDescription>
               </div>
             </div>
 
-            {/* Row 2: Date Filters */}
-            <div className="grid grid-cols-2 gap-2 items-end"> {/* Changed from sm:grid-cols-2 */}
-              <Popover>
-                  <PopoverTrigger asChild>
-                      <Button
-                      variant={"outline"}
-                      size="sm"
-                      className={cn(
-                          "h-9 w-full px-2 text-xs justify-start text-left font-normal",
-                          !startDate && "text-muted-foreground"
-                      )}
-                      >
-                      <CalendarIcon className="mr-1 h-3.5 w-3.5" />
-                      {startDate ? format(startDate, "d/M/yy", { locale: he }) : <span className="text-xs">מתאריך</span>}
-                      </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                      <Calendar
-                      mode="single"
-                      selected={startDate}
-                      onSelect={(date) => {setStartDate(date); setCurrentPage(1);}}
-                      initialFocus
-                      disabled={(date) => endDate ? date > endDate : false}
-                      />
-                  </PopoverContent>
-              </Popover>
-              <Popover>
-                  <PopoverTrigger asChild>
-                      <Button
-                      variant={"outline"}
-                      size="sm"
-                      className={cn(
-                          "h-9 w-full px-2 text-xs justify-start text-left font-normal",
-                          !endDate && "text-muted-foreground"
-                      )}
-                      >
-                      <CalendarIcon className="mr-1 h-3.5 w-3.5" />
-                      {endDate ? format(endDate, "d/M/yy", { locale: he }) : <span className="text-xs">עד תאריך</span>}
-                      </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                      <Calendar
-                      mode="single"
-                      selected={endDate}
-                      onSelect={(date) => {setEndDate(date); setCurrentPage(1);}}
-                      disabled={(date) => startDate && date < startDate}
-                      initialFocus
-                      />
-                  </PopoverContent>
-              </Popover>
-            </div>
-            
-            {/* Clear buttons and badges */}
-            <div className="flex items-center gap-2 mt-1 flex-wrap">
-                {(startDate || endDate) && (
-                    <Button variant="ghost" onClick={() => {handleClearDates(); setCurrentPage(1);}} size="icon" className="h-8 w-8 shrink-0">
-                        <X className="h-3.5 w-3.5" />
-                        <span className="sr-only">נקה תאריכים</span>
+            <div className="pt-3 space-y-2">
+              {/* Row 1: Phone Search and Status Filter */}
+              <div className="grid grid-cols-2 gap-2 items-end"> {/* Changed from sm:grid-cols-2 */}
+                <div className="relative">
+                  <UserSearch className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="order-customer-phone-search"
+                    type="tel"
+                    value={customerPhoneInput}
+                    onChange={handleCustomerPhoneInputChange}
+                    onKeyPress={(e) => { if (e.key === 'Enter') handleApplyCustomerPhoneFilter(); }}
+                    placeholder="חיפוש"
+                    className="h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-10 rtl:pr-10 placeholder:text-right text-right"
+                  />
+                </div>
+                <div>
+                  <Select value={statusFilter} onValueChange={(value) => {
+                      setStatusFilter(value as StatusFilterValue);
+                      setCurrentPage(1);
+                      const newParams = new URLSearchParams(searchParams.toString());
+                      if (value === 'all') newParams.delete('status'); else newParams.set('status', value);
+                      router.replace(`/admin/orders?${newParams.toString()}`);
+                  }}>
+                    <SelectTrigger className="h-9 w-full px-3 text-xs">
+                      {statusFilter === 'all' ? 'סטטוס' : <SelectValue />}
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableStatuses.map((statusKey) => (
+                        <SelectItem key={statusKey} value={statusKey} className="text-xs">
+                          {statusTranslationsForFilter[statusKey as StatusFilterValue]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Row 2: Date Filters */}
+              <div className="grid grid-cols-2 gap-2 items-end"> {/* Changed from sm:grid-cols-2 */}
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button
+                        variant={"outline"}
+                        size="sm"
+                        className={cn(
+                            "h-9 w-full px-2 text-xs justify-start text-left font-normal",
+                            !startDate && "text-muted-foreground"
+                        )}
+                        >
+                        <CalendarIcon className="mr-1 h-3.5 w-3.5" />
+                        {startDate ? format(startDate, "d/M/yy", { locale: he }) : <span className="text-xs">מתאריך</span>}
                     </Button>
-                )}
-                 {customerPhoneFilter && (
-                    <div className="text-xs text-muted-foreground py-1 px-1.5 rounded-md bg-muted/50 flex items-center">
-                      <UserSearch className="h-3.5 w-3.5 ml-1 text-primary" />
-                      <span>הזמנות עבור: {customerPhoneFilter}</span>
-                    </div>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                        <Calendar
+                        mode="single"
+                        selected={startDate}
+                        onSelect={(date) => {setStartDate(date); setCurrentPage(1);}}
+                        initialFocus
+                        disabled={(date) => endDate ? date > endDate : false}
+                        />
+                    </PopoverContent>
+                </Popover>
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button
+                        variant={"outline"}
+                        size="sm"
+                        className={cn(
+                            "h-9 w-full px-2 text-xs justify-start text-left font-normal",
+                            !endDate && "text-muted-foreground"
+                        )}
+                        >
+                        <CalendarIcon className="mr-1 h-3.5 w-3.5" />
+                        {endDate ? format(endDate, "d/M/yy", { locale: he }) : <span className="text-xs">עד תאריך</span>}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                        <Calendar
+                        mode="single"
+                        selected={endDate}
+                        onSelect={(date) => {setEndDate(date); setCurrentPage(1);}}
+                        disabled={(date) => startDate ? date < startDate : false}
+                        initialFocus
+                        />
+                    </PopoverContent>
+                </Popover>
+              </div>
+
+              {/* Clear buttons and badges */}
+              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  {(startDate || endDate) && (
+                      <Button variant="ghost" onClick={() => {handleClearDates(); setCurrentPage(1);}} size="icon" className="h-8 w-8 shrink-0">
+                          <X className="h-3.5 w-3.5" />
+                          <span className="sr-only">נקה תאריכים</span>
+                      </Button>
                   )}
-                 {(customerPhoneFilter || (customerPhoneInput && customerPhoneInput !== customerPhoneFilter) ) && (
-                     <Button variant="outline" size="xs" onClick={handleClearCustomerFilter} className="h-auto py-0.5 px-1.5 text-xs">
-                        <X className="h-3 w-3 ml-0.5" />
-                        נקה סינון לקוח
-                    </Button>
-                 )}
+                   {customerPhoneFilter && (
+                      <div className="text-xs text-muted-foreground py-1 px-1.5 rounded-md bg-muted/50 flex items-center">
+                        <UserSearch className="h-3.5 w-3.5 ml-1 text-primary" />
+                        <span>הזמנות עבור: {customerPhoneFilter}</span>
+                      </div>
+                    )}
+                   {(customerPhoneFilter || (customerPhoneInput && customerPhoneInput !== customerPhoneFilter) ) && (
+                       <Button variant="outline" size="xs" onClick={handleClearCustomerFilter} className="h-auto py-0.5 px-1.5 text-xs">
+                          <X className="h-3 w-3 ml-0.5" />
+                          נקה סינון לקוח
+                      </Button>
+                   )}
+              </div>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {paginatedOrders.length > 0 ? (
-             <>
-                <OrderTable orders={paginatedOrders} onUpdateStatus={handleUpdateStatus} />
-                {totalPages > 1 && (
-                    <AdminPaginationControls
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={handlePageChange}
-                    />
-                )}
-            </>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">
-                {allOrders.length === 0 ? 'לא קיימות הזמנות במערכת.' :
-                 (customerPhoneFilter || statusFilter !== 'all' || startDate || endDate) ? 'לא נמצאו הזמנות התואמות את הסינון הנוכחי.' :
-                 'לא קיימות הזמנות במערכת.'}
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent>
+            {paginatedOrders.length > 0 ? (
+               <>
+                  <OrderTable orders={paginatedOrders} onUpdateStatus={handleUpdateStatus} />
+                  {totalPages > 1 && (
+                      <AdminPaginationControls
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={handlePageChange}
+                      />
+                  )}
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">
+                  {allOrders.length === 0 ? 'לא קיימות הזמנות במערכת.' :
+                   (customerPhoneFilter || statusFilter !== 'all' || startDate || endDate) ? 'לא נמצאו הזמנות התואמות את הסינון הנוכחי.' :
+                   'לא קיימות הזמנות במערכת.'}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </Suspense>
     </>
   );
 }
