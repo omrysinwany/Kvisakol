@@ -153,11 +153,11 @@ export function CustomerDetailView({ customer, onSaveGeneralNotes, onSaveCustome
                   className="bg-background text-sm"
                 />
                 <div className="flex items-center gap-2 mt-1.5">
-                  <Button onClick={handleSaveNotesInternal} size="xs" disabled={isSavingGeneralNotes}>
+                  <Button onClick={handleSaveNotesInternal} size="sm" disabled={isSavingGeneralNotes}>
                     <Save className="ml-1.5 h-3.5 w-3.5" />
                     {isSavingGeneralNotes ? 'שומר...' : 'שמור הערות'}
                   </Button>
-                  <Button variant="outline" size="xs" onClick={handleCancelEditGeneralNotes} disabled={isSavingGeneralNotes}>
+                  <Button variant="outline" size="sm" onClick={handleCancelEditGeneralNotes} disabled={isSavingGeneralNotes}>
                     ביטול
                   </Button>
                 </div>
@@ -168,7 +168,7 @@ export function CustomerDetailView({ customer, onSaveGeneralNotes, onSaveCustome
                   <div>
                     <div className="flex justify-between items-center mb-0.5">
                         <h4 className="text-sm font-medium text-muted-foreground">הערות כלליות לסוכן:</h4>
-                        <Button variant="ghost" size="xs" onClick={() => setIsEditingGeneralNotes(true)} className="text-xs h-6 px-1.5">
+                        <Button variant="ghost" size="sm" onClick={() => setIsEditingGeneralNotes(true)} className="text-xs h-6 px-1.5">
                             <Edit2 className="h-3 w-3 ml-1" />
                             ערוך
                         </Button>
@@ -176,7 +176,7 @@ export function CustomerDetailView({ customer, onSaveGeneralNotes, onSaveCustome
                     <p className="text-sm bg-muted/30 p-2 rounded-md whitespace-pre-wrap min-h-[40px]">{customer.generalAgentNotes}</p>
                   </div>
                 ) : (
-                  <Button variant="outline" size="xs" onClick={() => { setCurrentGeneralNotes(''); setIsEditingGeneralNotes(true);}} className="text-xs">
+                  <Button variant="outline" size="sm" onClick={() => { setCurrentGeneralNotes(''); setIsEditingGeneralNotes(true);}} className="text-xs">
                     <PlusCircle className="h-3.5 w-3.5 ml-1"/>
                     הוסף הערות כלליות
                   </Button>
