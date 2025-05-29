@@ -69,6 +69,13 @@ export default function CatalogPage() {
   }, []);
 
   useEffect(() => {
+    console.log("🔍 env check:", {
+      apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    });
+  }, []);
+
+  useEffect(() => {
     if (isLoading && allProducts.length === 0) return; 
 
     let activeProducts = allProducts.filter(p => p.isActive);

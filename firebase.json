@@ -1,0 +1,12 @@
+{
+    "apphosting": {
+      "backendId": "studio",
+      "backendsWith": {
+        "//cloudfunctions-prod": {
+          "serviceId": "studio",
+          "region": "us-central1"
+        }
+      }
+    }
+  }
+  

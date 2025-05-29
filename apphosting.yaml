@@ -1,0 +1,52 @@
+# הגדרות עבור Cloud Run (לא חובה לשנות בשלב זה)
+runConfig:
+  minInstances: 0
+  # תוכל לפתוח את השורות הבאות אם תצטרך יותר משאבים:
+  # maxInstances: 100
+  # concurrency: 80
+  # cpu: 1
+  # memoryMiB: 512
+
+# משתני סביבה זמינים גם בזמן Build וגם בזמן ריצה
+env:
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: AIzaSyADws99Ain6kJB_fS8nIf-aesK8ZMJmkcU
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: kvisakol-orders.firebaseapp.com
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: kvisakol-orders
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: kvisakol-orders.firebasestorage.app
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "210347530199"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: "1:210347530199:web:0f835fb1d5da0d9e149d92"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # אם בעתיד תעבור לשימוש ב-Firebase Admin SDK, תוכל להשתמש ב-secrets:
+  # - variable: FIREBASE_PRIVATE_KEY
+  #   secret: firebasePrivateKeySecret
+  #   availability:
+  #     - RUNTIME
