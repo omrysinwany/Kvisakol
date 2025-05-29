@@ -69,10 +69,12 @@ export default function CatalogPage() {
   }, []);
 
   useEffect(() => {
-    console.log("🔍 env check:", {
-      apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-    });
+    if (process.env.NODE_ENV === 'development') {
+      console.log("🔍 env check:", {
+        apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      });
+    }
   }, []);
 
   useEffect(() => {

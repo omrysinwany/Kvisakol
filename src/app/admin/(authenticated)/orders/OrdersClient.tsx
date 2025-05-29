@@ -40,7 +40,22 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
   const { toast } = useToast()
 
   // --- state ראשוני מה־SSR ---
-  const [orders, setOrders] = useState<Order[]>(initialOrders)
+  const [orders, setOrders] = useState<Order[]>([])
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const liveOrders = await getOrdersForAdmin()
+        if (process.env.NODE_ENV === 'development') {
+          console.log("📦 Orders from Firestore (client):", liveOrders)
+        }
+        setOrders(liveOrders)
+      } catch (e) {
+        console.error("⚠️ Failed to fetch orders from Firestore", e)
+      }
+    }
+    fetchOrders()
+  }, [])
 
   // --- פילטרים ו-UI state ---
   const [statusFilter, setStatusFilter] = useState<StatusFilterValue>('all')
