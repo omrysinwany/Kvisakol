@@ -42,10 +42,13 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
 
   const handleAddToCart = () => {
     if (isAdminGalleryView || isAdminPreview) return;
-    addToCart(product);
+
+    // Add a full box quantity to the cart (Assuming 1 unit if unitsPerBox is not set or <= 0)
+    addToCart(product, product.unitsPerBox && product.unitsPerBox > 0 ? product.unitsPerBox : 1);
+
     toast({
       title: "מוצר נוסף לעגלה",
-      description: `${product.name} נוסף לעגלת הקניות שלך.`,
+      description: `ארגז ${product.name} נוסף לעגלת הקניות שלך.`,
       duration: 3000,
     });
   };
@@ -53,40 +56,47 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
   const handleQuantityChangeViaInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isAdminGalleryView || isAdminPreview) return;
     const value = e.target.value;
+    // Allow empty string temporarily for typing
     setInputValue(value);
 
-    const newQuantity = parseInt(value, 10);
-    if (!isNaN(newQuantity) && newQuantity > 0) {
-      updateQuantity(product.id, newQuantity);
-    } else if (value === '' || newQuantity === 0) {
-      updateQuantity(product.id, 0); 
-    }
+    // Convert input value (number of boxes) to total units
+    const numBoxes = parseInt(value, 10) || 0; // Default to 0 if input is not a valid number
+
+    // Ensure unitsPerBox is a valid number before multiplying
+    const effectiveUnitsPerBox = (product.unitsPerBox && product.unitsPerBox > 0) ? product.unitsPerBox : 1;
+    const newTotalUnits = numBoxes * effectiveUnitsPerBox;
+
+    // Update the cart with the new total units (ensure it's not negative)
+    updateQuantity(product.id, Math.max(0, newTotalUnits));
   };
 
   const handleBlurInput = () => {
-    if (isAdminGalleryView || isAdminPreview) return;
+    if (isAdminGalleryView || isAdminPreview || !product.unitsPerBox || product.unitsPerBox <= 0) return;
+
     const currentCartQty = getItemQuantity(product.id);
-    if (inputValue === '' || isNaN(parseInt(inputValue, 10)) || parseInt(inputValue, 10) <= 0) {
-      if (currentCartQty > 0) {
-        setInputValue(currentCartQty.toString());
-      } else {
-        setInputValue("0"); 
-      }
+    const currentBoxes = Math.floor(currentCartQty / product.unitsPerBox);
+
+    if (isNaN(parseInt(inputValue, 10)) || parseInt(inputValue, 10) < 0) { // Check for non-numeric or negative input
+      // If invalid input, revert to current number of boxes in cart
+      setInputValue(currentBoxes.toString());
+    } else {
+       // If valid input, set the input value to the integer number of boxes
+       setInputValue(parseInt(inputValue, 10).toString());
     }
   };
 
   const handleIncreaseQuantity = () => {
-    if (isAdminGalleryView || isAdminPreview) return;
-    const newQuantity = quantityInCart + 1;
-    updateQuantity(product.id, newQuantity);
-    setInputValue(newQuantity.toString());
+    if (isAdminGalleryView || isAdminPreview || !product.unitsPerBox || product.unitsPerBox <= 0) return;
+    // Increase quantity by the number of units in a box
+    const newTotalUnits = quantityInCart + product.unitsPerBox;
+    updateQuantity(product.id, newTotalUnits);
   };
 
   const handleDecreaseQuantity = () => {
-    if (isAdminGalleryView || isAdminPreview) return;
-    const newQuantity = quantityInCart - 1;
-    updateQuantity(product.id, newQuantity); 
-    setInputValue(newQuantity > 0 ? newQuantity.toString() : "0");
+    if (isAdminGalleryView || isAdminPreview || !product.unitsPerBox || product.unitsPerBox <= 0) return;
+    // Decrease quantity by the number of units in a box, ensuring it doesn't go below zero
+    const newTotalUnits = Math.max(0, quantityInCart - product.unitsPerBox);
+    updateQuantity(product.id, newTotalUnits);
   };
 
   const formatPrice = (price: number) => {
@@ -140,6 +150,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
           <CardTitle className="text-sm leading-normal text-center line-clamp-2 text-[hsl(var(--ring))]">
             {product.name}
           </CardTitle>
+          
         </CardContent>
         <CardFooter className="p-0" />
       </Card>
@@ -193,20 +204,20 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
         </CardHeader>
 
         <CardContent
-          className="p-3 pb-1 flex-1"
+          className="p-3 pb-1 min-h-[40px]"
           onClick={(e) => {
             if (!isAdminPreview && !isAdminGalleryView) handleCardContentClick(e);
           }}
+
         >
+          {/* whitespace-normal-override is to counteract default white-space: nowrap styles from the CardTitle component */}
           <CardTitle 
             className={cn(
-              "text-sm leading-normal text-center line-clamp-2 text-[hsl(var(--ring))]",
+              "text-sm leading-normal text-center text-[hsl(var(--ring))] flex flex-col items-center", // Add flex and items-center
               (!isAdminPreview && !isAdminGalleryView) && "cursor-pointer"
             )}
-            onClick={(e) => {
-              if (!isAdminPreview && !isAdminGalleryView) openDialog(e);
-            }}
-          >
+            // dangerouslySetInnerHTML={{ __html: product.name }} // Removed dangerouslySetInnerHTML
+          >  
             {product.name}
           </CardTitle>
         </CardContent>
@@ -223,10 +234,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
           }}
         >
           {/* עוטפים את שתי שורות המחיר כדי שלא יהיה רווח ביניהן */}
-          <div className="flex flex-col items-center gap-0">
-            <p className="text-sm text-foreground font-semibold">
-              {formatPrice(product.price * (product.unitsPerBox || 1))}
-            </p>
+          <div className="flex flex-col items-center gap-0 text-center"> {/* Added text-center for better alignment */}
             <p className="text-xs text-muted-foreground font-normal">
               ({formatPrice(product.price)} ליחידה)
             </p>
@@ -259,7 +267,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
                     onClick={(e) => e.stopPropagation()}
                     onChange={(e) => { e.stopPropagation(); handleQuantityChangeViaInput(e); }}
                     onBlur={(e) => { e.stopPropagation(); handleBlurInput(); }}
-                    className="h-7 w-10 text-center px-1 text-sm border-input focus:ring-primary focus:border-primary"
+                    className="h-7 w-12 text-center px-1 text-sm border-input focus:ring-primary focus:border-primary"
                     min="0"
                   />
                   <Button

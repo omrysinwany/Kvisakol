@@ -51,14 +51,6 @@ export async function getProductsForCatalog(): Promise<Product[]> {
   }
 }
 
-// TODO: The following functions currently use placeholder data and need to be updated to use Firebase Firestore.
-
-import {
-    placeholderProducts,
-    addPlaceholderProduct,
-    updatePlaceholderProduct as updateLocalProduct,
-    deletePlaceholderProduct as deleteLocalProduct
-  } from '@/lib/placeholder-data';
 
   const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 

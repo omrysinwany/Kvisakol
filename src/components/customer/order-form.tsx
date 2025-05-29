@@ -22,6 +22,7 @@ const MINIMUM_ORDER_VALUE = 200;
 const orderFormSchema = z.object({
   customerName: z.string().min(2, { message: 'שם חייב להכיל לפחות 2 תווים.' }),
   customerPhone: z.string().regex(/^0\d([\d]{0,1})([-]{0,1})\d{7}$/, { message: 'מספר טלפון לא תקין.' }),
+  customerBusinessName: z.string().optional(),
   customerAddress: z.string().min(5, { message: 'כתובת חייבת להכיל לפחות 5 תווים.' }),
   customerNotes: z.string().optional(),
 });
@@ -40,6 +41,7 @@ export function OrderForm() {
     defaultValues: {
       customerName: '',
       customerPhone: '',
+      customerBusinessName: '',
       customerAddress: '',
       customerNotes: '',
     },
@@ -79,6 +81,7 @@ export function OrderForm() {
         productName: item.name,
         quantity: item.quantity,
         priceAtOrder: item.price,
+        unitsPerBox:  item.unitsPerBox,
       }));
 
       const createdOrder = await createOrderService({
@@ -160,12 +163,25 @@ export function OrderForm() {
               />
               <FormField
                 control={form.control}
+                name="customerBusinessName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>שם העסק</FormLabel>
+                    <FormControl>
+                       <Input placeholder="שם העסק / החברה" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="customerAddress"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>כתובת למשלוח</FormLabel>
                     <FormControl>
-                      <Input placeholder="עיר, רחוב, מספר בית, דירה" {...field} />
+                      <Input placeholder="עיר, רחוב, מספר" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -212,7 +228,8 @@ export function OrderForm() {
                 <p className="font-medium">{item.name}</p>
                 <p className="text-xs text-muted-foreground">כמות: {item.quantity}</p>
               </div>
-              <p>{formatPrice(item.price * item.quantity)}</p>
+              {/* Individual product subtotal removed as per request */}
+              {/* <p>{formatPrice(item.price * item.quantity)}</p> */}
             </div>
           ))}
           <div className="flex justify-between font-semibold text-lg pt-2">

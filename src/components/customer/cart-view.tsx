@@ -1,22 +1,24 @@
-
 'use client';
 
 import Link from 'next/link';
 import { useCart } from '@/contexts/cart-context';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { CartItemCard } from './cart-item';
 import { ShoppingCart, AlertTriangle } from 'lucide-react';
 
-const MINIMUM_ORDER_VALUE = 200;
+const MINIMUM_ORDER_VALUE = 2000;
 
 export function CartView() {
   const { cartItems, totalPrice, totalItems, clearCart } = useCart();
   const isBelowMinimumOrder = totalPrice < MINIMUM_ORDER_VALUE;
 
   const formatPrice = (price: number) => {
-    return `₪${price.toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  }
+    return `₪${price.toLocaleString('he-IL', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+  };
 
   if (totalItems === 0) {
     return (
@@ -38,38 +40,50 @@ export function CartView() {
           <CartItemCard key={item.id} item={item} />
         ))}
       </div>
+
       <Card className="lg:col-span-1 h-fit sticky top-20 shadow-xl">
-        <CardHeader>
-          <CardTitle className="text-xl">סיכום הזמנה</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">סה"כ פריטים:</span>
-            <span>{totalItems}</span>
+        <CardContent className="space-y-3 pt-6">
+          <div className="flex justify-between items-center font-semibold text-lg">
+            <span className="text-muted-foreground">סה"כ לתשלום:</span>
+            <span className="text-primary text-xl">{formatPrice(totalPrice)}</span>
           </div>
-          <div className="flex justify-between font-semibold text-lg">
-            <span>סכום כולל:</span>
-            <span className="text-primary">{formatPrice(totalPrice)}</span>
-          </div>
+
           {isBelowMinimumOrder && (
-            <div className="mt-3 p-3 bg-destructive/10 border border-destructive/30 rounded-md text-destructive text-sm flex items-center gap-2">
+            <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-md text-destructive text-sm flex items-center gap-2 mt-2">
               <AlertTriangle className="h-5 w-5" />
               <div>
-                <p className="font-semibold">סכום ההזמנה המינימלי הוא {formatPrice(MINIMUM_ORDER_VALUE)}.</p>
+                <p className="font-semibold">
+                  סכום ההזמנה המינימלי הוא {formatPrice(MINIMUM_ORDER_VALUE)}.
+                </p>
                 <p>אנא הוסף פריטים נוספים לעגלה.</p>
               </div>
             </div>
           )}
+
           <p className="text-xs text-muted-foreground pt-2">
             המחירים לצורך מידע בלבד. התשלום יתבצע ישירות מול הסוכן.
           </p>
         </CardContent>
+
         <CardFooter className="flex flex-col gap-3">
-          <Button asChild size="lg" className="w-full" disabled={isBelowMinimumOrder}>
-            <Link href="/checkout" aria-disabled={isBelowMinimumOrder} tabIndex={isBelowMinimumOrder ? -1 : undefined} style={{ pointerEvents: isBelowMinimumOrder ? 'none' : 'auto' }}>
+          <Button
+            asChild
+            size="lg"
+            className="w-full"
+            disabled={isBelowMinimumOrder}
+          >
+            <Link
+              href="/checkout"
+              aria-disabled={isBelowMinimumOrder}
+              tabIndex={isBelowMinimumOrder ? -1 : undefined}
+              style={{
+                pointerEvents: isBelowMinimumOrder ? 'none' : 'auto',
+              }}
+            >
               המשך להזמנה
             </Link>
           </Button>
+
           <Button variant="outline" onClick={clearCart} className="w-full">
             רוקן עגלה
           </Button>

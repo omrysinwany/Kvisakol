@@ -79,7 +79,7 @@ export function CustomerTable({ customers }: CustomerTableProps) {
     <Table className="text-xs">
       <TableHeader>
         <TableRow>
-          <TableHead className="text-right">שם לקוח</TableHead>
+          <TableHead className="text-right">לקוח</TableHead>
           <TableHead className="text-right">סטטוס</TableHead>
           <TableHead className="text-right">טלפון</TableHead>
           <TableHead className="hidden md:table-cell text-right">כתובת אחרונה</TableHead>
@@ -97,7 +97,7 @@ export function CustomerTable({ customers }: CustomerTableProps) {
               className="cursor-pointer hover:bg-muted/50 transition-colors"
             >
               <TableCell className="font-medium">
-                {customer.name}
+                {customer.customerBusinessName || customer.name}
               </TableCell>
               <TableCell>
                 {displayStatus ? (
@@ -109,7 +109,9 @@ export function CustomerTable({ customers }: CustomerTableProps) {
                   <span className="text-muted-foreground">-</span>
                 )}
               </TableCell>
-              <TableCell>{customer.phone}</TableCell>
+              <TableCell>
+ <a href={`tel:${customer.phone}`} className="text-blue-600 hover:underline" onClick={(e) => e.stopPropagation()}>{customer.phone}</a>
+              </TableCell>
               <TableCell className="hidden md:table-cell">{customer.latestAddress || '-'}</TableCell>
               <TableCell className="hidden lg:table-cell">
                 {customer.lastOrderDate ? format(new Date(customer.lastOrderDate), 'dd/MM/yyyy', { locale: he }) : '-'}

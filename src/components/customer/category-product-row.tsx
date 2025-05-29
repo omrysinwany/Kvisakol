@@ -19,9 +19,9 @@ export function CategoryProductRow({ categoryName, products }: CategoryProductRo
       <h2 className="text-2xl font-bold tracking-tight text-primary text-center mb-2">{categoryName}</h2>
       <div className="mx-auto h-1 w-16 bg-primary/50 rounded-full mb-6"></div>
       <div className="w-full overflow-x-auto scrollbar-h-2.5 scrollbar-thumb-primary scrollbar-track-muted/40 pb-2">
-        <div className="inline-flex whitespace-nowrap gap-4 py-2 px-1">
+        <div className="inline-flex gap-4 py-2 px-1">
           {products.map((product) => (
-            <div key={product.id} className="w-[180px] sm:w-[200px] flex-shrink-0 h-full"> {/* Updated width here */}
+            <div key={product.id} className="w-[180px] sm:w-[200px] flex-shrink-0"> {/* Updated width here */}
               <ProductCard product={product} />
             </div>
           ))}

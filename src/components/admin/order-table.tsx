@@ -79,7 +79,7 @@ export function OrderTable({ orders, onUpdateStatus }: OrderTableProps) {
             <TableCell className="font-medium">
               #{order.id.substring(order.id.length - 6)}
             </TableCell>
-            <TableCell>{order.customerName}</TableCell>
+            <TableCell>{order.customerBusinessName || order.customerName}</TableCell>
             <TableCell className="hidden md:table-cell">
               {format(new Date(order.orderTimestamp), 'dd/MM/yyyy HH:mm', { locale: he })}
             </TableCell>

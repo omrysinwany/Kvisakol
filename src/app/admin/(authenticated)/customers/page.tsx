@@ -49,16 +49,16 @@ const totalOrdersFilterOptionsOrder: TotalOrdersFilter[] = ['all', '1', '2-4', '
 // Helper function to determine customer display status
 const getCustomerDisplayStatus = (customer: CustomerSummary): CustomerStatusFilter => {
   const now = endOfDay(new Date());
-  const ninetyDaysAgo = subDays(now, 90);
-  const isNewCustomer = customer.totalOrders === 1;
+  const thirtyDaysAgo = subDays(now, 30);
+  const isNewCustomer = customer.totalOrders <= 2;
   // Ensure lastOrderDate is valid before comparison
   const customerLastOrderDate = customer.lastOrderDate ? new Date(customer.lastOrderDate) : new Date(0); // Treat undefined as very old date
-  const isActuallyInactive = isBefore(customerLastOrderDate, ninetyDaysAgo);
+  const isActuallyInactive = isBefore(customerLastOrderDate, thirtyDaysAgo);
 
-  if (customer.totalOrders >= 5 && !isActuallyInactive) return 'vip';
+  if (customer.totalOrders >= 12 && !isActuallyInactive) return 'vip';
   if (isNewCustomer) return 'new';
   if (isActuallyInactive) return 'inactive'; 
-  if (customer.totalOrders > 1 && !isActuallyInactive) return 'returning'; 
+  if (customer.totalOrders > 2 && !isActuallyInactive) return 'returning'; 
   return 'all'; 
 };
 

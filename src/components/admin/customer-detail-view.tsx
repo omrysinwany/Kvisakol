@@ -74,7 +74,15 @@ export function CustomerDetailView({ customer, onSaveGeneralNotes, onSaveCustome
             <div className="flex items-center gap-3 flex-grow min-w-0">
                 <UserCircle className="h-8 w-8 text-primary shrink-0" />
                 {!isEditingName ? (
-                    <CardTitle className="text-2xl truncate" title={customer.name}>{customer.name}</CardTitle> 
+                    // Display logic: Business name first, fallback to personal name in title
+                    // Only personal name is displayed in the title
+                    <div className="flex flex-col">
+ <CardTitle className="text-2xl truncate" title={customer.customerBusinessName || customer.name}>
+ {customer.customerBusinessName || customer.name}
+ </CardTitle>
+ {/* Display personal name if business name is present */}
+ {customer.customerBusinessName && (<p className="text-sm text-muted-foreground font-normal">שם הלקוח: {customer.name}</p>)}
+ </div>
                 ) : (
                     <Input 
                         value={editedName} 

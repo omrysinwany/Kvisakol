@@ -20,7 +20,8 @@ export interface OrderItem {
   productId: string;
   productName: string;
   quantity: number;
-  priceAtOrder: number; 
+  priceAtOrder: number;
+  unitsPerBox: number;
 }
 
 export interface Order {
@@ -29,6 +30,7 @@ export interface Order {
   customerPhone: string;
   customerAddress: string;
   customerNotes?: string;
+  customerBusinessName?: string;
   items: OrderItem[];
   totalAmount: number;
   orderTimestamp: Date;
@@ -55,4 +57,5 @@ export interface CustomerSummary {
   totalSpent: number;
   latestAddress?: string;
   generalAgentNotes?: string; // Added new field
+  customerBusinessName?: string;
 }

@@ -49,6 +49,7 @@ interface PopularProduct {
   id: string;
   name: string;
   count: number;
+  unitsPerBox?: number; // Add unitsPerBox to the interface
 }
 
 type RevenuePeriod = 'allTime' | 'today' | 'thisWeek' | 'thisMonth' | 'custom';
@@ -94,45 +95,48 @@ export default function AdminDashboardPage() {
         const [ordersData, topCustomersData, recentOrdersData, newCustomersCount] = await Promise.all([
           getOrdersForAdmin(),
           getTopCustomers(3),
-          getRecentOrders(7), 
+          getRecentOrders(7),
           getNewCustomersThisMonthCount(),
         ]);
-        
+  
+        // הגדרות בסיסיות
         setAllOrders(ordersData);
         setTopCustomers(topCustomersData);
         setNewCustomersThisMonth(newCustomersCount);
-
+  
         const newOrdersUnviewedCount = ordersData.filter(o => o.status === 'new').length;
-        const receivedOrdersCount = ordersData.filter(o => o.status === 'received').length;
-                
-        const latestOrders = ordersData.slice(0, 5);
-
+        const receivedOrdersCount   = ordersData.filter(o => o.status === 'received').length;
+        const latestOrders           = ordersData.slice(0, 5);
+  
         setSummary({
           newOrdersUnviewed: newOrdersUnviewedCount,
-          receivedOrders: receivedOrdersCount,
+          receivedOrders:    receivedOrdersCount,
           latestOrders,
         });
-
+  
+        // חישוב מוצרים פופולריים בקרטונים
         if (recentOrdersData.length > 0) {
           const productCounts: Record<string, number> = {};
           recentOrdersData.forEach(order => {
             order.items.forEach(item => {
-              productCounts[item.productId] = (productCounts[item.productId] || 0) + item.quantity;
+              const cartons = Math.ceil(item.quantity / (item.unitsPerBox ?? 1));
+              productCounts[item.productId] = (productCounts[item.productId] || 0) + cartons;
             });
           });
-
+  
           const sortedProductIds = Object.entries(productCounts)
-            .sort(([, aCount], [, bCount]) => bCount - aCount)
+            .sort(([, a], [, b]) => b - a)
             .slice(0, 3)
             .map(([productId]) => productId);
-
+  
           const popularProductsDetails = await Promise.all(
             sortedProductIds.map(async (productId) => {
               const product = await getProductById(productId);
               return {
-                id: productId,
-                name: product?.name || 'מוצר לא ידוע',
-                count: productCounts[productId],
+                id:          productId,
+                name:        product?.name || 'מוצר לא ידוע',
+                count:       productCounts[productId],      // קרטונים
+                unitsPerBox: product?.unitsPerBox,          // לשימוש עתידי
               };
             })
           );
@@ -140,16 +144,21 @@ export default function AdminDashboardPage() {
         } else {
           setPopularProducts([]);
         }
-
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
-        toast({ variant: "destructive", title: "שגיאה", description: "לא ניתן היה לטעון את נתוני לוח הבקרה." });
+        toast({
+          variant:    "destructive",
+          title:      "שגיאה",
+          description:"לא ניתן היה לטעון את נתוני לוח הבקרה."
+        });
       } finally {
         setIsLoading(false);
       }
     }
+  
     fetchDashboardData();
   }, [toast]);
+  
 
   useEffect(() => {
     if (!allOrders.length) { 
@@ -337,8 +346,8 @@ export default function AdminDashboardPage() {
                 <div className="flex items-center gap-2">
                    <span className="text-xs text-muted-foreground">({format(new Date(order.orderTimestamp), 'dd/MM', { locale: he })})</span>
                   <div>
-                    <p className="font-medium text-sm">{order.customerName}</p>
-                    <p className="text-xs text-muted-foreground">{order.customerPhone}</p>
+ <p className="font-medium text-sm">{order.customerBusinessName || order.customerName}</p>
+ <a href={`tel:${order.customerPhone}`} className="text-xs text-primary hover:underline">{order.customerPhone}</a>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -346,7 +355,7 @@ export default function AdminDashboardPage() {
                     {statusTranslationsForDashboard[order.status]}
                   </Badge>
                   <div className="text-right">
-                     <p className="font-semibold text-sm">{formatPrice(order.totalAmount)}</p>
+ <p className="font-semibold text-sm">{formatPrice(order.totalAmount)}</p>
                      <Link href={`/admin/orders/${order.id}`} className="text-xs text-primary hover:underline">צפה בפרטים</Link>
                   </div>
                 </div>
@@ -368,8 +377,12 @@ export default function AdminDashboardPage() {
               {topCustomers.map((customer) => (
                 <div key={customer.id} className="flex items-center justify-between py-2.5 border-b last:border-0">
                   <div>
-                    <Link href={`/admin/customers/${customer.id}`} className="font-medium text-sm text-primary hover:underline">{customer.name}</Link>
-                    <p className="text-xs text-muted-foreground">{customer.phone}</p>
+ <Link href={`/admin/customers/${customer.id}`} className="font-medium text-sm text-primary hover:underline">
+ {customer.customerBusinessName && customer.customerBusinessName !== '' ? customer.customerBusinessName : customer.name}
+ </Link>
+ {customer.customerBusinessName && customer.customerBusinessName !== '' && customer.customerBusinessName !== customer.name && (
+ <p className="text-xs text-muted-foreground">{customer.name}</p>
+ )}
                   </div>
                   <p className="font-semibold text-sm">{formatPrice(customer.totalSpent)}</p>
                 </div>
@@ -381,14 +394,17 @@ export default function AdminDashboardPage() {
         {popularProducts && popularProducts.length > 0 && (
           <Card className="col-span-2 md:col-span-1">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><ListChecks className="h-5 w-5 text-green-500"/>מוצרים נפוצים לאחרונה</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <ListChecks className="h-5 w-5 text-green-500"/>
+                מוצרים נפוצים לאחרונה
+              </CardTitle>
               <CardDescription>3 המוצרים הנפוצים ביותר בהזמנות מהשבוע האחרון.</CardDescription>
             </CardHeader>
             <CardContent>
               {popularProducts.map((product) => (
                 <div key={product.id} className="flex items-center justify-between py-2.5 border-b last:border-0">
                    <Link href={`/admin/products/edit/${product.id}`} className="font-medium text-sm text-primary hover:underline">{product.name}</Link>
-                  <p className="text-sm text-muted-foreground">נמכרו: {product.count} יח'</p>
+                  <p className="text-sm text-muted-foreground">נמכרו: {product.count} קרטונים</p>
                 </div>
               ))}
             </CardContent>

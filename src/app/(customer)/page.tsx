@@ -21,9 +21,9 @@ const TARGET_CATEGORY_FOR_RESORT_MNM = 'מוצרי ניקוי מקצועיים';
 
 const TARGET_CATEGORY_MBSMM = 'מבשמים';
 const ORDERED_PRODUCT_IDS_MBSMM = [
-  'kmb7',  
   'kmb14', 
   'kmb1',  
+  'kmb7',  
   'kmb2',  
   'kmb6',  
   'kmb3',  
@@ -48,6 +48,7 @@ export default function CatalogPage() {
   const [categorizedProducts, setCategorizedProducts] = useState<{ categoryName: string; products: Product[] }[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<Error | null>(null); // Add new state
   const scrollTargetRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -55,9 +56,11 @@ export default function CatalogPage() {
       setIsLoading(true);
       try {
         const products = await getProductsForCatalog(); 
+      setFetchError(null); // Clear previous errors
         setAllProducts(products);
       } catch (error) {
         console.error("Failed to fetch products:", error);
+      setFetchError(error as Error); // Set the error state
       } finally {
         setIsLoading(false);
       }
@@ -138,7 +141,7 @@ export default function CatalogPage() {
             if (indexA !== -1 && indexB !== -1) return indexA - indexB;
             if (indexA !== -1) return -1;
             if (indexB !== -1) return 1;
-            return a.name.localeCompare(b.name, 'he'); 
+            return a.name.localeCompare(b.name, 'he');
         });
       } else if (categoryName === TARGET_CATEGORY_FOR_RESORT_MNM) {
         let productToMoveLast: Product | null = null;
@@ -209,9 +212,18 @@ export default function CatalogPage() {
     <div className="container mx-auto px-4 py-8">
       <header className="mb-8 text-center">
         <h1 className="text-4xl font-bold tracking-tight text-primary">קטלוג המוצרים שלנו</h1>
+        {/* Optionally display an error message if fetching failed */}
+        {fetchError && (
+            <p className="mt-2 text-lg text-destructive">
+                אירעה שגיאה בטעינת המוצרים. אנא נסה שוב מאוחר יותר.
+                {/* Optionally display error details in development */}
+                {process.env.NODE_ENV === 'development' && <span className="block text-sm">{fetchError.message}</span>}
+            </p>
+        )}
         <p className="mt-2 text-lg text-muted-foreground">
           עיין במגוון מוצרי "כביסכל" והוסף לעגלה בקלות.
         </p>
+
       </header>
       
       <div ref={scrollTargetRef} className="mb-8 sticky top-16 bg-background/90 backdrop-blur-sm z-40 py-4 -mx-4 px-4 shadow-sm"> 

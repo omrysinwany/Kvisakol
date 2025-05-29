@@ -10,17 +10,26 @@ import { subDays, startOfDay, endOfDay, startOfMonth, endOfMonth, startOfWeek, i
 const orderFromDoc = (docSnap: any): Order => {
   const data = docSnap.data();
   return {
-    id: docSnap.id,
-    customerName: data.customerName || '',
-    customerPhone: String(data.customerPhone || '').trim(),
-    customerAddress: data.customerAddress || '',
-    customerNotes: data.customerNotes || '',
-    items: data.items || [],
-    totalAmount: data.totalAmount !== undefined ? Number(data.totalAmount) : 0,
-    orderTimestamp: data.orderTimestamp instanceof Timestamp ? data.orderTimestamp.toDate() : new Date(0),
-    status: data.status || 'new',
-    isViewedByAgent: data.isViewedByAgent !== undefined ? data.isViewedByAgent : false,
-    agentNotes: data.agentNotes || '',
+    id:               docSnap.id,
+    customerName:     data.customerName || '',
+    customerPhone:    String(data.customerPhone || '').trim(),
+    customerAddress:  data.customerAddress || '',
+    customerNotes:    data.customerNotes || '',
+    customerBusinessName: data.customerBusinessName || '',
+    items: (data.items || []).map((item: any) => ({
+      productId:    item.productId,
+      productName:  item.productName,
+      quantity:     item.quantity,
+      priceAtOrder: item.priceAtOrder,
+      unitsPerBox:  item.unitsPerBox ?? 1,  // אם אין, בברירת מחדל 1
+    })),
+    totalAmount:      data.totalAmount !== undefined ? Number(data.totalAmount) : 0,
+    orderTimestamp:   data.orderTimestamp instanceof Timestamp
+                       ? data.orderTimestamp.toDate()
+                       : new Date(0),
+    status:           data.status || 'new',
+    isViewedByAgent:  data.isViewedByAgent !== undefined ? data.isViewedByAgent : false,
+    agentNotes:       data.agentNotes || '',
   };
 };
 
@@ -37,6 +46,7 @@ const customerSummaryFromDoc = (docSnap: any): CustomerSummary => {
       totalSpent: data.totalSpent || 0,
       latestAddress: data.latestAddress || '',
       generalAgentNotes: data.generalAgentNotes || '',
+ customerBusinessName: data.customerBusinessName || '', // Include business name
     };
   };
 
@@ -101,6 +111,7 @@ export async function createOrderService(orderDetails: {
   customerPhone: string;
   customerAddress: string;
   customerNotes?: string;
+  customerBusinessName?: string;
   items: OrderItem[];
   totalAmount: number;
 }): Promise<Order> {
@@ -119,16 +130,23 @@ export async function createOrderService(orderDetails: {
   let agentNoteForNameDiscrepancy = "";
 
   const newOrderData: Omit<Order, 'id'> = {
-    customerName: orderDetails.customerName,
-    customerPhone: customerPhoneTrimmed, // Storing the cleaned phone number
-    customerAddress: orderDetails.customerAddress,
-    customerNotes: orderDetails.customerNotes || '',
-    items: orderDetails.items,
-    totalAmount: orderDetails.totalAmount,
-    orderTimestamp: currentTimestamp.toDate(),
-    status: 'new' as Order['status'],
-    isViewedByAgent: false,
-    agentNotes: '',
+    customerName:        orderDetails.customerName,
+    customerPhone:       customerPhoneTrimmed,
+    customerAddress:     orderDetails.customerAddress,
+    customerNotes:       orderDetails.customerNotes || '',
+    customerBusinessName:orderDetails.customerBusinessName || '',
+    items: orderDetails.items.map(item => ({
+      productId:    item.productId,
+      productName:  item.productName,
+      quantity:     item.quantity,
+      priceAtOrder: item.priceAtOrder,
+      unitsPerBox: item.unitsPerBox ?? 1,       // <-- חשוב: עובר את השדה
+    })),
+    totalAmount:         orderDetails.totalAmount,
+    orderTimestamp:      currentTimestamp.toDate(),
+    status:              'new' as Order['status'],
+    isViewedByAgent:     false,
+    agentNotes:          '',
   };
   console.log(`OrderService (createOrderService): Preparing to save new order ${newOrderId}. Customer details: Name='${orderDetails.customerName}', Phone='${customerPhoneTrimmed}'`);
 
@@ -149,6 +167,7 @@ export async function createOrderService(orderDetails: {
           totalSpent: 0, // Initial totalSpent is 0 for new customers, updated on 'completed' status
           latestAddress: orderDetails.customerAddress,
           generalAgentNotes: '',
+          customerBusinessName: orderDetails.customerBusinessName || '',
         };
         transaction.set(customerDocRef, newCustomerData);
         console.log(`OrderService (createOrderService): Created NEW customer document for ${customerPhoneTrimmed} with data:`, newCustomerData);
@@ -165,8 +184,10 @@ export async function createOrderService(orderDetails: {
           lastOrderDate: currentTimestamp.toDate(),
           totalOrders: increment(1), // Increment for this new, non-cancelled order
           latestAddress: orderDetails.customerAddress,
+          customerBusinessName: orderDetails.customerBusinessName || existingCustomerData.customerBusinessName,
           // name: orderDetails.customerName, // Name is NOT updated automatically
         };
+        updatedCustomerData.customerBusinessName = orderDetails.customerBusinessName;
         if (!existingCustomerData.firstOrderDate) {
             updatedCustomerData.firstOrderDate = currentTimestamp.toDate();
         }

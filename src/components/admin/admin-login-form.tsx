@@ -1,4 +1,3 @@
-
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,10 +10,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { AppLogo } from '../shared/app-logo';
-import { KeyRound, User, ArrowRight } from 'lucide-react';
-import { getAdminUserByUsername, verifyAdminPassword } from '@/services/admin-user-service';
+import { KeyRound, User, ArrowRight, Loader2 } from 'lucide-react';
 import type { AdminUser } from '@/lib/types';
 import Link from 'next/link';
+
+// Import your database authentication service functions
+import { getAdminUserByUsername, verifyAdminPassword } from '@/services/admin-user-service';
+
 
 const loginFormSchema = z.object({
   username: z.string().min(3, { message: 'שם משתמש חייב להכיל לפחות 3 תווים.' }),
@@ -35,41 +37,59 @@ export function AdminLoginForm() {
     },
   });
 
+  // This onSubmit will use your custom database authentication logic
   const onSubmit = async (data: LoginFormValues) => {
-    console.log('Admin login attempt with username:', data.username); 
+    console.log('Admin login attempt with username:', data.username);
     try {
+      // Use your service to get the admin user by username
       const foundUser = await getAdminUserByUsername(data.username);
 
       if (foundUser) {
+        // Use your service to verify the password against the hashed password from the database
         const isPasswordCorrect = await verifyAdminPassword(foundUser, data.password);
+
         if (isPasswordCorrect) {
+          // Authentication successful
+          console.log('Admin authenticated successfully:', foundUser.username);
+
+          // Store admin user details (e.g., in local storage or a cookie)
+          // IMPORTANT: Adapt this to your actual state management or session handling
           const loggedInUserDetails = {
             id: foundUser.id,
             username: foundUser.username,
-            isSuperAdmin: foundUser.isSuperAdmin,
+            isSuperAdmin: foundUser.isSuperAdmin, // Assuming you have this field
             displayName: foundUser.displayName || foundUser.username,
           };
-          localStorage.setItem('loggedInKviskalAdmin', JSON.stringify(loggedInUserDetails));
+          localStorage.setItem('loggedInKviskalAdmin', JSON.stringify(loggedInUserDetails)); // Example using localStorage
 
           toast({
-            title: 'התחברות מוצלחת',
-            description: `ברוך הבא, ${foundUser.displayName || foundUser.username}!`,
+            title: "התחברות בוצעה בהצלחה",
+            description: "ברוכים הבאים לממשק הניהול.",
+            variant: "success",
           });
+          // Redirect to admin dashboard
           router.push('/admin/dashboard');
+
         } else {
+          // Password incorrect
+          console.log('Admin login failed: Incorrect password');
           toast({
-            variant: 'destructive',
             title: 'שגיאת התחברות',
             description: 'שם משתמש או סיסמה שגויים. אנא נסה שנית.',
+            variant: 'destructive',
           });
+           // Optionally reset password field on failure for security
           form.resetField("password");
         }
       } else {
-        toast({
-          variant: 'destructive',
+        // User not found
+        console.log('Admin login failed: User not found');
+         toast({
           title: 'שגיאת התחברות',
           description: 'שם משתמש או סיסמה שגויים. אנא נסה שנית.',
+          variant: 'destructive',
         });
+        // Optionally reset password field on failure for security
         form.resetField("password");
       }
     } catch (error) {
@@ -81,6 +101,7 @@ export function AdminLoginForm() {
       });
     }
   };
+
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-primary/10 via-background to-background p-4">
@@ -126,7 +147,12 @@ export function AdminLoginForm() {
                 )}
               />
               <Button type="submit" className="w-full" size="lg" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'מתחבר...' : (
+                {form.formState.isSubmitting ? (
+                 <>
+                   <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                   מתחבר...
+                 </>
+                ) : (
                   <>
                     <KeyRound className="ml-2 h-5 w-5" />
                     התחבר
