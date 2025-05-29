@@ -3,12 +3,12 @@
 @tailwind utilities;
 
 body {
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-rubik), sans-serif;
 }
 
 @layer base {
   :root {
-    --background: 207 88% 94%; /* Very Light Blue (#E3F2FD) */
+    --background: 210 40% 98%; /* #f7f9fc */
     --foreground: 210 15% 25%; /* Dark Grey/Blue for text */
 
     --card: 0 0% 100%; /* White cards */
@@ -17,7 +17,7 @@ body {
     --popover: 0 0% 100%;
     --popover-foreground: 210 15% 25%;
 
-    --primary: 207 88% 74%; /* Clean Blue (#64B5F6) */
+    --primary: 197 100% 38%; /* בהירות +10% */
     --primary-foreground: 210 40% 10%; /* Dark text for on-primary */
 
     --secondary: 207 50% 88%; /* Lighter shade of primary for secondary elements */

@@ -245,7 +245,7 @@ export function ProductCard({ product, isAdminPreview = false, isAdminGalleryVie
               {quantityInCart === 0 ? (
                 <Button
                   onClick={(e) => { e.stopPropagation(); handleAddToCart(); }}
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-auto text-white bg-primary hover:bg-primary/90"
                   size="sm"
                 >
                   <ShoppingCartIcon className="ml-1.5 h-4 w-4" />
