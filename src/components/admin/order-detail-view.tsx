@@ -229,11 +229,11 @@ export function OrderDetailView({
                   className="bg-background text-sm"
                 />
                 <div className="flex items-center gap-2 mt-1.5">
-                  <Button onClick={handleSaveNotesInternal} size="xs" disabled={isSavingNotes}>
+                  <Button onClick={handleSaveNotesInternal} size="sm" disabled={isSavingNotes}>
                     <Save className="ml-1.5 h-3.5 w-3.5" />
                     {isSavingNotes ? 'שומר...' : 'שמור הערות'}
                   </Button>
-                  <Button variant="outline" size="xs" onClick={handleCancelEditNotes}>
+                  <Button variant="outline" size="sm" onClick={handleCancelEditNotes}>
                     ביטול
                   </Button>
                 </div>
@@ -244,7 +244,7 @@ export function OrderDetailView({
                   <h4 className="text-sm font-medium text-muted-foreground">הערות סוכן:</h4>
                   <Button
                     variant="ghost"
-                    size="xs"
+                    size="sm"
                     onClick={() => setIsEditingAgentNotes(true)}
                     className="text-xs h-6 px-1.5"
                   >
@@ -259,7 +259,7 @@ export function OrderDetailView({
             ) : (
               <Button
                 variant="outline"
-                size="xs"
+                size="sm"
                 onClick={() => { setCurrentAgentNotes(''); setIsEditingAgentNotes(true); }}
                 className="text-xs"
               >
