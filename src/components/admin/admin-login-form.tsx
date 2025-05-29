@@ -65,7 +65,7 @@ export function AdminLoginForm() {
           toast({
             title: "התחברות בוצעה בהצלחה",
             description: "ברוכים הבאים לממשק הניהול.",
-            variant: "success",
+            variant: "default",
           });
           // Redirect to admin dashboard
           router.push('/admin/dashboard');

@@ -321,7 +321,7 @@ export default function OrdersContent() {
                     </div>
                   )}
                  {(customerPhoneFilter || (customerPhoneInput && customerPhoneInput !== customerPhoneFilter) ) && (
-                     <Button variant="outline" size="xs" onClick={handleClearCustomerFilter} className="h-auto py-0.5 px-1.5 text-xs">
+                     <Button variant="outline" size="sm" onClick={handleClearCustomerFilter} className="h-auto py-0.5 px-1.5 text-xs">
                         <X className="h-3 w-3 ml-0.5" />
                         נקה סינון לקוח
                     </Button>

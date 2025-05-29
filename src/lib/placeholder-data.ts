@@ -21,6 +21,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'bio elegance',
     category: 'נוזלי כביסה',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kbio2',
@@ -31,6 +33,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'bio sport',
     category: 'נוזלי כביסה',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kbio3',
@@ -41,6 +45,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'bio soft',
     category: 'נוזלי כביסה',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kbio4',
@@ -51,6 +57,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'bio freedom',
     category: 'נוזלי כביסה',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kbio5',
@@ -61,6 +69,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'bio oriental',
     category: 'נוזלי כביסה',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kbio6',
@@ -71,6 +81,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'bio spa',
     category: 'נוזלי כביסה',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kbio7',
@@ -81,6 +93,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'bio baby',
     category: 'נוזלי כביסה',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kbio8',
@@ -91,6 +105,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'bio musk flowers',
     category: 'נוזלי כביסה',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kbio9',
@@ -101,6 +117,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'bio rose',
     category: 'נוזלי כביסה',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kbio10',
@@ -111,6 +129,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'bio aromatic',
     category: 'נוזלי כביסה',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kbio11',
@@ -121,6 +141,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'bio red rose',
     category: 'נוזלי כביסה',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
 
 
@@ -134,6 +156,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'large bundle',
     category: 'חבילות',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'pkg2',
@@ -144,6 +168,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'luxury bundle',
     category: 'חבילות',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'pkg3',
@@ -154,6 +180,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'package bundle',
     category: 'חבילות',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0,
   },
   {
     id: 'pkg4',
@@ -164,6 +192,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'musk flowers bundle',
     category: 'חבילות',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'pkg5',
@@ -174,6 +204,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'bio diffuser bundle',
     category: 'חבילות',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'pkg6',
@@ -184,6 +216,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'cleaning bundle',
     category: 'חבילות',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'pkg7',
@@ -194,6 +228,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'baby bundle',
     category: 'חבילות',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'pkg8',
@@ -204,6 +240,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'rose bundle',
     category: 'חבילות',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'pkg9',
@@ -214,6 +252,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'aromatic bundle',
     category: 'חבילות',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'pkg10',
@@ -224,6 +264,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'red rose bundle',
     category: 'חבילות',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'pkg11',
@@ -234,6 +276,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'spa bundle',
     category: 'חבילות',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'pkg12',
@@ -244,6 +288,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'perfume clean bundle',
     category: 'חבילות',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
 
   // מוצרי ניקוי מקצועיים
@@ -256,6 +302,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'pine cleaner',
     category: 'מוצרי ניקוי מקצועיים',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kprof2',
@@ -266,6 +314,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'glass cleaner',
     category: 'מוצרי ניקוי מקצועיים',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kprof3',
@@ -276,6 +326,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'washing machine cleaner',
     category: 'מוצרי ניקוי מקצועיים',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kprof4',
@@ -286,6 +338,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'grease remover',
     category: 'מוצרי ניקוי מקצועיים',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kprof5',
@@ -296,6 +350,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'limescale remover',
     category: 'מוצרי ניקוי מקצועיים',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kprof6',
@@ -306,6 +362,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'surface cleaner furniture',
     category: 'מוצרי ניקוי מקצועיים',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kprof7',
@@ -316,6 +374,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'stain remover prewash',
     category: 'מוצרי ניקוי מקצועיים',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
 
   // מפיצי ריח
@@ -328,6 +388,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'musk flowers diffuser',
     category: 'מפיצי ריח',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kdf2',
@@ -338,6 +400,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'soft care diffuser',
     category: 'מפיצי ריח',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kdf3',
@@ -348,6 +412,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'automatic diffuser',
     category: 'מפיצי ריח',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kdf4',
@@ -358,6 +424,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'rose diffuser',
     category: 'מפיצי ריח',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kdf5',
@@ -368,6 +436,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'aromatic diffuser',
     category: 'מפיצי ריח',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kdf6',
@@ -378,6 +448,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'baby diffuser',
     category: 'מפיצי ריח',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kdf7',
@@ -388,6 +460,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'spa diffuser',
     category: 'מפיצי ריח',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kdf8',
@@ -398,6 +472,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'silver sticks diffuser',
     category: 'מפיצי ריח',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kdf9',
@@ -408,6 +484,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'gold sticks diffuser',
     category: 'מפיצי ריח',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kdf10',
@@ -418,6 +496,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'platinum sticks diffuser',
     category: 'מפיצי ריח',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kdf11',
@@ -428,6 +508,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'bronze sticks diffuser',
     category: 'מפיצי ריח',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kdf12',
@@ -438,6 +520,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'flower diffuser vanilla',
     category: 'מפיצי ריח',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kdf13',
@@ -448,6 +532,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'flower diffuser vanilla only',
     category: 'מפיצי ריח',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kdf14',
@@ -458,6 +544,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'flower diffuser kids',
     category: 'מפיצי ריח',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kdf15',
@@ -468,6 +556,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'flower diffuser ocean',
     category: 'מפיצי ריח',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kdf16',
@@ -478,6 +568,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'flower diffuser lemongrass',
     category: 'מפיצי ריח',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kdf17',
@@ -488,6 +580,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'flower diffuser blackice',
     category: 'מפיצי ריח',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kdf18',
@@ -498,6 +592,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'flower diffuser zanzibar',
     category: 'מפיצי ריח',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kdf19',
@@ -508,6 +604,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'flower diffuser goldencar',
     category: 'מפיצי ריח',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
 
   // מבשמים
@@ -520,6 +618,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'elegance perfume',
     category: 'מבשמים',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kmb2',
@@ -530,6 +630,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'softcare perfume',
     category: 'מבשמים',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kmb3',
@@ -540,6 +642,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'freedom perfume',
     category: 'מבשמים',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kmb16',
@@ -550,6 +654,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'bronze capsule',
     category: 'מבשמים',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kmb17',
@@ -560,6 +666,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'platinum capsule',
     category: 'מבשמים',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kmb18',
@@ -570,6 +678,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'silver capsule',
     category: 'מבשמים',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kmb19',
@@ -580,6 +690,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'gold capsule',
     category: 'מבשמים',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kmb4',
@@ -590,6 +702,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'oriental perfume',
     category: 'מבשמים',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kmb20',
@@ -600,6 +714,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'oriental perfume small',
     category: 'מבשמים',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kmb5',
@@ -610,7 +726,11 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'vanilla perfume',
     category: 'מבשמים',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
+    
   },
+
   {
     id: 'kmb21',
     name: 'מבשם ספא 350 מ"ל',
@@ -620,6 +740,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'spa perfume small',
     category: 'מבשמים',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kmb22',
@@ -630,6 +752,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'muskflowers perfume small',
     category: 'מבשמים',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kmb23',
@@ -640,6 +764,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'boutique perfume small',
     category: 'מבשמים',
     isActive: false,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kmb6',
@@ -650,6 +776,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'spa perfume',
     category: 'מבשמים',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kmb8',
@@ -660,6 +788,8 @@ export let placeholderProducts: Product[] = [
     dataAiHint: 'invictus perfume',
     category: 'מבשמים',
     isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
   },
   {
     id: 'kmb9',
@@ -668,4 +798,34 @@ export let placeholderProducts: Product[] = [
     price: 25.00,
     imageUrl: '/images/products/kmb9.jpg',
     dataAiHint: 'lavender perfume',
-    category
+    category: 'מבשמים',
+    isActive: true,
+    unitsPerBox: 0,
+    consumerPrice: 0
+  }]
+
+// Add this section to define and export placeholderOrders
+export const placeholderOrders: Order[] = [
+  // Add your placeholder order objects here,
+  // or leave it as an empty array if you don't have placeholder orders yet:
+  // {
+  //   id: 'order1',
+  //   customerId: 'customer1',
+  //   date: new Date(),
+  //   items: [],
+  //   total: 0,
+  //   status: 'Pending',
+  //   shippingAddress: '',
+  //   notes: '',
+  //   customerName: '',
+  //   customerPhone: '',
+  //   customerEmail: '',
+  //   deliveryMethod: 'shipping',
+  //   paymentMethod: 'credit_card',
+  // },
+];
+
+// Make sure all three are exported
+// export const placeholderAdminUsers: AdminUser[] = [ /* ... */ ]; // Already exported
+// export let placeholderProducts: Product[] = [ /* ... */ ]; // Already exported
+// export const placeholderOrders: Order[] = [ /* ... */ ]; // Add this export

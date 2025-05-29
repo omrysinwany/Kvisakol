@@ -8,7 +8,7 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' }); // Load environment variables from .env.local
 
 import { db } from '../lib/firebase/config'; // Adjust path as necessary
-import { collection, writeBatch, getDocs, query, Timestamp } from 'firebase/firestore';
+import { collection, writeBatch, getDocs, query, Timestamp, doc } from 'firebase/firestore';
 import {
   placeholderProducts,
   placeholderOrders,
